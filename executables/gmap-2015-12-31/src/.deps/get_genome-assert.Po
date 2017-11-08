@@ -1,0 +1,18 @@
+get_genome-assert.o get_genome-assert.o: assert.c config.h assert.h \
+  except.h /usr/include/setjmp.h /usr/include/sys/cdefs.h \
+  /usr/include/sys/_symbol_aliasing.h \
+  /usr/include/sys/_posix_availability.h
+
+config.h:
+
+assert.h:
+
+except.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/sys/_symbol_aliasing.h:
+
+/usr/include/sys/_posix_availability.h:
