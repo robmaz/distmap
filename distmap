@@ -1,0 +1,951 @@
+#!/usr/bin/perl -w
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+
+use FindBin qw/$RealBin/;
+use lib "$RealBin/bin";
+use Utility;
+use GenomeIndex;
+use DataProcess;
+use DataUpload;
+use HadoopTrimming;
+use HadoopMapping;
+use DataDownload;
+use DataMerge;
+use DownloadTrimmedRead;
+use DataCleanup;
+
+my $script = "distmap";
+my $version = "2.7.1";
+
+my $usage = qq{
+$script: Run NGS data mapping on hadoop cluster
+
+Usage: perl $script
+
+--hadoop-home			Give the full path of hadoop folder. MANDATORY parameter.
+				hadoop home path should be identical in master, secondary namenode and all slaves.
+				Example: --hadoop-home /usr/local/hadoop
+ 
+--reference-fasta      		Reference fasta file full path. MANDATORY parameter.
+
+--reference-index-archive	Reference index archive created by previous DistMap run.
+				This will avoid the re-indexing of same verion of reference fasta.
+				Example: --reference-index-archive /home/test_output/distmap_mapping1/refarch.tgz
+				
+--input                		provide input fasta files. Either as a pair or single Fastq file.
+				For Paired-end data --input 'read1.fastq,read2.fastq'
+				For Single-end data --input 'read.fastq'
+				Multiple inputs are possible to repeat --input parameter
+					
+				--input 'sample1_1.fastq,sample1_2.fastq' --input 'sample2_1.fastq,sample2_2.fastq'
+				This is important to give single or a pair input file within
+				single or double quote and if paired file, it must be comma
+				seperated. MANDATORY parameter.
+				
+				For Exonerate input will be a FASTA file format file
+					
+--output              		Full path of output folder where final output will be kept. MANDATORY parameter.
+
+--only-index    		Step1: This option will create genome index and create archieve to upload on HDFS. OPTIONAL parameter
+
+--only-process    		Step2: This option will 1) convert FASTQ files into 1 line format, 2) create genome index
+			        and 3) create archieve to send for job and exit. OPTIONAL parameter
+				
+--only-hdfs-upload          	Step3: This option assume that data processing is done and only upload reads and archieve created in
+				data process step will be loaded into HDFS file system and exit. OPTIONAL parameter
+
+--only-trim            		Step4: This option will assume that data is already loaded into HDFS and will only
+				run read trimming on cluster
+
+--no-trim            		This option will skip the trimming
+
+--trim-script-path		Give the full path of the trim-fastq.pl fro popoolation/basic-pipeline. Kofler et. al (2011)
+
+--trim-args			Give the trimming arguments EXAMPLE: --trim-args '--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output'
+
+--only-map            		Step5: This option will assume that data is already loaded into HDFS and will only
+				run map on cluster
+--only-hdfs-download          	Step4: This option assume that mapping already done on cluster and files will be downloaded
+				from cluster to local output directory. OPTIONAL parameter
+				
+--only-merge          		Step6: This option assume that data already in local directory from HDFS
+				and now will be merged and create a single SAM or BAM output file. OPTIONAL parameter
+
+--only-delete-temp          	Step7: This is the last step of piepline. This option will delete the
+				mapping data from HDFS file system as well as from local temp directory.
+				OPTIONAL parameter
+							
+--mapper              		Mapper name [bwa,tophat,gsnap,bowtie,soap]. MANDATORY parameter.
+				Example: --mapper bwa
+					
+--mapper-path         		Mapper executable full path. Mapper executables should be in
+				same loaction on all nodes (slaves). MANDATORY parameter.
+				Example: --mapper-path /usr/local/hadoop/bwa
+--gsnap-output-split		GSNAP has a feature to split different type of maaping output in different
+                                SAM files.
+				
+				For detail do gsnap --help and you can see --split--output.
+				  --split-output=STRING   Basename for multiple-file output, separately for nomapping,
+                                   halfmapping_uniq, halfmapping_mult, unpaired_uniq, unpaired_mult,
+                                   paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
+                                   or 10 if --fails-as-input is selected, or 3 for single-end reads)
+				   					
+--picard-mergesamfiles-jar     PICARD MergeSamFiles.jar full path. It will be used to merge all
+				SAM or BAM files. MANDATORY parameter.
+				Example: --picard-mergesamfiles-jar /usr/local/hadoop/picard-tools-1.56/MergeSamFiles.jar
+				
+--picard-sortsam-jar     	PICARD SortSam.jar full path. It will be used to for SAM BAM conversion. MANDATORY parameter.
+				Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
+				
+--mapper-args        		Arguments for mapping:
+				BWA mapping for aln command:
+					Example --mapper-args "-o 1 -n 0.01 -l 200 -e 12 -d 12"
+					Note: Define BWA parameters correctly accoring to the version is used here.
+				TopHat:
+					Example: --mapper-args "--mate-inner-dist 200 --max-multihits 40 --phred64-quals"
+					Note: Define TopHat parameters correctly accoring to the version is used here.
+				GSNAP mapping:
+					Example: --mapper-args "--pairexpect 200 --quality-protocol illumina"
+					Note: Define gsnap parameters correctly accoring to the version is used here.
+					For detail about parameters visit [http://research-pub.gene.com/gmap/]
+				bowtie mapping:
+					Example: --mapper-args "--sam"
+					Note: Define gsnap parameters correctly accoring to the version is used here.
+					For detail about parameters visit [http://bowtie-bio.sourceforge.net/index.shtml]
+				SOAPAlinger:
+					Example: --mapper-args "-m 400 -x 600"
+					Note: Define SOAPaligner parameters correctly accoring to the version is used here.
+					For detail about parameters visit [http://soap.genomics.org.cn/soapaligner.html]
+Please note that processor parameters not required in arguments. Example in case of BWA mapping dont give -t parameter.
+This parameter is given by DistMap internally.
+
+--bwa-sampe-args      	Arguments for BWA sampe or samse module.
+			bwa sampe for paired-end reads
+			bwa samse for single-end reads
+			Example --bwa-sampe-args "-a 500 -s"
+					
+--output-format    		Output file format either SAM or BAM.
+				Default: BAM
+					
+--job-desc    		Give a job description which will be dispalyed in JobTracker webpage.
+				Default: <mapper name> mapping.
+Hadoop streaming Parameters:
+
+--queue-name    		If your hadoop has Capacity Scheduler then provide --queue-name.
+				Example: --queue-name pg1
+				
+--verbose                 	To print inputs on screen.  
+--help                	To run a test for all dependency and all.
+
+};
+
+
+
+
+### This number need to define. How many processors Hadoop can use on each nodes.
+my $number_of_processors = 3; #18;
+
+
+my $reference_fasta="";
+my $refindex_archive="";
+my @input_files = ();                        
+my $output_directory="";	 
+
+my $only_index=0;
+my $only_process=0;
+my $only_trim=0;
+my $no_trim=0;
+my $only_map=0;
+my $only_hdfs_upload=0;
+my $only_hdfs_download =0;
+my $only_merging=0;
+my $only_delete_temp=0;
+my $only_download_reads=0;
+
+my $gsnap_output_split=0;
+#my $hadoop_home=$ENV{"HADOOP_HOME"};
+my $hadoop_home=$ENV{"HADOOP_HOME"};
+
+my $mapper="";
+my $mapper_path="";         
+my $mapper_args="";
+my @mapper=();
+my @mapper_path=();         
+my @mapper_args=();
+
+my $bwa_sampe_args="";
+my $picard_jar="";
+my $picard_mergesamfiles_jar="";
+my $picard_sortsam_jar="";
+my $picard_mark_duplicates_jar="";
+my $output_format="bam";
+my $job_desc="";
+my $queue_name="pg1";
+my $job_priority="VERY_HIGH";
+my $hadoop_scheduler="Fair";
+
+my $mappers_exe_archive = "";
+
+my $trim_script_path="";
+my $trim_args="";
+
+my $verbose = 0;
+my $test = 0;
+my $help = 0;
+
+
+
+#### Trimming parameters
+
+    my $qualThreshold=20;
+    my $minLength=40;
+    my $fastqtype="illumina";
+    my $discardRemainingNs=0;
+    my $trimQuality=0;
+    my $no5ptrim=0;
+    my $nozip=0;
+    
+    
+GetOptions(
+	"reference-fasta=s"			=>\$reference_fasta,	# to check
+	"input=s"                           	=> \@input_files,      # to check                  
+	"output=s"                          	=> \$output_directory,	# to check
+	"only-index" 				=> \$only_index,
+	"only-process" 				=> \$only_process,
+	"only-hdfs-upload" 			=> \$only_hdfs_upload,
+	"only-trim" 				=> \$only_trim,
+	"no-trim" 				=> \$no_trim,
+	"trim-script-path=s"			=> \$trim_script_path,
+	"trim-args"				=> \$trim_args,
+	"only-map" 				=> \$only_map,
+	"only-hdfs-download" 			=> \$only_hdfs_download,
+	"only-merge" 				=> \$only_merging,
+	"only-delete-temp" 			=> \$only_delete_temp,
+	"only-download-trimmed-reads"		=> \$only_download_reads,
+	"reference-index-archive=s"         	=> \$refindex_archive,
+	"quality-threshold=i"   		=>\$qualThreshold,
+	"min-length=i"          		=>\$minLength,
+	"fastq-type=s"          		=>\$fastqtype,
+	"discard-internal-N"    		=>\$discardRemainingNs,
+	"no-trim-quality"       		=>$trimQuality,
+	"no-5p-trim"            		=>\$no5ptrim,
+	"disable-zipped-output" 		=>\$nozip,
+	"hadoop-home=s" 			=>\$hadoop_home,
+	"mappers-exe-archive=s" 		=>\$mappers_exe_archive,
+	
+	
+	"mapper=s" 				=> \@mapper,		# to check	
+	"mapper-path=s"				=> \@mapper_path,
+	"picard-jar=s"				=> \$picard_jar,
+	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# to ckeck
+	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# to check
+	"mapper-args=s"				=> \@mapper_args,
+	"bwa-sampe-args=s"			=> \$bwa_sampe_args,
+	"output-format=s"			=> \$output_format,					
+	"job-desc=s"				=> \$job_desc,	# to check
+	"queue-name=s"				=> \$queue_name,	# to check
+	"gsnap-output-split"			=> \$gsnap_output_split,	# to check
+	"verbose"        		        => \$verbose,
+	"help"          		        =>\$help,
+	"h"          		        	=>\$help
+) or pod2usage(-msg=>"Wrong options",-verbose=>1); 
+
+pod2usage(-verbose=>2) if $help;
+
+if($verbose) {
+	print STDERR "Following inputs are provided to run $script:\n";
+	print STDERR "  reference genome fasta:\t$reference_fasta\n";
+	print STDERR "  input fastq files:\t@input_files\n";                        
+	print STDERR "  local output directory:\t$output_directory\n";		 
+	print STDERR "  only fastq file process:\t$only_process\n";
+	print STDERR "  only hdfs upload:\t$only_hdfs_upload\n";
+	print STDERR "  only trim reads:\t$only_trim\n";
+	print STDERR "  only mapping reads:\t$only_map\n";
+	print STDERR "  only hdfs download:\t$only_hdfs_download\n";
+	print STDERR "  only merging the hadoop mapping output files :\t$only_merging\n";
+	print STDERR "  only delete temperory files and folders:\t$only_delete_temp\n";
+	print STDERR "  hadoop home:\t$hadoop_home\n";
+	print STDERR "  mapper name:\t@mapper\n";			
+	print STDERR "  mapper path:\t@mapper_path\n";           
+	print STDERR "  picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
+	print STDERR "  picard SortSam.jar:\t$picard_sortsam_jar\n";
+	print STDERR "  picard MarkDuplicates.jar:\t$picard_mark_duplicates_jar\n";	      
+	print STDERR "  mapper arguments:\t@mapper_args\n";
+	print STDERR "  bwa sampe arguments:\t$bwa_sampe_args\n";
+	print STDERR "  output format:\t$output_format\n";					
+	print STDERR "  job description:\t$job_desc\n";
+	exit(0);
+}
+#elsif ($help) {
+#	print "$usage\n";#
+#	exit(0);
+#}
+#elsif ($mapper eq "exonerate") {
+#	pod2usage(-msg=>"\n\tERROR: --input; 'read1.fastq,read2.fast' one or more input files must be provided\n",-verbose=>1) if scalar(@input_files)<1;
+#	pod2usage(-msg=>"\n\tERROR: --reference-fasta; A reference fasta file must be provided\n",-verbose=>1) unless -e $reference_fasta;
+#	pod2usage(-msg=>"\n\tERROR: --output; An output directory must be provided\n",-verbose=>1) unless $output_directory;
+#	pod2usage(-msg=>"\n\tERROR: --mapper; One mapper name must be provided [bwa, gsnap, tophat, bowtie, soap]\n",-verbose=>1) if scalar(@mapper)<1;
+#	pod2usage(-msg=>"\n\tERROR: --mapper-path; Mapper's executable file full path must be provided\n",-verbose=>1) if scalar(@mapper_path)<1;
+#	pod2usage(-msg=>"\n\tERROR: --job-desc; A meaningful job description must be provided in double quote or single quote Example: 'Exonerate run 1' \n",-verbose=>1) unless $job_desc;
+#	pod2usage(-msg=>"\n\tERROR: --queue-name; A valid queue name must be provided. Options [pg1, pg2, pg3]\n",-verbose=>1) unless $queue_name;
+#	
+#}
+#else {
+#	pod2usage(-msg=>"\n\tERROR: --input; 'read1.fastq,read2.fast' one or more input files must be provided\n",-verbose=>1) if scalar(@input_files)<1;
+#	pod2usage(-msg=>"\n\tERROR: --reference-fasta; A reference fasta file must be provided\n",-verbose=>1) unless -e $reference_fasta;
+#	pod2usage(-msg=>"\n\tERROR: --output; An output directory must be provided\n",-verbose=>1) unless $output_directory;
+#	pod2usage(-msg=>"\n\tERROR: --mapper; One mapper name must be provided [bwa, gsnap, tophat, bowtie, soap]\n",-verbose=>1) unless $mapper;
+#	pod2usage(-msg=>"\n\tERROR: --mapper-path; Mapper's executable file full path must be provided\n",-verbose=>1) unless -e $mapper_path;
+#	#pod2usage(-msg=>"\n\tERROR: --picard-mergesamfiles-jar; PICARD MergeSamFiles.jar full path must be provided \n",-verbose=>1) unless -e $picard_mergesamfiles_jar;
+#	#pod2usage(-msg=>"\n\tERROR: --picard-sortsam-jar; PICARD ShortSam.jar file full path must be provided\n",-verbose=>1) unless -e $picard_sortsam_jar;
+#	pod2usage(-msg=>"\n\tERROR: --job-desc; A meaningful job description must be provided in double quote or single quote Example: 'My fastq file BWA mapping' \n",-verbose=>1) unless $job_desc;
+#	pod2usage(-msg=>"\n\tERROR: --queue-name; A valid queue name must be provided. Options [pg1, pg2, pg3]\n",-verbose=>1) unless $queue_name;
+#
+#}
+
+
+#print "$hadoop_home\n";
+#exit();
+
+## assign HADOOP_HOME based on mapper's executables
+foreach my $mapper_path (@mapper_path) {
+	if (-x $mapper_path) {
+		$hadoop_home=$ENV{"HADOOP_HOME"};
+	}
+}
+
+#print "hadoop_home: $hadoop_home\n";
+
+$trim_args="";
+
+
+if ($trim_script_path =~ /.pl$/) {
+	$trim_args .= "--quality-threshold $qualThreshold --min-length $minLength --fastq-type $fastqtype";
+	if ($discardRemainingNs) {
+		$trim_args .= " --discard-internal-N";
+	}
+	if ($trimQuality) {
+		$trim_args .= " --no-trim-quality";
+	}
+	if ($no5ptrim) {
+		$trim_args .= " --no-5p-trim";
+	}
+	
+}
+else {
+	$trim_args .= "--quality-threshold $qualThreshold --minimum-length $minLength";
+	if ($discardRemainingNs) {
+		$trim_args .= " --discard-internal-N";
+	}
+	if ($trimQuality) {
+		$trim_args .= " --no-trim-quality";
+	}
+	if ($no5ptrim) {
+		$trim_args .= " --no-5p-trim";
+	}
+}
+
+
+
+####
+#$only_trim
+
+
+my $args_dict = {};
+
+
+$args_dict->{"only_index"} = $only_index;
+$args_dict->{"only_process"} = $only_process;
+$args_dict->{"only_hdfs_upload"} = $only_hdfs_upload;
+$args_dict->{"only_trim"} = $only_trim;
+$args_dict->{"only_map"} = $only_map;
+$args_dict->{"only_hdfs_download"} = $only_hdfs_download;
+$args_dict->{"only_merging"} = $only_merging;
+$args_dict->{"only_download_reads"} = $only_download_reads;
+$args_dict->{"only_delete_temp"} = $only_delete_temp;
+$args_dict->{"refindex_archive"} = $refindex_archive;
+$args_dict->{"mappers_exe_archive"} = $mappers_exe_archive;
+$args_dict->{"hadoop_home"} = $hadoop_home;
+$args_dict->{"output_directory"} = $output_directory;
+$args_dict->{"exec_arch"} = "DistMap_Mapper_Archive.tgz";
+$args_dict->{"extracted_execarch"} = "execarch";
+
+$args_dict->{"ref_arch"} = "DistMap_Genome_Index_Archive.tgz";
+$args_dict->{"extracted_refarch"} = "Genome_Index_Archive";
+$args_dict->{"mapper_path"} = \@mapper_path;
+$args_dict->{"reference_fasta"} = $reference_fasta;
+
+
+$args_dict->{"trim_script_path"} = $trim_script_path;
+	
+$args_dict->{"picard_jar"} = $picard_jar;
+	
+if ($picard_jar ne "" and -e $picard_jar) {
+	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
+	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
+	$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
+
+	
+}
+else {
+	$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
+	$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
+	$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
+}
+
+	
+my $step_hash = {};
+$step_hash = Utility::get_steps($args_dict);
+
+if (scalar(keys %$step_hash)==1 and $args_dict->{"only_index"}) {
+	#print "only_index------\n";
+	Utility::create_dir($args_dict);
+	if (scalar(keys %$step_hash)>0) {
+		foreach my $step ( sort { $a <=> $b } keys %$step_hash) {
+			#print "$step $step_hash->{$step}\n";
+			$args_dict->{"upload_index"}=1;
+			$step_hash->{$step}->start($args_dict);
+		}
+	}
+
+}
+
+elsif (scalar(keys %$step_hash)==1 and $args_dict->{"only_delete_temp"}) {
+	#print "only_delete_temp------\n";
+	Utility::create_dir($args_dict);
+	### Get HADOOP executables and Streaming jar
+	Utility::check_hadoop($args_dict);
+	
+	if (scalar(keys %$step_hash)>0) {
+		foreach my $step ( sort { $a <=> $b } keys %$step_hash) {
+			#print "$step $step_hash->{$step}\n";
+			
+			$step_hash->{$step}->start($args_dict);
+		}
+	}
+	
+}
+
+else {
+	
+
+$args_dict = check_inputs();
+
+foreach my $k (keys %$args_dict) {
+	#print "$k => ",$args_dict->{$k},"\n";
+	
+}
+
+
+
+
+
+#print @{$args_dict->{"mapper"}},"\n";
+#
+#if ($args_dict->{"only_map"}) {
+#	if (scalar(@{$args_dict->{"mapper"}})==scalar(@{$args_dict->{"mapper_path"}}) and scalar(@{$args_dict->{"mapper_path"}})==scalar(@{$args_dict->{"mapper_args"}})) {
+#		print "mappers are correct\n";
+#	}
+#}
+#exit();
+#($mapper,$mapper_args,$mapper_path) = 
+#Utility::check_mapper($args_dict);
+#exit();
+#print "trim_args: ", $args_dict->{"trim_args"}, "\n";
+#print "TRIM: ",$args_dict->{"trimming_flag"} ,"\n";
+#print "SCRIPT: ", $args_dict->{"trim_script_path"}, "\n";
+
+if ($args_dict->{"trimming_flag"}) {
+	unless (-e $args_dict->{"trim_script_path"}) {
+		print "\n\tERROR: trimming script (trim-fastq.pl) path not correct: \n\t$args_dict->{'trim_script_path'}\n\n";
+		$args_dict->{"trimming_flag"}="";
+		exit(1);
+	}
+}
+else {
+	
+}
+
+
+
+
+	
+#foreach (keys %$args_dict) {
+	#print "$_\t$args_dict->{$_}\n";
+#}
+
+
+Utility::check_genome_index($args_dict);
+#my $step_hash = {};
+#$step_hash = Utility::get_steps($args_dict);
+
+#### checking the mappers integritiy. If multiple mappers are using in a single command . Implemented on 12-04-2016
+
+if (scalar(keys %$step_hash)>0) {
+	if (($args_dict->{"only_index"}) or ($args_dict->{"only_map"})) {
+		
+		check_mapper_integritiy($args_dict);
+	
+	}
+	
+}
+else {
+	check_mapper_integritiy($args_dict);
+}
+
+if (scalar(keys %$step_hash)>0) {
+	foreach my $step ( sort { $a <=> $b } keys %$step_hash) {
+		#print "$step $step_hash->{$step}\n";
+		
+		$step_hash->{$step}->start($args_dict);
+	}
+}
+else {
+	#print "whole",$args_dict->{"trimming_flag"},"\n";
+	#print "trim: ", $args_dict->{"no_trim"}," | ", $args_dict->{"only_trim"},"\n";
+	Utility::run_whole_pipeline($args_dict);
+}
+
+
+}
+exit;
+
+
+
+sub check_mapper_integritiy {
+	my ($args_dict) = @_;
+	
+	$args_dict->{"mapper"} = \@mapper;	
+	$args_dict->{"mapper_path"} = \@mapper_path;
+	$args_dict->{"mapper_args"} = \@mapper_args;
+	
+	if (scalar(@{$args_dict->{"mapper_path"}})<1) {
+		print "\n\tERROR: 3 arguments (--mapper --mapper-path --mapper-args) must be in the same order\n\n";
+		print "\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args \"<bowtie2 mapper parameters>\" --mapper-args \"<novoalign mapper parameters>\" --mapper-args \"<bwa mapper parameters>\" --mapper-path <bowtie2 mapper path> --mapper-path <novoalign mapper path> --mapper-path <bwa mapper path>\"\n\n";
+		
+		print qq(\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args \"--phred33 --end-to-end -X 1500\" --mapper-args \"-i 250,75 -F STDFQ -o SAM -r RANDOM\" --mapper-args \"bwasw\" --mapper-path $ENV{"DISTMAP_HOME"}/executables/bowtie2-2.2.6/bowtie2 --mapper-path $ENV{"DISTMAP_HOME"}/executables/novocraft/novoalign --mapper-path $ENV{"DISTMAP_HOME"}/executables/bwa-0.7.13/bwa\"\n\n);
+		
+		exit(1);
+		
+	}
+	elsif (scalar(@{$args_dict->{"mapper"}})==scalar(@{$args_dict->{"mapper_path"}}) and scalar(@{$args_dict->{"mapper_path"}})==scalar(@{$args_dict->{"mapper_args"}})) {
+		#print "mappers are correct\n";
+	}
+	
+	else {
+		print "\n\tERROR: 3 arguments (--mapper --mapper-path --mapper-args) must be in the same order\n\n";
+		print "\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args \"<bowtie2 mapper parameters>\" --mapper-args \"<novoalign mapper parameters>\" --mapper-args \"<bwa mapper parameters>\" --mapper-path <bowtie2 mapper path> --mapper-path <novoalign mapper path> --mapper-path <bwa mapper path>\"\n\n";
+		
+		print qq(\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args \"--phred33 --end-to-end -X 1500\" --mapper-args \"-i 250,75 -F STDFQ -o SAM -r RANDOM\" --mapper-args \"bwasw\" --mapper-path $ENV{"DISTMAP_HOME"}/executables/bowtie2-2.2.6/bowtie2 --mapper-path $ENV{"DISTMAP_HOME"}/executables/novocraft/novoalign --mapper-path $ENV{"DISTMAP_HOME"}/executables/bwa-0.7.13/bwa\"\n\n);
+		
+		exit(1);
+	}
+		
+	
+	
+}
+
+
+
+
+sub check_inputs {
+	
+	my $args_dict = {};
+	
+	if ($output_directory =~ /\/$/g) {
+		$output_directory =~ s/\/$//g;
+	}
+	
+	$args_dict->{"only_download_reads"} = $only_download_reads;
+	
+	
+	$args_dict->{"number_of_processors"} = $number_of_processors;
+	#$args_dict->{"usage"} = $usage;
+	$args_dict->{"reference_fasta"} = $reference_fasta;
+	$args_dict->{"input_files"} = \@input_files;                       
+	$args_dict->{"output_directory"} = $output_directory;
+	$args_dict->{"refindex_archive"} = $refindex_archive;
+	
+	$args_dict->{"mappers_exe_archive"} = $mappers_exe_archive;
+	
+	$args_dict->{"only_index"} = $only_index;
+	$args_dict->{"only_process"} = $only_process;
+	$args_dict->{"only_trim"} = $only_trim;
+	$args_dict->{"no_trim"} = $no_trim;
+	$args_dict->{"only_download_reads"} = $only_download_reads;
+	$args_dict->{"trim_script_path"} = $trim_script_path;
+	$args_dict->{"trim_args"} = $trim_args;
+
+	$args_dict->{"nozip"} = $nozip; # this is a flag to output trimmed fastq files as zipped file.
+
+	$args_dict->{"only_map"} = $only_map;
+	$args_dict->{"only_hdfs_upload"} = $only_hdfs_upload;
+	$args_dict->{"only_hdfs_download"} = $only_hdfs_download;
+	$args_dict->{"only_merging"} = $only_merging;
+	$args_dict->{"only_delete_temp"} = $only_delete_temp;
+	$args_dict->{"hadoop_home"} = $hadoop_home;
+	$args_dict->{"mapper"} = \@mapper;			
+	$args_dict->{"mapper_path"} = \@mapper_path;
+	
+	$args_dict->{"picard_jar"} = $picard_jar;
+	
+	if ($picard_jar ne "" and -e $picard_jar) {
+		$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
+		$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
+		$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
+	
+		
+	}
+	else {
+		$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
+		$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
+		$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
+	}
+	
+	#$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
+	#$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
+	#$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
+	
+	$mapper_args =~ s/\"//g;
+	$args_dict->{"mapper_args"} = \@mapper_args;
+	$args_dict->{"bwa_sampe_args"} = $bwa_sampe_args;
+	$args_dict->{"output_format"} = $output_format;					
+	$args_dict->{"job_desc"} = $job_desc;
+	$args_dict->{"gsnap_output_split"} = $gsnap_output_split;
+	
+	if (!$queue_name) {
+		$queue_name="default";
+	}
+	
+	if (!$job_priority) {
+		$job_priority="NORMAL";
+	}
+	
+	$job_priority = uc($job_priority);
+	
+	if ($hadoop_scheduler=~ /Fair/i) {
+		$args_dict->{"queue_name"} = "mapreduce.job.queuename=$queue_name";
+	}
+	else {
+		$args_dict->{"queue_name"} = "mapreduce.job.queuename=$queue_name"; #mapred.job.queue.name
+	}
+	$args_dict->{"job_priority"} = "mapreduce.job.priority=$job_priority";
+	
+	
+	#print $args_dict->{"mapper"}, "\n";
+	#my $mapper_list = $args_dict->{"mapper"};
+	
+	#print "Hi: @$mapper_list\n";
+	#exit();
+	if ($args_dict->{"mapper"}->[0] =~ /gsnap/i ) {
+		$args_dict->{"block_size"} = "128m";
+	}
+	else {
+		#$args_dict->{"block_size"} = "64m";
+		$args_dict->{"block_size"} = "8m";
+	}
+	$args_dict->{"exec_arch"} = "DistMap_Mapper_Archive.tgz";
+	$args_dict->{"extracted_execarch"} = "execarch";
+	
+	$args_dict->{"ref_arch"} = "Genome_Index_Archive.tgz";
+	$args_dict->{"extracted_refarch"} = "Genome_Index_Archive";
+	
+	#if ($args_dict->{"mapper"} =~ /gsnap/i) {
+	#	$args_dict->{"number_of_processors"} = $number_of_processors-5;
+	#}
+	
+	if ($args_dict->{"only_trim"}) {
+		$args_dict->{"trimming_flag"} = "--trim";
+	}
+	else {
+		if ($args_dict->{"no_trim"}) {
+			$args_dict->{"trimming_flag"} = "";
+		}
+		else {
+			$args_dict->{"trimming_flag"} = "--trim";
+		}
+	}
+	
+	
+	### Get HADOOP executables and Streaming jar
+	Utility::check_hadoop($args_dict);
+	
+	### Create all temp folder and directory
+	Utility::create_dir($args_dict);
+	
+	#get username
+	my $username = getlogin();
+	my $uname = (getpwuid($<))[0];
+	my @groups = split'\s',$(; # $( means real group id (gid), list (seperated by spaces) of groups. $) means effective group id (gied), list (seperated by spaces) of groups
+	my @group_name = ();
+	foreach (@groups) {
+		push(@group_name,getgrgid($_));
+	}
+	#print "$username,,$uname,,,@group_name\n";
+	$args_dict->{"username"} = $uname;
+	$args_dict->{"groupname"} = "hadoop";
+	#$args_dict->{'username'}:$args_dict->{'groupname'}
+	#exit();
+	return $args_dict;
+	
+}
+
+
+=head1 NAME
+
+DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.  
+
+=head1 SYNOPSIS
+
+ DistMap_v1.2/distmap --reference-fasta /reads/dmel_genome.fasta --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq" --mapper bwa --mapper-path /executables/bwa --picard-mergesamfiles-jar /executables/MergeSamFiles.jar --picard-sortsam-jar /executables/SortSam.jar --mapper-args "-l 200" --output-format sam --hadoop-scheduler Fair --queue-name pg1 --job-priority VERY_HIGH --output /reads/bwa/bwa_mapping --job-desc "BWA mapping 5M 1"
+
+
+=head1 DistMap OPTIONS
+
+=over 4
+
+=item B<--reference-fasta>
+
+ Reference fasta file full path. MANDATORY parameter.
+  
+=item B<--input>
+
+ provide input fasta files. Either as a pair or single Fastq file.
+ For Paired-end data --input 'read1.fastq,read2.fastq'
+ For Single-end data --input 'read.fastq'
+ Multiple inputs are possible to repeat --input parameter
+					
+ --input 'sample1_1.fastq,sample1_2.fastq' --input 'sample2_1.fastq,sample2_2.fastq'
+ This is important to give single or a pair input file within
+ single or double quote and if paired file, it must be comma
+ seperated. MANDATORY parameter.
+					
+=item B<--output>
+
+ Full path of output folder where final output will be kept. MANDATORY parameter.
+
+=item B<--only-index>
+ Step1: This option will create genome index and create archieve to upload on HDFS. OPTIONAL parameter
+
+
+=item B<--only-process>
+
+ Step2: This option will 1) convert FASTQ files into 1 line format, 2) create genome index
+ and 3) create archieve to send for job and exit. OPTIONAL parameter
+				
+=item B<--only-hdfs-upload>
+
+ Step3 This option assume that data processing is done and only upload reads and archieve created in
+ data process step will be loaded into HDFS file system and exit. OPTIONAL parameter
+
+=item B<--only-map>
+
+ Step4: This option will assume that data is already loaded into HDFS and will only
+ run map on cluster
+
+=item B<--only-hdfs-download>
+
+ Step5: This option assume that mapping already done on cluster and files will be downloaded
+ from cluster to local output directory. OPTIONAL parameter
+				
+=item B<--only-merge>
+
+ Step6: This option assume that data already in local directory from HDFS
+ and now will be merged and create a single SAM or BAM output file. OPTIONAL parameter
+
+=item B<--only-delete-temp>
+
+ Step7: This is the last step of piepline. This option will delete the
+ mapping data from HDFS file system as well as from local temp directory.
+ OPTIONAL parameter
+				
+=item B<--hadoop-home>
+
+ Give the full path of hadoop folder. MANDATORY parameter.
+ hadoop home path should be identical in master, secondary namenode and all slaves.
+ Example: --hadoop-home /usr/local/hadoop
+					
+=item B<--mapper>
+
+ Mapper name [bwa,tophat,gsnap,bowtie,soap]. MANDATORY parameter.
+ Example: --mapper bwa
+					
+=item B<--mapper-path>
+ Mapper executable full path. MANDATORY parameter.
+ Example: --mapper-path /usr/local/hadoop/bwa
+
+=item B<--gsnap-output-split>
+
+ GSNAP has a feature to split different type of maaping output in different SAM files.
+				
+	or detail do gsnap --help and you can see --split--output.
+	--split-output=STRING   Basename for multiple-file output, separately for nomapping,
+        halfmapping_uniq, halfmapping_mult, unpaired_uniq, unpaired_mult,
+        paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
+        or 10 if --fails-as-input is selected, or 3 for single-end reads)
+				   					
+=item B<--picard-mergesamfiles-jar>
+
+ PICARD MergeSamFiles.jar full path. It will be used to merge all
+ SAM or BAM files. MANDATORY parameter.
+ Example: --picard-mergesamfiles-jar /usr/local/hadoop/picard-tools-1.56/MergeSamFiles.jar
+				
+=item B<--picard-sortsam-jar>
+
+ PICARD SortSam.jar full path. It will be used to for SAM BAM conversion. MANDATORY parameter.
+ Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
+				
+=item B<--mapper-args>
+
+ Arguments for mapping:
+	BWA mapping for aln command:
+		Example --mapper-args "-o 1 -n 0.01 -l 200 -e 12 -d 12"
+		Note: Define BWA parameters correctly accoring to the version is used here.
+		
+	TopHat mapping:
+		Example: --mapper-args "--mate-inner-dist 200 --max-multihits 40 --phred64-quals"
+		Note: Define TopHat parameters correctly accoring to the version is used here.
+	
+	GSNAP mapping:
+		Example: --mapper-args "--pairexpect 200 --quality-protocol illumina"
+		Note: Define gsnap parameters correctly accoring to the version is used here.
+		For detail about parameters visit [http://research-pub.gene.com/gmap/]
+	
+	bowtie mapping:
+		Example: --mapper-args "--sam"
+		Note: Define gsnap parameters correctly accoring to the version is used here.
+		For detail about parameters visit [http://bowtie-bio.sourceforge.net/index.shtml]
+	
+	SOAPAlinger:
+		Example: --mapper-args "-m 400 -x 600"
+		Note: Define SOAPaligner parameters correctly accoring to the version is used here.
+		For detail about parameters visit [http://soap.genomics.org.cn/soapaligner.html]
+		
+ Please note that processor parameters not required in arguments. Example in case of BWA mapping dont give -t parameter.
+ This parameter is given by DistMap internally.
+
+=item B<--bwa-sampe-args>
+
+ Arguments for BWA sampe or samse module.
+	bwa sampe for paired-end reads
+	bwa samse for single-end reads
+	Example --bwa-sampe-args "-a 500 -s"
+					
+=item B<--output-format>
+
+ Output file format either SAM or BAM.
+ Default: BAM
+					
+=item B<--job-desc>
+
+ Give a job description which will be dispalyed in JobTracker webpage.
+ Default: <mapper name> mapping.
+
+
+=item B<--queue-name>
+
+ If your hadoop has Capacity Scheduler then provide --queue-name.
+ Example: --queue-name pg1
+
+
+
+
+=item B<--only-trim>
+ 
+ Step3: This option will assume that data is already loaded into HDFS and will only
+ run read trimming on cluster
+
+
+
+=item B<--no-trim>
+ 
+ This option will skip the trimming
+
+
+
+=item B<--trim-script-path>
+ 
+ Give the full path of the trim-fastq.pl from popoolation/basic-pipeline. Kofler et. al (2011)
+
+
+
+=item B<--trim-args>
+ 
+ Give the trimming arguments EXAMPLE: --trim-args "--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output"
+
+
+
+=item B<--verbose>
+
+To print inputs on screen.
+
+=item B<--help>
+
+To run a test for all dependency and all.
+
+
+=head1 TRIMMING OPTIONS
+
+=over 4
+
+=item B<--quality-threshold>
+
+minimum average quality; A modified Mott algorithm is used for trimming; the threshold is used for calculating a score: score = quality_at_base - threshold; default=20
+
+=item B<--fastq-type>
+
+The encoding of the quality characters; Must either be 'sanger' or 'illumina'; 
+
+ Using the notation suggested by Cock et al (2009) the following applies:
+ 'sanger'   = fastq-sanger: phred encoding; offset of 33
+ 'solexa'   = fastq-solexa: -> NOT SUPPORTED
+ 'illumina' = fastq-illumina: phred encoding: offset of 64
+ 
+ See also:
+ Cock et al (2009) The Sanger FASTQ file format for sequecnes with quality socres,
+ and the Solexa/Illumina FASTQ variants; 
+
+default=illumina
+
+=item B<--discard-internal-N>
+
+flag, if set reads having internal Ns will be discarded; default=off
+
+=item B<--min-length>
+
+The minimum length of the read after trimming; default=40
+
+
+=item B<--no-trim-quality>
+
+toggle switch: switch of trimming of quality
+
+=item B<--no-5p-trim>
+
+togle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
+Duplicates are usually identified by the 5' mapping position which should thus not be modified by trimming. default=off
+
+=item B<--disable-zipped-output>
+
+Dissable zipped output
+
+
+
+=back
+
+=head1 Details
+
+ DistMap is an integrated pipeline to map FASTQ formatted short reads on a local Hadoop cluster framework.
+ It takes all input from local disk and return single SAM or BAM mapping file in local disk. User does not need to upload or download data in Hadoop manually.
+ 
+
+=head1 AUTHORS
+
+ Ram Vinay Pandey
+ Christian Schloetterer
+
+=cut
+
