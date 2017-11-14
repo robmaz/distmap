@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
+use File:Which;
 
 use FindBin qw/$RealBin/;
 use lib "$RealBin/bin";
@@ -180,6 +181,8 @@ my $job_desc                   = "";
 my $queue_name                 = "pg1";
 my $job_priority               = "VERY_HIGH";
 my $hadoop_scheduler           = "Fair";
+### will rely on installed readtools for a number of tasks
+my $readtools                  = `which readtools`;
 
 my $mappers_exe_archive = "";
 
@@ -203,6 +206,7 @@ my $nozip              = 0;
 my $hadoop_home = $ENV{"HADOOP_HOME"};
 
 GetOptions(
+    "nproc_per_node"              => \$number_of_processors,
     "reference-fasta=s"           => \$reference_fasta,
     "input=s"                     => \@input_files,
     "output=s"                    => \$output_directory,
@@ -233,6 +237,7 @@ GetOptions(
     "picard-jar=s"                => \$picard_jar,
     "picard-mergesamfiles-jar=s"  => \$picard_mergesamfiles_jar,
     "picard-sortsam-jar=s"        => \$picard_sortsam_jar,
+		"readtools=s"                 => \$readtools,
     "mapper-args=s"               => \@mapper_args,
     "bwa-sampe-args=s"            => \$bwa_sampe_args,
     "output-format=s"             => \$output_format,
@@ -243,6 +248,13 @@ GetOptions(
     "help"                        => \$help,
     "h"                           => \$help
 ) or pod2usage( -msg => "Wrong options", -verbose => 1 );
+
+## TODO: if $hadoop_home is still unset, try to find "hadoop" in the path
+## and infer $hadoop_home from there
+# make sure there is no trailing slash
+$hadoop_home =~ s/\/$//;
+
+unless ( -x $readtools ) die "distmap: cannot find readtools $readtools";
 
 pod2usage( -verbose => 2 ) if $help;
 
@@ -266,17 +278,13 @@ if ($verbose) {
     print STDERR "  picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
     print STDERR "  picard SortSam.jar:\t$picard_sortsam_jar\n";
     print STDERR "  picard MarkDuplicates.jar:\t$picard_mark_duplicates_jar\n";
+		print STDERR "  readtools:\t$readtools\n";
     print STDERR "  mapper arguments:\t@mapper_args\n";
     print STDERR "  bwa sampe arguments:\t$bwa_sampe_args\n";
     print STDERR "  output format:\t$output_format\n";
     print STDERR "  job description:\t$job_desc\n";
     exit(0);
 }
-
-## TODO: if $hadoop_home is still unset, try to find "hadoop" in the path
-## and infer $hadoop_home from there
-# make sure there is no trailing slash
-$hadoop_home =~ s/\/$//;
 
 $trim_args = "";
 if ( $trim_script_path =~ /.pl$/ ) {
@@ -328,6 +336,7 @@ $args_dict->{"mapper_path"}         = \@mapper_path;
 $args_dict->{"reference_fasta"}     = $reference_fasta;
 $args_dict->{"trim_script_path"}    = $trim_script_path;
 $args_dict->{"picard_jar"}          = $picard_jar;
+$args_dict->{"readtools"}           = $readtools;
 
 if ( -r $picard_jar ) {
     $args_dict->{"picard_mergesamfiles_jar"}   = "$picard_jar MergeSamFiles";
@@ -434,9 +443,7 @@ qq(\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args
 sub check_inputs {
     my $args_dict = {};
 
-    if ( $output_directory =~ /\/$/g ) {
-        $output_directory =~ s/\/$//g;
-    }
+    $output_directory =~ s/\/$//g;
 
     $args_dict->{"only_download_reads"} = $only_download_reads;
 
@@ -468,8 +475,8 @@ sub check_inputs {
     $args_dict->{"hadoop_home"}        = $hadoop_home;
     $args_dict->{"mapper"}             = \@mapper;
     $args_dict->{"mapper_path"}        = \@mapper_path;
-
-    $args_dict->{"picard_jar"} = $picard_jar;
+    $args_dict->{"readtools"}          = $readtools;
+    $args_dict->{"picard_jar"}         = $picard_jar;
 
     if ( $picard_jar ne "" and -e $picard_jar ) {
         $args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
@@ -559,11 +566,11 @@ sub check_inputs {
 
 =head1 NAME
 
-DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
+distmap-2.7.4 - This pipeline maps NGS reads on a local hadoop cluster.
 
 =head1 SYNOPSIS
 
- DistMap_v1.2/distmap --reference-fasta /reads/dmel_genome.fasta --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq" --mapper bwa --mapper-path /executables/bwa --picard-mergesamfiles-jar /executables/MergeSamFiles.jar --picard-sortsam-jar /executables/SortSam.jar --mapper-args "-l 200" --output-format sam --hadoop-scheduler Fair --queue-name pg1 --job-priority VERY_HIGH --output /reads/bwa/bwa_mapping --job-desc "BWA mapping 5M 1"
+ /path/to/distmap --reference-fasta /reads/dmel_genome.fasta --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq" --mapper bwa --mapper-path /executables/bwa --picard-mergesamfiles-jar /executables/MergeSamFiles.jar --picard-sortsam-jar /executables/SortSam.jar --mapper-args "-l 200" --output-format sam --hadoop-scheduler Fair --queue-name pg1 --job-priority VERY_HIGH --output /reads/bwa/bwa_mapping --job-desc "BWA mapping 5M 1"
 
 
 =head1 DistMap OPTIONS
@@ -661,6 +668,11 @@ DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
  PICARD SortSam.jar full path. It will be used to for SAM BAM conversion. MANDATORY parameter.
  Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
 
+=item B<--readtools>
+
+ Path to readtools launcher script. MANDATORY, unless readtools is found in the path.
+
+
 =item B<--mapper-args>
 
  Arguments for mapping:
@@ -740,6 +752,12 @@ DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
  Give the trimming arguments EXAMPLE: --trim-args "--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output"
 
 
+=item B<--nproc_per_node>
+
+ Number of processors per node to use
+
+ default = 3 (realized number also depends on yarn settings)
+
 
 =item B<--verbose>
 
@@ -793,7 +811,7 @@ Duplicates are usually identified by the 5' mapping position which should thus n
 
 =item B<--disable-zipped-output>
 
-Dissable zipped output
+Disable zipped output
 
 
 
