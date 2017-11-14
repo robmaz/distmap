@@ -321,6 +321,7 @@ sub fastq2tab_pe_java {
     my $input_dir1 = "/$args_dict->{'random_id'}_input/fastq_paired_end";
 
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
+    my $readtools = $args_dict->{"readtools"};
 
     if ( system("$hdfs_exe dfs -test -d $input_dir1") == 0 ) {
         system("$hdfs_exe dfs -rm -r $input_dir1") == 0
@@ -336,11 +337,8 @@ sub fastq2tab_pe_java {
     #my $jar_file_path = "$script_dirname/bin/JDistmap.jar";
     # ReadTools 1+ is too large to be distributed with distmap
     # my $jar_file_path = "$script_dirname/executables/ReadTools-1.1.0.jar";
-    use File::Which;
-    my $readtools = `which readtools`;
-    unless ( -x $readtools ) die "ReadTools not found in path.";
 
-      my $block_size = $args_dict->{"block_size"};
+    my $block_size = $args_dict->{"block_size"};
 
     $block_size =~ s/\D//g;
     my $block_size_byte = $block_size * 1024 * 1024;
@@ -388,6 +386,7 @@ sub fastq2tab_se_java {
     my $input_dir1 = "/$args_dict->{'random_id'}_input/fastq_single_end";
 
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
+    my $readtools = $args_dict->{"readtools"};
 
     if ( system("$hdfs_exe dfs -test -d $input_dir1") == 0 ) {
         system("$hdfs_exe dfs -rm -r $input_dir1") == 0
@@ -403,11 +402,8 @@ sub fastq2tab_se_java {
     # my $jar_file_path  = "$script_dirname/bin/JDistmap.jar";
     # ReadTools 1+ is too large to be distributed with distmap
     # my $jar_file_path = "$script_dirname/executables/ReadTools-1.1.0.jar";
-    use File::Which;
-    my $readtools = `which readtools`;
-    unless ( -x $readtools ) die "ReadTools not found in path.";
 
-      my $block_size = $args_dict->{"block_size"};
+    my $block_size = $args_dict->{"block_size"};
 
     $block_size =~ s/\D//g;
     my $block_size_byte = $block_size * 1024 * 1024;
