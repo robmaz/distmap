@@ -338,7 +338,7 @@ sub fastq2tab_pe_java {
     # my $jar_file_path = "$script_dirname/executables/ReadTools-1.1.0.jar";
     use File::Which;
     my $readtools = `which readtools`;
-    unless ( -x $readtools ) die("ReadTools not found in path.")
+    unless ( -x $readtools ) die("ReadTools not found in path.");
 
       my $block_size = $args_dict->{"block_size"};
 
@@ -405,7 +405,7 @@ sub fastq2tab_se_java {
     # my $jar_file_path = "$script_dirname/executables/ReadTools-1.1.0.jar";
     use File::Which;
     my $readtools = `which readtools`;
-    unless ( -x $readtools ) die("ReadTools not found in path.")
+    unless ( -x $readtools ) die("ReadTools not found in path.");
 
       my $block_size = $args_dict->{"block_size"};
 
