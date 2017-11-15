@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
-use File:Which;
+use File::Which;
 
 use FindBin qw/$RealBin/;
 use lib "$RealBin/bin";
@@ -183,7 +183,7 @@ my $queue_name                 = "pg1";
 my $job_priority               = "VERY_HIGH";
 my $hadoop_scheduler           = "Fair";
 ### will rely on installed readtools for a number of tasks
-my $readtools                  = `which readtools`;
+my $readtools = `which readtools`;
 
 my $mappers_exe_archive = "";
 
@@ -238,7 +238,7 @@ GetOptions(
     "picard-jar=s"                => \$picard_jar,
     "picard-mergesamfiles-jar=s"  => \$picard_mergesamfiles_jar,
     "picard-sortsam-jar=s"        => \$picard_sortsam_jar,
-		"readtools=s"                 => \$readtools,
+    "readtools=s"                 => \$readtools,
     "mapper-args=s"               => \@mapper_args,
     "bwa-sampe-args=s"            => \$bwa_sampe_args,
     "output-format=s"             => \$output_format,
@@ -250,10 +250,15 @@ GetOptions(
     "h"                           => \$help
 ) or pod2usage( -msg => "Wrong options", -verbose => 1 );
 
-## TODO: if $hadoop_home is still unset, try to find "hadoop" in the path
-## and infer $hadoop_home from there
-# make sure there is no trailing slash
-$hadoop_home =~ s/\/$//;
+if ( $hadoop_home ne "" ) {
+    # if $hadoop_home is set, make sure there is no trailing slash
+    $hadoop_home =~ s/\/$//;
+}
+else {
+    # try to find "hadoop" in path and prune "/bin/hadoop" from the full path
+    $hadoop_home = `which hadoop`;
+    $hadoop_home =~ s/\/bin\/hadoop$//;
+}
 
 unless ( -x $readtools ) die "distmap: cannot find readtools $readtools";
 
@@ -279,7 +284,7 @@ if ($verbose) {
     print STDERR "  picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
     print STDERR "  picard SortSam.jar:\t$picard_sortsam_jar\n";
     print STDERR "  picard MarkDuplicates.jar:\t$picard_mark_duplicates_jar\n";
-		print STDERR "  readtools:\t$readtools\n";
+    print STDERR "  readtools:\t$readtools\n";
     print STDERR "  mapper arguments:\t@mapper_args\n";
     print STDERR "  bwa sampe arguments:\t$bwa_sampe_args\n";
     print STDERR "  output format:\t$output_format\n";
