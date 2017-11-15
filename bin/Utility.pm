@@ -375,11 +375,18 @@ sub run_whole_pipeline {
     my $mapping_object = HadoopMapping->new();
     $mapping_object->start($args_dict);
 
-    my $datadownload_object = DataDownload->new();
-    $datadownload_object->start($args_dict);
+    my $datadownloadandmerge_object = DataDownloadAndMerge->new();
+    $datadownloadandmerge_object->start($args_dict);
 
-    my $datamerge_object = DataMerge->new();
-    $datamerge_object->start($args_dict);
+    # my $datadownload_object = DataDownload->new();
+    # $datadownload_object->start($args_dict);
+    #
+    # my $datamerge_object = DataMerge->new();
+    # $datamerge_object->start($args_dict);
+    #
+    ### use readtools merge download instead
+    my $datadownloadandmerge_object = DataDownloadAndMerge->new();
+    $datadownloadandmerge_object->start($args_dict);
 }
 
 sub data_cleanup {
@@ -416,18 +423,23 @@ sub get_steps {
         my $mapping_object = HadoopMapping->new();
         $step_hash->{5} = $mapping_object;
     }
-    if ( $args_dict->{"only_hdfs_download"} ) {
-        my $datadownload_object = DataDownload->new();
-        $step_hash->{6} = $datadownload_object;
+    if ( $args_dict->"only_hdfs_download" and $args_dict{"only_merge"} ) {
+        my $datadownloadandmerge_object = DataDownloadAndMerge->new();
+        $step_hash{6} = $datadownloadandmerge_object;
     }
-    if ( $args_dict->{"only_merge"} ) {
-        my $datamerge_object = DataMerge->new();
-        $step_hash->{7} = $datamerge_object;
+    else {
+        if ( $args_dict->{"only_hdfs_download"} ) {
+            my $datadownload_object = DataDownload->new();
+            $step_hash->{6} = $datadownload_object;
+        }
+        if ( $args_dict->{"only_merge"} ) {
+            my $datamerge_object = DataMerge->new();
+            $step_hash->{7} = $datamerge_object;
+        }
     }
     if ( $args_dict->{"only_download_reads"} ) {
         my $read_download_object = DownloadTrimmedRead->new();
         $step_hash->{8} = $read_download_object;
-
     }
     if ( $args_dict->{"only_delete_temp"} ) {
         my $datacleanup_object = DataCleanup->new();

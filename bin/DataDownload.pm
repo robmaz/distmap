@@ -16,7 +16,6 @@ sub new {
 }
 
 sub start {
-
     my ( $self, $args_dict ) = @_;
 
     print STDERR "\n\n";
@@ -44,9 +43,7 @@ sub start {
     my $time_stamp_end = Utility::get_time_stamp();
     print STDERR "Finished at: $time_stamp_end\n";
     print STDERR "Duration: $execution_time\n\n";
-
 }
-#
 
 sub paired_end_data {
     my ( $self, $args_dict ) = @_;
@@ -67,13 +64,11 @@ sub paired_end_data {
     my $hdfs_input_folder =
       "/$args_dict->{'random_id'}" . "_input/fastq_paired_end";
 
-    #my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
     my @cmd = ();
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {
         @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     }
 
-    #my @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     my $hdfs_file_count = 0;
 
     if ( scalar(@cmd) > 1 ) {
@@ -116,9 +111,7 @@ sub paired_end_data {
 
             $i++;
         }
-
     }
-
 }
 
 sub single_end_data {
@@ -140,13 +133,11 @@ sub single_end_data {
     my $hdfs_input_folder =
       "/$args_dict->{'random_id'}" . "_input/fastq_single_end";
 
-    #my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
     my @cmd = ();
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {
         @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     }
 
-    #my @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     my $hdfs_file_count = 0;
 
     if ( scalar(@cmd) > 1 ) {
@@ -155,15 +146,6 @@ sub single_end_data {
     }
 
     if ( $file_count > 0 or $hdfs_file_count > 0 ) {
-
-        #### Deleting the download folder if already exists
-#Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}"."_mapping");
-#
-#my $download_command = "$hdfs_exe dfs -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'random_id'}/";
-#
-#print STDERR "Data download from hdfs file system started ", localtime(), "\n";
-#system($download_command) == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
-#print STDERR "Data download from hdfs file system finished ", localtime(), "\n";
 
         my $i = 0;
         foreach my $mapper_name ( @{ $args_dict->{"mapper"} } ) {
@@ -197,11 +179,8 @@ sub single_end_data {
               localtime(), "\n";
 
             $i++;
-
         }
-
     }
-
 }
 
 sub get_file_list {

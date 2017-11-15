@@ -15,6 +15,7 @@ use HadoopTrimming;
 use HadoopMapping;
 use DataDownload;
 use DataMerge;
+use DataDownloadAndMerge;
 use DownloadTrimmedRead;
 use DataCleanup;
 
@@ -424,7 +425,6 @@ sub check_mapper_integrity {
 qq(\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args \"--phred33 --end-to-end -X 1500\" --mapper-args \"-i 250,75 -F STDFQ -o SAM -r RANDOM\" --mapper-args \"bwasw\" --mapper-path $ENV{"DISTMAP_HOME"}/executables/bowtie2-2.2.6/bowtie2 --mapper-path $ENV{"DISTMAP_HOME"}/executables/novocraft/novoalign --mapper-path $ENV{"DISTMAP_HOME"}/executables/bwa-0.7.13/bwa\"\n\n);
 
         exit(1);
-
     }
     else {
         print
@@ -437,7 +437,6 @@ qq(\n\tExample: \"--mapper bowtie2 --mapper novoalign --mapper bwa --mapper-args
 
         exit(1);
     }
-
 }
 
 sub check_inputs {
@@ -483,7 +482,6 @@ sub check_inputs {
         $args_dict->{"picard_sortsam_jar"}       = "$picard_jar SortSam";
         $args_dict->{"picard_mark_duplicates_jar"} =
           "$picard_jar MarkDuplicates";
-
     }
     else {
         $args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
@@ -561,7 +559,6 @@ sub check_inputs {
     $args_dict->{"groupname"} = "hadoop";
 
     return $args_dict;
-
 }
 
 =head1 NAME
