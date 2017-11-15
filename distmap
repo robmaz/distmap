@@ -20,7 +20,7 @@ use DownloadTrimmedRead;
 use DataCleanup;
 
 my $script  = "distmap";
-my $version = "2.7.1";
+my $version = "devel";
 
 my $usage = qq{
 $script: Run NGS data mapping on hadoop cluster
