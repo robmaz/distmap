@@ -13,7 +13,7 @@ use Cwd;
 use FindBin qw/$RealBin/;
 use lib "$RealBin/bin";
 use Utility;
-use XML::XPath;
+#use XML::XPath;
 
 ##
 # Author: Ram Vinay Pandey
@@ -36,7 +36,7 @@ sub start {
 "=======================================================================\n";
     print STDERR
       "Step2: Converting FASTQ into tab seperated file, uploading in HDFS \n";
-    print STDERR "	     and creating archieve to upload into HDFS system\n";
+    print STDERR "	     and creating archive to upload into HDFS system\n";
     print STDERR
 "=======================================================================\n\n";
 

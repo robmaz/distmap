@@ -50,12 +50,12 @@ Usage: perl $script
 
 --output              		Full path of output folder where final output will be kept. MANDATORY parameter.
 
---only-index    		Step1: This option will create genome index and create archieve to upload on HDFS. OPTIONAL parameter
+--only-index    		Step1: This option will create genome index and create archive to upload on HDFS. OPTIONAL parameter
 
 --only-process    		Step2: This option will 1) convert FASTQ files into 1 line format, 2) create genome index
-			        and 3) create archieve to send for job and exit. OPTIONAL parameter
+			        and 3) create archive to send for job and exit. OPTIONAL parameter
 
---only-hdfs-upload          	Step3: This option assume that data processing is done and only upload reads and archieve created in
+--only-hdfs-upload          	Step3: This option assume that data processing is done and only upload reads and archive created in
 				data process step will be loaded into HDFS file system and exit. OPTIONAL parameter
 
 --only-trim            		Step4: This option will assume that data is already loaded into HDFS and will only
@@ -598,17 +598,17 @@ distmap-2.7.4 - This pipeline maps NGS reads on a local hadoop cluster.
  Full path of output folder where final output will be kept. MANDATORY parameter.
 
 =item B<--only-index>
- Step1: This option will create genome index and create archieve to upload on HDFS. OPTIONAL parameter
+ Step1: This option will create genome index and create archive to upload on HDFS. OPTIONAL parameter
 
 
 =item B<--only-process>
 
  Step2: This option will 1) convert FASTQ files into 1 line format, 2) create genome index
- and 3) create archieve to send for job and exit. OPTIONAL parameter
+ and 3) create archive to send for job and exit. OPTIONAL parameter
 
 =item B<--only-hdfs-upload>
 
- Step3 This option assume that data processing is done and only upload reads and archieve created in
+ Step3 This option assume that data processing is done and only upload reads and archive created in
  data process step will be loaded into HDFS file system and exit. OPTIONAL parameter
 
 =item B<--only-map>

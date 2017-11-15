@@ -28,9 +28,6 @@ sub new {
 sub start {
     my ( $self, $args_dict ) = @_;
 
-    ### to avoid the genome re-indexing
-    #Utility::check_genome_index($args_dict);
-
     if ( $args_dict->{"upload_index"} ) {
         print STDERR
 "=======================================================================\n";
@@ -76,7 +73,6 @@ sub start {
           "tar -cvzf $args_dict->{'exec_arch'} $args_dict->{'bin_dir'}/";
         $self->create_archive( $args_dict, $cmd1 );
     }
-
 }
 
 sub create_genome_index {
@@ -113,12 +109,10 @@ sub create_genome_index {
             $self->soap_index( $args_dict->{"reference_fasta"},
                 $mapper_path, $ref_dir );
         }
-
         elsif ( $mapper =~ /star/i ) {
             $self->star_index( $args_dict->{"reference_fasta"},
                 $mapper_path, $ref_dir );
         }
-
         elsif ( $mapper =~ /bismark/i ) {
             $self->bismark_index( $args_dict->{"reference_fasta"},
                 $mapper_path, $ref_dir, $args_dict );
@@ -139,53 +133,10 @@ sub create_genome_index {
             print STDERR
               "\t--mapper $args_dict->{'mapper'} not supported in DistMap\n";
             print STDERR "$args_dict->{'usage'}\n";
-
-            #exit(1);
         }
 
         $i++;
     }
-
-#if ($args_dict->{"mapper"} =~ m/bwa/i) {
-#	$self->bwa_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#elsif ($args_dict->{"mapper"} =~ m/(gsnap|gmap)/i) {
-#	$reference_file = "reference";
-#	$self->gsnap_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#elsif ($args_dict->{"mapper"} =~ /(tophat|tophat2)/i) {
-#	$reference_file = "reference";
-#	$self->tophat_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir,$args_dict);
-#}
-#elsif ($args_dict->{"mapper"} =~ /(bowtie|bowtie2)/i) {
-#	$reference_file = "reference";
-#	$self->bowtie_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir,$args_dict);
-#}
-#elsif ($args_dict->{"mapper"} =~ /soap/i) {
-#	$self->soap_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#
-#elsif ($args_dict->{"mapper"} =~ /star/i) {
-#	$self->star_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#
-#elsif ($args_dict->{"mapper"} =~ /bismark/i) {
-#	$self->bismark_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir,$args_dict);
-#}
-#elsif ($args_dict->{"mapper"} =~ /bsmap/i) {
-#	$self->bsmap_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#elsif ($args_dict->{"mapper"} =~ /novoalign/i) {
-#	$self->novoalign_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#elsif ($args_dict->{"mapper"} =~ /ngm/i) {
-#	$self->ngm_index($args_dict->{"reference_fasta"},$args_dict->{"mapper_path"},$ref_dir);
-#}
-#else {
-#	print STDERR "\t--mapper $args_dict->{'mapper'} not supported in DistMap\n";
-#	print STDERR "$args_dict->{'usage'}\n";
-#	#exit(1);
-#}
 
     $args_dict->{"index_name"} = $reference_file;
     $args_dict->{"index_dir"}  = $ref_dir;
@@ -204,18 +155,14 @@ sub create_archive {
       || die
       "Can not change to directory: $args_dict->{'output_directory'} $!\n";
 
-    #system("tar -cvzf $args_dict->{'ref_arch'} $args_dict->{'ref_dir'}/");
-    #system("tar -cvzf $args_dict->{'exec_arch'} $args_dict->{'bin_dir'}/");
     system($cmd1);
     chdir($current_directory)
       || die "Can not change to directory: $current_directory $!\n";
-
 }
 
 sub copy_exec {
     my ( $self, $args_dict ) = @_;
 
-#my $bin_dir_path = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}";
     my $bin_dir_path =
       "$args_dict->{'output_directory'}/$args_dict->{'bin_dir'}";
     my $i = 0;
@@ -238,24 +185,20 @@ sub copy_exec {
     if ( -e $args_dict->{"picard_mergesamfiles_jar"} ) {
         copy( $args_dict->{"picard_mergesamfiles_jar"}, "$bin_dir_path/" );
     }
-
     if ( -e $args_dict->{"picard_sortsam_jar"} ) {
         copy( $args_dict->{"picard_sortsam_jar"}, "$bin_dir_path/" );
     }
     if ( -e $args_dict->{"picard_mark_duplicates_jar"} ) {
         copy( $args_dict->{"picard_mark_duplicates_jar"}, "$bin_dir_path/" );
     }
-
     if ( -e $args_dict->{"picard_jar"} ) {
         copy( $args_dict->{"picard_jar"}, "$bin_dir_path/" );
     }
-
     if ( -e $args_dict->{"trim_script_path"} ) {
         copy( $args_dict->{"trim_script_path"}, "$bin_dir_path/" );
     }
 
     system("chmod -R +x $bin_dir_path/");
-
 }
 
 sub read_dir {
@@ -286,17 +229,13 @@ sub bwa_index {
     if ( system("$mapper index $output_dir/$reference_file") != 0 ) {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub gsnap_index {
     my ( $self, $fasta_file, $mapper, $output_dir ) = @_;
     my $reference_file = "reference";
 
-    #copy($fasta_file,"$output_dir/$reference_file") or die "Copy failed: $!";
     my ( $name, $path, $extension ) =
       File::Basename::fileparse( $mapper, '\..*' );
 
@@ -309,10 +248,7 @@ sub gsnap_index {
     {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub star_index {
@@ -330,10 +266,7 @@ sub star_index {
     if ( system($command) != 0 ) {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub bsmap_index {
@@ -344,7 +277,6 @@ sub bsmap_index {
         copy( $fasta_file, "$output_dir/$reference_file" )
           or die "Copy failed: $!";
     }
-
 }
 
 sub bismark_index {
@@ -384,8 +316,6 @@ sub bismark_index {
         unless ( -e $bowtie_path and -x $bowtie_path ) {
             print
 "\n\tERROR: bowtie-build or bowtie2-build not found  in the directory \"$path\"\n\n";
-
-            #exit(1);
         }
 
         my ( $name1, $path1, $extension1 ) =
@@ -397,8 +327,6 @@ sub bismark_index {
     {
         print
 "\n\tERROR: \"$bismark_genome_preparation\" executables not found to create genome index \n\n";
-
-        #exit(1);
     }
     $bowtie_final_path =~ s/\/$//g;
     $current_directory =~ s/\/$//g;
@@ -410,10 +338,7 @@ sub bismark_index {
     if ( system($command) != 0 ) {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub bowtie_index {
@@ -450,10 +375,7 @@ sub bowtie_index {
         unless ( -e $bowtie_build and -x $bowtie_build ) {
             print
 "\n\tERROR: bowtie-build or bowtie2-build not found  in the directory \"$path\"\n\n";
-
-            #exit(1);
         }
-
     }
 
     if (
@@ -464,10 +386,7 @@ sub bowtie_index {
     {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub tophat_index {
@@ -489,21 +408,15 @@ sub tophat_index {
     {
         print
 "\n\tERROR: bowtie-build or bowtie2-build not found  in the directory \"$path\"\n\n";
-
-        #exit(1);
     }
 
-    my $command = "";
-    $command =
+    my $command =
 "$args_dict->{'bowtie_build_version'} $output_dir/$reference_file $output_dir/$reference_file1";
 
     if ( system($command) != 0 ) {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub soap_index {
@@ -524,29 +437,22 @@ sub soap_index {
     if ( system("$bwt_builder $output_dir/$reference_file") != 0 ) {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub novoalign_index {
     my ( $self, $fasta_file, $mapper, $output_dir ) = @_;
     my $reference_file = "reference.nix";
 
-    #copy($fasta_file,"$output_dir/$reference_file") or die "Copy failed: $!";
     my ( $name, $path, $extension ) =
       File::Basename::fileparse( $mapper, '\..*' );
 
     my $novoindex_path = "";
     $novoindex_path = $path . "novoindex";
 
-  #novoindex -k 14 -s 1 -t 9 ../reference/2R-2Mbp.nix ../reference/2R-2Mbp.fasta
     my $cmd =
 "$novoindex_path  -k 14 -s 1 -t 2 $output_dir/$reference_file $fasta_file";
     system($cmd);
-
-    #print "$cmd\n";
 
     if (
         system(
@@ -556,10 +462,7 @@ sub novoalign_index {
     {
         print
 "\n\tERROR: mapper executable seems to be not compatible \"$mapper\"; give compatible version of mapper \n\n";
-
-        #exit(1);
     }
-
 }
 
 sub ngm_index {
@@ -570,7 +473,6 @@ sub ngm_index {
         copy( $fasta_file, "$output_dir/$reference_file" )
           or die "Copy failed: $!";
     }
-
 }
 
 1;

@@ -38,28 +38,13 @@ sub start {
     my $time_stamp_end = Utility::get_time_stamp();
     print STDERR "Finished at: $time_stamp_end\n";
     print STDERR "Duration: $execution_time\n\n";
-
 }
-
-#sub delete_temp {
-#	my ($args_dict) = @_;
-#	print STDERR "=======================================================================\n";
-#	print STDERR "Step6: Cleaning the temperory files and folders\n";
-#	print STDERR "=======================================================================\n";
-#
-#	Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}");
-#
-#}
 
 sub paired_end_mapping {
     my ( $self, $args_dict ) = @_;
 
     $args_dict->{"read_folder"} = "fastq_paired_end";
     $args_dict->{"read_type"}   = "pe";
-
-#$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_reads";
-#my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($args_dict->{"mapper"})."_pe_hadoop.sh";
-#$args_dict->{"shell_script"} = $shell_script;
 
     my $file_count = 0;
 
@@ -74,14 +59,12 @@ sub paired_end_mapping {
     my $hdfs_input_folder =
       "/$args_dict->{'random_id'}" . "_input/fastq_paired_end";
 
-    #my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
     my @cmd      = ();
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {
         @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     }
 
-    #my @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     my $hdfs_file_count = 0;
 
     if ( scalar(@cmd) > 1 ) {
@@ -90,7 +73,6 @@ sub paired_end_mapping {
     }
 
     if ( $file_count > 0 or $hdfs_file_count > 0 ) {
-
         my $i = 0;
         foreach my $mapper_name ( @{ $args_dict->{"mapper"} } ) {
             my $mapper_path = $args_dict->{"mapper_path"}->[$i];
@@ -130,11 +112,7 @@ sub paired_end_mapping {
 
             $i++;
         }
-
-        #$self->write_hadoop_mapping_job($args_dict);
-        #system("sh $shell_script");
     }
-
 }
 
 sub single_end_mapping {
@@ -163,14 +141,12 @@ sub single_end_mapping {
     my $hdfs_input_folder =
       "/$args_dict->{'random_id'}" . "_input/fastq_single_end";
 
-    #my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
     my @cmd      = ();
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {
         @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     }
 
-    #my @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     my $hdfs_file_count = 0;
 
     if ( scalar(@cmd) > 1 ) {
@@ -179,7 +155,6 @@ sub single_end_mapping {
     }
 
     if ( $file_count > 0 or $hdfs_file_count > 0 ) {
-
         my $i = 0;
         foreach my $mapper_name ( @{ $args_dict->{"mapper"} } ) {
             my $mapper_path = $args_dict->{"mapper_path"}->[$i];
@@ -219,12 +194,7 @@ sub single_end_mapping {
 
             $i++;
         }
-
-        #$self->get_mapper_command($args_dict);
-        #$self->write_hadoop_mapping_job($args_dict);
-        #system("sh $shell_script");
     }
-
 }
 
 sub get_file_list {
@@ -241,7 +211,6 @@ sub get_file_list {
     }
 
     return scalar(@f);
-
 }
 
 sub get_mapper_command {
@@ -258,11 +227,11 @@ sub get_mapper_command {
     ##########################################################################################
     # 				Hadoop input output folders
 
-    my $input       = "/$args_dict->{'random_id'}" . "_input";
-    my $output      = "/$args_dict->{'random_id'}" . "_output";
-    my $read_folder = "$input/$args_dict->{'read_folder'}";
-    my $input_folder    = $read_folder;    #"$read_folder/fastq";
-    my $archieve_folder = $input;          #"$read_folder/archieve";
+    my $input          = "/$args_dict->{'random_id'}" . "_input";
+    my $output         = "/$args_dict->{'random_id'}" . "_output";
+    my $read_folder    = "$input/$args_dict->{'read_folder'}";
+    my $input_folder   = $read_folder;
+    my $archive_folder = $input;
     my $output_folder =
       "$output/$args_dict->{'read_folder'}" . "_mapping_" . lc($mapper_name);
     my $output_folder_trim =
@@ -347,9 +316,7 @@ sub get_mapper_command {
                 $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
             }
-
         }
-
     }
 
     if ( $mapper_name =~ m/exonerate/i ) {
@@ -374,7 +341,6 @@ sub get_mapper_command {
             else {
                 $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
             }
         }
         else {
@@ -385,11 +351,8 @@ sub get_mapper_command {
             else {
                 $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
             }
-
         }
-
     }
 
     if ( $mapper_name =~ m/novoalign/i ) {
@@ -401,9 +364,7 @@ sub get_mapper_command {
 
             $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/novoalign --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
         }
-
     }
 
     elsif ( $mapper_name =~ /tophat/i ) {
@@ -412,7 +373,6 @@ sub get_mapper_command {
         $args_dict->{"mapper_script_name"} = "tophat_mapping.pl";
         $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/tophat --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
     }
 
     elsif ( $mapper_name =~ /bowtie$/i ) {
@@ -423,7 +383,6 @@ sub get_mapper_command {
 
         $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bowtie --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
     }
     elsif ( $mapper_name =~ /bowtie2$/i ) {
         $reference_file                    = "reference";
@@ -432,8 +391,6 @@ sub get_mapper_command {
 
         $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bowtie2 --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
-        #print "command: $mapper_command\n";
     }
 
     elsif ( $mapper_name =~ /soap/i ) {
@@ -443,7 +400,6 @@ sub get_mapper_command {
 
         $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/soap --soap2sam-path $args_dict->{'extracted_execarch'}/bin/soap2sam.pl --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
-
     }
 
     if ( $mapper_name =~ m/ngm/i ) {
@@ -456,15 +412,11 @@ sub get_mapper_command {
             $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/ngm --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
             print "$mapper_command\n";
-
-            #exit();
         }
         else {
             $mapper_command =
 "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/ngm --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
             print "$mapper_command\n";
-
-            #exit();
         }
     }
 
@@ -475,7 +427,7 @@ sub get_mapper_command {
     $args_dict->{"input_folder"}       = $input_folder;
     $args_dict->{"output_folder"}      = $output_folder;
     $args_dict->{"output_folder_trim"} = $output_folder_trim;
-    $args_dict->{"archieve_folder"}    = $archieve_folder;
+    $args_dict->{"archive_folder"}     = $archive_folder;
     $args_dict->{"mapper_command"}     = $mapper_command;
 
 }
@@ -492,12 +444,11 @@ sub write_hadoop_mapping_job {
         my $refindex_archive    = $args_dict->{"refindex_archive"};
         my $exec_arch_file_name = basename($refindex_archive);
         $ref_index_archive_path =
-          "hdfs://$args_dict->{'archieve_folder'}/$exec_arch_file_name";
-
+          "hdfs://$args_dict->{'archive_folder'}/$exec_arch_file_name";
     }
     else {
         $ref_index_archive_path =
-          "hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'ref_arch'}";
+          "hdfs://$args_dict->{'archive_folder'}/$args_dict->{'ref_arch'}";
     }
 
     if ( $args_dict->{'mappers_exe_archive'} ne ""
@@ -506,21 +457,19 @@ sub write_hadoop_mapping_job {
         my $exec_arch_file_name =
           basename( $args_dict->{'mappers_exe_archive'} );
         $exe_archive_path =
-            "'hdfs://$args_dict->{'archieve_folder'}/$exec_arch_file_name" . "#"
+            "'hdfs://$args_dict->{'archive_folder'}/$exec_arch_file_name" . "#"
           . "$args_dict->{'extracted_execarch'},$ref_index_archive_path" . "#"
           . "$args_dict->{'extracted_refarch'}'";
     }
     else {
         $exe_archive_path =
-            "'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'exec_arch'}"
+            "'hdfs://$args_dict->{'archive_folder'}/$args_dict->{'exec_arch'}"
           . "#"
           . "$args_dict->{'extracted_execarch'},$ref_index_archive_path" . "#"
           . "$args_dict->{'extracted_refarch'}'";
     }
 
     print "$exe_archive_path\n";
-
-    #exit();
 
     my $shell_script = "";
     $shell_script = $args_dict->{"shell_script"};
@@ -548,8 +497,6 @@ sub write_hadoop_mapping_job {
     print $ofh "time \$hdfs_home dfs -rm -r \$output_folder\n\n";
 
     print $ofh "time \$hadoop_home  jar \$streaming_home \\\n";
-
-#print $ofh "-archives 'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'job_arch'}"."#"."{'extracted_execarch'}' \\\n";
 
     if ( $args_dict->{"upload_index"} ) {
         print $ofh "-archives $exe_archive_path \\\n";

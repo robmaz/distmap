@@ -40,16 +40,6 @@ sub start {
 
 }
 
-#sub delete_temp {
-#	my ($args_dict) = @_;
-#	print STDERR "=======================================================================\n";
-#	print STDERR "Step6: Cleaning the temperory files and folders\n";
-#	print STDERR "=======================================================================\n";
-#
-#	Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}");
-#
-#}
-
 sub paired_end_trimming {
     my ( $self, $args_dict ) = @_;
 
@@ -71,12 +61,9 @@ sub paired_end_trimming {
         );
     }
 
-    #my $output_string = `ls`;
-
     my $hdfs_input_folder =
       "/$args_dict->{'random_id'}" . "_input/fastq_paired_end";
 
-    #my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
 
     my @cmd      = ();
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
@@ -84,7 +71,6 @@ sub paired_end_trimming {
         @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     }
 
-    #my @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     my $hdfs_file_count = 0;
 
     if ( scalar(@cmd) > 1 ) {
@@ -100,7 +86,6 @@ sub paired_end_trimming {
             $self->download_merge_trimmed_reads($args_dict);
         }
     }
-
 }
 
 sub single_end_trimming {
@@ -127,14 +112,12 @@ sub single_end_trimming {
     my $hdfs_input_folder =
       "/$args_dict->{'random_id'}" . "_input/fastq_single_end";
 
-    #my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
     my @cmd      = ();
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {
         @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     }
 
-    #my @cmd = `$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder`;
     my $hdfs_file_count = 0;
 
     if ( scalar(@cmd) > 1 ) {
@@ -150,7 +133,6 @@ sub single_end_trimming {
             $self->download_merge_trimmed_reads($args_dict);
         }
     }
-
 }
 
 sub get_file_list {
@@ -167,7 +149,6 @@ sub get_file_list {
     }
 
     return scalar(@f);
-
 }
 
 sub get_trim_command {
@@ -183,19 +164,14 @@ sub get_trim_command {
     ##########################################################################################
     # 				Hadoop input output folders
 
-    my $input       = "/$args_dict->{'random_id'}" . "_input";
-    my $output      = "/$args_dict->{'random_id'}" . "_output";
-    my $read_folder = "$input/$args_dict->{'read_folder'}";
-
-    #my $input_folder ="$read_folder/fastq";
-    my $input_folder = "$read_folder";
-
-    #my $archieve_folder = "$read_folder/archieve";
-    my $archieve_folder = $input;
-
-    my $output_folder = "$output/$args_dict->{'read_folder'}" . "_trimming";
-    my $hadoop_exe    = $args_dict->{'hadoop_exe'};
-    my $hdfs_exe      = $args_dict->{"hdfs_exe"};
+    my $input          = "/$args_dict->{'random_id'}" . "_input";
+    my $output         = "/$args_dict->{'random_id'}" . "_output";
+    my $read_folder    = "$input/$args_dict->{'read_folder'}";
+    my $input_folder   = "$read_folder";
+    my $archive_folder = $input;
+    my $output_folder  = "$output/$args_dict->{'read_folder'}" . "_trimming";
+    my $hadoop_exe     = $args_dict->{'hadoop_exe'};
+    my $hdfs_exe       = $args_dict->{"hdfs_exe"};
 
     system("$hdfs_exe dfs -mkdir $output") == 0
       || warn
@@ -219,12 +195,10 @@ sub get_trim_command {
       "$script_current_directory/bin/$args_dict->{'trim_script_name'}";
     $args_dict->{"utility_script_path"} =
       "$script_current_directory/bin/Utility.pm";
-    $args_dict->{"input_folder"}    = $input_folder;
-    $args_dict->{"output_folder"}   = $output_folder;
-    $args_dict->{"archieve_folder"} = $archieve_folder;
-    $args_dict->{"trim_command"}    = $trim_command;
-
-    #$args_dict->{"trim_script_path"}
+    $args_dict->{"input_folder"}   = $input_folder;
+    $args_dict->{"output_folder"}  = $output_folder;
+    $args_dict->{"archive_folder"} = $archive_folder;
+    $args_dict->{"trim_command"}   = $trim_command;
 }
 
 sub download_merge_trimmed_reads {
@@ -251,7 +225,6 @@ sub download_merge_trimmed_reads {
     }
 
     system($command);
-
 }
 
 sub write_hadoop_trimming_job {
@@ -283,19 +256,17 @@ sub write_hadoop_trimming_job {
     print $ofh "time \$hdfs_home dfs -rm -r \$output_folder\n\n";
     print $ofh "time \$hadoop_home  jar \$streaming_home \\\n";
 
-#print $ofh "-archives 'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'job_arch'}"."#"."$args_dict->{'extracted_arch'}' \\\n";
-
     if ( $args_dict->{"upload_index"} ) {
         print $ofh
-"-archives 'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'exec_arch'}"
+"-archives 'hdfs://$args_dict->{'archive_folder'}/$args_dict->{'exec_arch'}"
           . "#"
-          . "$args_dict->{'extracted_execarch'},hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'ref_arch'}"
+          . "$args_dict->{'extracted_execarch'},hdfs://$args_dict->{'archive_folder'}/$args_dict->{'ref_arch'}"
           . "#"
           . "$args_dict->{'extracted_refarch'}' \\\n";
     }
     else {
         print $ofh
-"-archives 'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'exec_arch'}"
+"-archives 'hdfs://$args_dict->{'archive_folder'}/$args_dict->{'exec_arch'}"
           . "#"
           . "$args_dict->{'extracted_execarch'},$args_dict->{'refindex_archive'}"
           . "#"
@@ -313,14 +284,6 @@ sub write_hadoop_trimming_job {
     print $ofh "-D mapreduce.reduce.memory.mb=3072 \\\n";
     print $ofh "-D mapreduce.reduce.java.opts=-Xmx2304m \\\n";
 
-    #print $ofh "-D mapreduce.map.memory.mb=4096 \\\n";
-    #print $ofh "-D mapreduce.map.java.opts=-Xmx3072m \\\n";
-    #print $ofh "-D mapred.child.java.opts=-Xmx3072m \\\n";
-    #print $ofh "-D mapreduce.reduce.memory.mb=4096 \\\n";
-    #print $ofh "-D mapreduce.reduce.java.opts=-Xmx3072m \\\n";
-
-    #print $ofh "-D mapreduce.map.memory.mb=6144 \\\n";
-    #print $ofh "-D mapreduce.map.java.opts=-Xmx4608m \\\n";
     print $ofh "-D mapreduce.output.fileoutputformat.compress.type=RECORD \\\n";
 
     print $ofh
@@ -333,7 +296,7 @@ sub write_hadoop_trimming_job {
     print $ofh "-D $args_dict->{'job_priority'} \\\n";
     print $ofh "-D $args_dict->{'queue_name'} \\\n";
     print $ofh "-D mapreduce.job.reduces=0 \\\n";
-    print $ofh "-D mapreduce.job.name=\"\$job\" \\\n";    #mapreduce.job.tags
+    print $ofh "-D mapreduce.job.name=\"\$job\" \\\n";
     print $ofh
 "-D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \\\n";
     print $ofh "-D stream.num.map.output.key.fields=4 \\\n";
@@ -343,10 +306,6 @@ sub write_hadoop_trimming_job {
       "-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner \\\n";
     print $ofh "-input \"\$input_folder\" \\\n";
     print $ofh "-output \"\$output_folder\" \\\n";
-
-    #print $ofh "-D mapred.child.java.opts=-Xmx4608m \\\n";
-    #print $ofh "-D mapreduce.reduce.memory.mb=9216 \\\n";
-    #print $ofh "-D mapreduce.reduce.java.opts=-Xmx6912m \\\n";
 
     print $ofh "-mapper \"$args_dict->{'trim_command'}\" \\\n";
     print $ofh "-file '$args_dict->{'cluster_trim_script_path'}' \\\n";
