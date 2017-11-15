@@ -214,7 +214,6 @@ sub get_execution_time {
     my $execution_time = "$hour:$minutes:$seconds";
 
     return $execution_time;
-
 }
 
 sub check_mapper {
@@ -377,16 +376,6 @@ sub run_whole_pipeline {
 
     my $datadownloadandmerge_object = DataDownloadAndMerge->new();
     $datadownloadandmerge_object->start($args_dict);
-
-    # my $datadownload_object = DataDownload->new();
-    # $datadownload_object->start($args_dict);
-    #
-    # my $datamerge_object = DataMerge->new();
-    # $datamerge_object->start($args_dict);
-    #
-    ### use readtools merge download instead
-    my $datadownloadandmerge_object = DataDownloadAndMerge->new();
-    $datadownloadandmerge_object->start($args_dict);
 }
 
 sub data_cleanup {
@@ -476,7 +465,7 @@ sub check_genome_index {
                 }
                 else {
                     print STDERR
-"WARNING: This archive does not exists!!! going to index the reference genome fasta file\n";
+"WARNING: This archive does not exist! Will index the reference genome fasta file\n";
                     $args_dict->{"upload_index"} = 1;
                 }
             }
@@ -484,7 +473,7 @@ sub check_genome_index {
                 if ( system("tar -tvf $args_dict->{'refindex_archive'}") != 0 )
                 {
                     print STDERR
-"WARNING: This archive does not exists!!! going to index the reference genome fasta file\n";
+"WARNING: This archive does not exist! Will index the reference genome fasta file\n";
                     $args_dict->{"upload_index"} = 1;
                 }
                 else {
