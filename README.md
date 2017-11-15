@@ -12,12 +12,10 @@ The Hadoop utilities used internally should respect HADOOP_CONF_DIR.
 Current milestones are to
 
 + remove all hardcoded paths and replace them with environment variables (done)
-+ use Daniel's readtools wherever applicable (done for fastq2tab uploads)
-+ identify the tricks used to send jobs from vetgrids to the Linux cluster and
-  sanitize this behavior
++ use Daniel's readtools wherever applicable (done for fastq2tab uploads and merge/downloads)
 + remove outdated unused binaries, archives with no apparent purpose, hard-coded
   Hadoop configuration info, unused scripts/modules etc. (partly done)
-+ remove third-party software and rather find it in the PATH or the hdfs (ReadTools!)
-+ add a Homebrew formula
++ remove third-party software and rather find it in the PATH or the hdfs (ReadTools!, mappers, samtools)
++ add a Homebrew formula (to replace dummy homebrew/distmap.rb)
 
 so that this can become a normal easily installable package.
