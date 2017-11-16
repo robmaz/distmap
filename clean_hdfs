@@ -1,117 +1,132 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+
 package Utility;
 use File::Basename;
 use Date::Calc qw/Delta_Days/;
 
-my $hadoop_exe = "/Volumes/cluster/hadoop-2.7.1/bin/hdfs";
+my $hadoop_exe  = $ENV{"HADOOP_HOME"} . "/bin/hdfs";
 my $output_file = "/Volumes/cluster/hdfs_files";
-my $cutoff_day = 15; # delete all files from hdfs which are older than 20 days
+my $cutoff_day = 15;   # delete all files from hdfs which are older than 20 days
 
-if (scalar(@ARGV)>=1) {
-	$cutoff_day = $ARGV[0];
+if ( scalar(@ARGV) >= 1 ) {
+    $cutoff_day = $ARGV[0];
 }
-
 
 #open (my $ofh,">".$output_file) or die "could not open $_";
 #open my $fh1,$read1_fastq or die "could not open $_";
-                
-my $curr_time =  get_time_stamp();
 
-list_hdfs_files($hadoop_exe,$output_file);
+my $curr_time = get_time_stamp();
 
-read_hdfs_files($hadoop_exe,$output_file,$curr_time);
+list_hdfs_files( $hadoop_exe, $output_file );
+
+read_hdfs_files( $hadoop_exe, $output_file, $curr_time );
 
 sub read_hdfs_files {
-    my ($hadoop_exe,$output_file,$curr_time) = @_;
-    
-    open(IN,"<$output_file") or die "could not open to read\n";
-    
+    my ( $hadoop_exe, $output_file, $curr_time ) = @_;
+
+    open( IN, "<$output_file" ) or die "could not open to read\n";
+
     my @lines = <IN>;
+
     #print @lines;
-    
+
     my $to_delete = 0;
     foreach my $l (@lines) {
         chomp $l;
-        my @col = split('\s+',$l);
-        
-        if (scalar(@col)>=8) {
-            
-            my $date_string = "";
-            my $file = "";
-            my @file_date = ();
+        my @col = split( '\s+', $l );
+
+        if ( scalar(@col) >= 8 ) {
+
+            my $date_string  = "";
+            my $file         = "";
+            my @file_date    = ();
             my @current_date = ();
             $date_string = $col[-3];
-            $file = $col[-1];
-	    #if (($file ne "/user") and ($file ne "/tmp") and ($file ne "/logs") and ($file ne "/system") and ($file ne "/Volumes") and ($file !~ /^Mapping/)) {
-            if (($file ne "/user") and ($file ne "/tmp") and ($file ne "/logs") and ($file ne "/system") and ($file ne "/Volumes")) {
-                @file_date = split("-",$date_string);
-                @current_date = ($curr_time->{"year"},$curr_time->{"month"},$curr_time->{"date"});
-                
-		#print "@file_date\t@current_date\n";
-                my $dd = Delta_Days(@file_date, @current_date);
-                if ($dd>$cutoff_day) {
-                   #print scalar(@col),"\t$file\t$date_string\t@file_date\t@current_date\t$dd\n";
-		   my $command = "$hadoop_exe dfs -rm -r $file";
-		   print "File \"$file\" is $dd days older has been deleted\n";
-		   #print "$command\n";
-		   system($command);
-		   $to_delete++;
+            $file        = $col[-1];
+
+#if (($file ne "/user") and ($file ne "/tmp") and ($file ne "/logs") and ($file ne "/system") and ($file ne "/Volumes") and ($file !~ /^Mapping/)) {
+            if (    ( $file ne "/user" )
+                and ( $file ne "/tmp" )
+                and ( $file ne "/logs" )
+                and ( $file ne "/system" )
+                and ( $file ne "/Volumes" ) )
+            {
+                @file_date = split( "-", $date_string );
+                @current_date = (
+                    $curr_time->{"year"}, $curr_time->{"month"},
+                    $curr_time->{"date"}
+                );
+
+                #print "@file_date\t@current_date\n";
+                my $dd = Delta_Days( @file_date, @current_date );
+                if ( $dd > $cutoff_day ) {
+
+  #print scalar(@col),"\t$file\t$date_string\t@file_date\t@current_date\t$dd\n";
+                    my $command = "$hadoop_exe dfs -rm -r $file";
+                    print "File \"$file\" is $dd days older has been deleted\n";
+
+                    #print "$command\n";
+                    system($command);
+                    $to_delete++;
                 }
-        }
-	else {
-		#print "File \"$file\" is dd days older has been deleted\n";
-	}
-            
-            
+            }
+            else {
+                #print "File \"$file\" is dd days older has been deleted\n";
+            }
+
         }
     }
-    
-    if ($to_delete<1) {
-	print "\nINFO:\tthere is no file older then $cutoff_day days\n\n";
+
+    if ( $to_delete < 1 ) {
+        print "\nINFO:\tthere is no file older then $cutoff_day days\n\n";
     }
     else {
-	print "\nINFO:\t$to_delete files are older then $cutoff_day days\n\n";
+        print "\nINFO:\t$to_delete files are older then $cutoff_day days\n\n";
     }
-    
-    
+
     close IN;
-    
+
 }
 
 sub list_hdfs_files {
-    my ($hadoop_exe,$output_file) = @_;
+    my ( $hadoop_exe, $output_file ) = @_;
     my $command = "$hadoop_exe dfs -ls / > $output_file";
     system($command);
 }
 
 sub get_time_stamp {
-    
-    my @weekday = ("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    
+
+    my @weekday = (
+        "Sunday",   "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday"
+    );
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+      localtime(time);
+
     my $curr_time = {};
     $year = $year + 1900;
     $mon += 1;
-    if (length($mday)<2) {
+    if ( length($mday) < 2 ) {
         $mday = "0$mday";
     }
-    
-    if (length($mon)<2) {
+
+    if ( length($mon) < 2 ) {
         $mon = "0$mon";
     }
-    
+
     my $time_stamp = "$mday/$mon/$year $hour:$min:$sec $weekday[$wday]";
+
     #print "Formated time = $mday/$mon/$year $hour:$min:$sec $weekday[$wday]\n";
-    
-    $curr_time->{"date"} = $mday;
-    $curr_time->{"month"} = $mon;
-    $curr_time->{"year"} = $year;
-    $curr_time->{"hour"} = $hour;
+
+    $curr_time->{"date"}   = $mday;
+    $curr_time->{"month"}  = $mon;
+    $curr_time->{"year"}   = $year;
+    $curr_time->{"hour"}   = $hour;
     $curr_time->{"minute"} = $min;
     $curr_time->{"second"} = $sec;
+
     #return $time_stamp;
     return $curr_time;
 }
-
