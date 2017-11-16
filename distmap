@@ -251,6 +251,7 @@ GetOptions(
 ) or pod2usage( -msg => "Wrong options", -verbose => 1 );
 
 if ( $hadoop_home ne "" ) {
+
     # if $hadoop_home is set, make sure there is no trailing slash
     $hadoop_home =~ s/\/$//;
 }
@@ -260,7 +261,10 @@ else {
     $hadoop_home =~ s/\/bin\/hadoop$//;
 }
 
-unless ( -x $readtools ) die "distmap: cannot find readtools $readtools";
+$readtools = "java -Xmx8g -Dsnappy.disable=true -jar $readtools"
+  if ( $readtools =~ /\.jar$/ );
+die "distmap: have ReadTools \"$readtools\", which does not provide version >= 1.1.0"
+  unless ( `$readtools --version` gt "1.1.0" );
 
 pod2usage( -verbose => 2 ) if $help;
 
