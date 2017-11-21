@@ -18,7 +18,7 @@ use DownloadTrimmedRead;
 use DataCleanup;
 
 my $script = "distmap";
-my $version = "2.7.1";
+my $version = "3.0.0-alpha"; # since 3.0.0, we use semantic versioning
 
 my $usage = qq{
 $script: Run NGS data mapping on hadoop cluster
