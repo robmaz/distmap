@@ -13,6 +13,19 @@ This unified version will find a Hadoop configuration either via `HADOOP_CONF_DI
 via a command line argument, and use the cluster configured there.
 
 
+## Requirements
+
+* [ReadTools](http://magicdgs.github.io/ReadTools/) >= 1.1.0
+* [samtools](http://samtools.sourceforge.net/)
+* [Picard Tools](http://broadinstitute.github.io/picard/)
+* Mappers:
+  - [bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
+  - [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+  - [bwa](http://bio-bwa.sourceforge.net/)
+  - [gmap](http://research-pub.gene.com/gmap/)
+  - [novoalign](http://www.novocraft.com/products/novoalign/)
+
+
 ## Versioning
 
 The _master_ branch of this repository contains versions >= 3.0.0, and releases might be found after
