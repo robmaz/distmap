@@ -120,6 +120,7 @@ sub single_end_data {
 
     my $hadoop_exe    = $args_dict->{'hadoop_exe'};
     my $hdfs_exe      = $args_dict->{"hdfs_exe"};
+    my $readtools     = $args_dict->{"readtools"};
     my $output        = "/$args_dict->{'random_id'}" . "_output";
     my $output_folder = "$output/$args_dict->{'read_folder'}" . "_mapping";
 

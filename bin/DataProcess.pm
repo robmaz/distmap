@@ -335,7 +335,7 @@ sub fastq2tab_pe_java {
 	my $input_dir =  $args_dict->{'random_id'};
 	my $input_dir1 =  "/$args_dict->{'random_id'}_input/fastq_paired_end";
 
-	my $readtools = $args_dict{'readtools'};
+	my $readtools = $args_dict->{'readtools'};
 
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
 
@@ -398,7 +398,7 @@ sub fastq2tab_se_java {
 	my $input_dir =  $args_dict->{'random_id'};
 	my $input_dir1 =  "/$args_dict->{'random_id'}_input/fastq_single_end";
 
-	my $readtools = $args_dict{'readtools'};
+	my $readtools = $args_dict->{'readtools'};
 
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
 

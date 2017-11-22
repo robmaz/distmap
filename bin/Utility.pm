@@ -463,9 +463,9 @@ sub get_steps {
 	}
 
 
-    if ( $args_dict->"only_hdfs_download" and $args_dict{"only_merge"} ) {
+    if ( $args_dict->{"only_hdfs_download"} and $args_dict->{"only_merge"} ) {
         my $datadownloadandmerge_object = DataDownloadAndMerge->new();
-        $step_hash{6} = $datadownloadandmerge_object;
+        $step_hash->{6} = $datadownloadandmerge_object;
     }
     else {
         if ( $args_dict->{"only_hdfs_download"} ) {
