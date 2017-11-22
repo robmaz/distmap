@@ -20,7 +20,7 @@ use DownloadTrimmedRead;
 use DataCleanup;
 
 my $script = "distmap";
-my $version = "1.1.0"; # use semantic versioning + define the v2.7.1 API as 1.0.0
+my $version = "3.1.0-alpha";
 
 my $usage = qq{
 $script: Run NGS data mapping on hadoop cluster
@@ -102,8 +102,9 @@ Usage: perl $script
 --picard-sortsam-jar     	PICARD SortSam.jar full path. It will be used to for SAM BAM conversion. MANDATORY parameter.
 				Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
 
---readtools               Path to either ReadTools.jar or the readtools launcher script.
-          Example: --readtools /usr/local/bin/readtools
+--readtools               Full path to either ReadTools.jar or the readtools launcher script.
+                          MANDATORY unless the launcher script can be found in the path.
+        Example: --readtools /usr/local/bin/readtools
 
 --mapper-args        		Arguments for mapping:
 				BWA mapping for aln command:
@@ -273,7 +274,7 @@ else {
 }
 
 if ( $readtools =~ /\.jar$/ ) {
-  $readtools = "java -Xmx8g -Dsnappy.disable=true -jar $readtools";
+  $readtools = "eval java \\\$JAVA_OPTS -jar $readtools";
 }
 unless ( `$readtools --version` gt "1.1.0" ) {
   die "distmap: only found ReadTools \"$readtools\", which does not provide version >= 1.1.0";

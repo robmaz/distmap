@@ -12,7 +12,6 @@ use Cwd;
 use FindBin qw/$RealBin/;
 use lib "$RealBin/bin";
 use Utility;
-#use XML::XPath;
 
 ##
 # Author: Ram Vinay Pandey
@@ -362,8 +361,6 @@ sub fastq2tab_pe_java {
 	$file_count = $file_count+1;
 	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'fastq_dir_pe'}";
 	my $index=1;
-    # my $xp = qw(/configuration/property[string(name)="fs.defaultFS"]/value);
-    # my $hdfs = XML::XPath->new(filename => "$ENV{HADOOP_CONF_DIR}/core-site.xml")->findvalue($xp);
 	my $hdfs = `$hdfs_exe getconf -confKey "fs.defaultFS"`;
 	foreach my $f (@$file_list) {
 		my $output_file = "$output_dir/fastq_file".$index;

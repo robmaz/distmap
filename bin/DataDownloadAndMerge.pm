@@ -96,7 +96,7 @@ sub paired_end_data {
                 $args_dict->{"final_output_file"} . "."
               . $args_dict->{"output_format"};
             my $download_command =
-"JAVA_OPTS=-Xmx8g -Dsnappy.disable=true $readtools --input $output_folder --output $local_output_dir/$output_file";
+qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file );
 
             print STDERR "Data merge/download from hdfs file system started ",
               localtime(), "\n";
@@ -161,7 +161,7 @@ sub single_end_data {
                 $args_dict->{"final_output_file"} . "."
               . $args_dict->{"output_format"};
             my $download_command =
-"JAVA_OPTS=-Xmx8g -Dsnappy.disable=true $readtools --input $output_folder --output $local_output_dir/$output_file";
+qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file );
 
             print STDERR "Data merge/download from hdfs file system started ",
               localtime(), "\n";
