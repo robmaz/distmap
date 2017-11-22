@@ -10,37 +10,37 @@ use POSIX ":sys_wait_h";
 
 
 sub check_hadoop {
-    
+
     my ($args_dict,$usage) = @_;
     my $hadoop_home = $args_dict->{"hadoop_home"};
     if ($hadoop_home =~ /\/$/) {
         $hadoop_home =~ s/\/$//;
     }
-    
+
     my $streaming_home = "$hadoop_home/share/hadoop/tools/lib";
-    
+
     my $streaming_jar="";
     my $hadoop_exe="";
     my $hdfs_exe="";
     my $mapred_exe="";
     my $yarn_exe="";
-    
+
     opendir(DIR, "$streaming_home") || die "Can't opedir $streaming_home: $!\n";
     my @file_list = readdir(DIR);
     closedir(DIR);
-    
+
     foreach my $file (@file_list) {
         if ($file =~ /streaming/i) {
             $streaming_jar=$file;
         }
     }
-    
+
     $streaming_jar = "$streaming_home/$streaming_jar";
     $hadoop_exe = "$hadoop_home/bin/hadoop";
     $hdfs_exe="$hadoop_home/bin/hdfs";
     $mapred_exe="$hadoop_home/bin/mapred";
     $yarn_exe="$hadoop_home/bin/yarn";
-    
+
     ## Check hadoop executables
     unless ((-e $hadoop_exe) && (-x $hadoop_exe)) {
 	print STDERR "\tHADOOP executable $hadoop_exe does not exists.\n";
@@ -50,7 +50,7 @@ sub check_hadoop {
     unless (-x $hadoop_exe) {
 	system("chmod -R +x $hadoop_exe");
     }
-    
+
     ## Check hdfs executables
     unless ((-e $hdfs_exe) && (-x $hdfs_exe)) {
 	print STDERR "\tHDFS executable $hdfs_exe does not exists.\n";
@@ -60,7 +60,7 @@ sub check_hadoop {
     unless (-x $hdfs_exe) {
 	system("chmod -R +x $hdfs_exe");
     }
-    
+
     unless (-e $streaming_jar) {
 	print STDERR "\tHADOOP streaming jar file: $streaming_jar does not exists\n";
 	print STDERR "$usage\n";
@@ -72,19 +72,19 @@ sub check_hadoop {
     $args_dict->{"mapred_exe"} = $mapred_exe;
     $args_dict->{"yarn_exe"} = $yarn_exe;
     $args_dict->{"streaming_jar"} = $streaming_jar;
-    
+
 }
 
 sub create_dir {
     my ($args_dict,$usage) = @_;
     my $output_dir = $args_dict->{"output_directory"};
-    
+
     createdir($output_dir);
-    
+
     my $temp_d = $output_dir;
-    
+
     my @temp = split("/",$temp_d);
-    
+
     #my $random_string = generate_random_string();
     my $random_string="temp";
     $random_string=$temp[-1];
@@ -98,7 +98,7 @@ sub create_dir {
     my $tmp_dir_pe="tmp_paired_end";
     my $tmp_dir_se="tmp_single_end";
     my $bin_dir="bin";
-    
+
     #deletedir("$output_dir/$output_dir1");
     #deletedir("$output_dir/$output_dir1/$fastq_dir_pe");
     #deletedir("$output_dir/$output_dir1/$fastq_dir_se");
@@ -106,10 +106,10 @@ sub create_dir {
     #deletedir("$output_dir/$output_dir1/$tmp_dir_pe");
     #deletedir("$output_dir/$output_dir1/$tmp_dir_se");
     #deletedir("$output_dir/$output_dir1/$bin_dir");
-    
-    
+
+
     createdir("$output_dir/$output_dir1");
-    
+
  #   if ($args_dict->{"mapper"} =~ /exonerate/i) {
 #	createdir("$output_dir/$output_dir1/$input_fasta_dir");
     #}
@@ -117,7 +117,7 @@ sub create_dir {
 	createdir("$output_dir/$output_dir1/$fastq_dir_pe");
 	createdir("$output_dir/$output_dir1/$fastq_dir_se");
     #}
-    
+
     createdir("$output_dir/$ref_dir");
     #createdir("$output_dir/$output_dir1/$tmp_dir_pe");
     #createdir("$output_dir/$output_dir1/$tmp_dir_se");
@@ -130,24 +130,24 @@ sub create_dir {
    $args_dict->{"ref_dir"} = $ref_dir;
    #$args_dict->{"tmp_dir_pe"} = $tmp_dir_pe;
    $args_dict->{"bin_dir"} = $bin_dir;
-   
-   
-   
- 
+
+
+
+
 }
 
 
 sub createdir {
     my ($dir) = @_;
     unless (-d "$dir") { mkdir $dir || die "Could not create Directory $dir $!\n"; }
-    
+
 }
 
 sub deletedir {
-    
+
     my ($dir) = @_;
     if (-d "$dir") { rmtree("$dir") || die "Could not delete Directory $dir $!\n"; }
-    
+
 }
 
 # This function generates random strings of a given length
@@ -204,20 +204,20 @@ sub runCommand {
 
 
 sub get_time_stamp {
-    
+
     my @weekday = ("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday");
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    
+
     $year = $year + 1900;
     $mon += 1;
     if (length($mday)<2) {
         $mday = "0$mday";
     }
-    
+
     if (length($mon)<2) {
         $mon = "0$mon";
     }
-    
+
     my $time_stamp = "$mday/$mon/$year $hour:$min:$sec $weekday[$wday]";
     #print "Formated time = $mday/$mon/$year $hour:$min:$sec $weekday[$wday]\n";
     return $time_stamp;
@@ -227,20 +227,20 @@ sub get_time_stamp {
 sub get_executation_time {
     my ($start_time,$end_time) = @_;
     my $duration = ($end_time-$start_time)+1;
-    
+
     my ($seconds, $minutes, $hour, $dayOfMonth, $month, $year, $dayOfWeek, $dayOfYear) = localtime($duration);
     $hour--;
     if (length($hour)<2) {
         $hour = "0$hour";
     }
-    
+
     if (length($minutes)<2) {
         $minutes = "0$minutes";
     }
     if (length($seconds)<2) {
         $seconds = "0$seconds";
     }
-    
+
     my $executation_time = "$hour:$minutes:$seconds";
     #print "$hour:$minutes:$seconds\n";
     return $executation_time;
@@ -250,7 +250,7 @@ sub get_executation_time {
 
 sub check_mapper {
 	my ($args_dict, $mapper,$mapper_args,$mapper_path) = @_;
-	
+
 	if (!exists$args_dict->{'number_of_processors'}) {
 	    $args_dict->{'number_of_processors'} = 3;
 	}
@@ -264,15 +264,15 @@ sub check_mapper {
 		}
 	}
 	elsif ($mapper =~ /gsnap/i) {
-		
+
 		if ($args_dict->{"mapper_args"} =~ /\-t/) {
-		    
+
 		    $args_dict->{"mapper_args"} =~ s/\-t\s*\d+\s*//;
 		     $mapper_args = $mapper_args." -t $args_dict->{'number_of_processors'}";
 
 		}
 		elsif ($args_dict->{"mapper_args"} =~ /\-\-nthreads/) {
-		    
+
 		    $args_dict->{"mapper_args"} =~ s/\-\-nthreads\s*\d+\s*//;
 		     $mapper_args = $mapper_args." --nthreads $args_dict->{'number_of_processors'}";
 		}
@@ -282,13 +282,13 @@ sub check_mapper {
 	}
 	elsif ($mapper =~ /tophat/i) {
 		if ($args_dict->{"mapper_args"} =~ /\-p/) {
-		    
+
 		    $args_dict->{"mapper_args"} =~ s/\-p\s*\d+\s*//;
 		     $mapper_args = $mapper_args." -p $args_dict->{'number_of_processors'}";
 
 		}
 		elsif ($args_dict->{"mapper_args"} =~ /\-\-num\-threads/) {
-		    
+
 		    $args_dict->{"mapper_args"} =~ s/\-\-num\-threads\s*\d+\s*//;
 		     $mapper_args = $mapper_args." --num-threads $args_dict->{'number_of_processors'}";
 		}
@@ -298,13 +298,13 @@ sub check_mapper {
 	}
 	elsif ($mapper =~ /bowtie/i) {
 		if ($args_dict->{"mapper_args"} =~ /\-p/) {
-		    
+
 		    $args_dict->{"mapper_args"} =~ s/\-p\s*\d+\s*//;
 		     $mapper_args = $mapper_args." -p $args_dict->{'number_of_processors'}";
 
 		}
 		elsif ($args_dict->{"mapper_args"} =~ /\-\-threads/) {
-		    
+
 		    $args_dict->{"mapper_args"} =~ s/\-\-threads\s*\d+\s*//;
 		     $mapper_args = $mapper_args." --threads $args_dict->{'number_of_processors'}";
 		}
@@ -339,7 +339,7 @@ sub check_mapper {
 		    $mapper_args = $mapper_args."";
 		}
 	}
-	
+
 	elsif ($mapper =~ /exonerate/i) {
 
 	}
@@ -348,13 +348,13 @@ sub check_mapper {
 		print STDERR "$args_dict->{'usage'}\n";
 		#exit(1);
 	}
-	
+
 	unless (-e $mapper_path) {
 	    print STDERR "\n\tERROR: --mapper-path $mapper_path file does not exists\n";
 	    print STDERR "$args_dict->{'usage'}\n";
 	    #exit(1);
 	}
-	
+
 	if ($mapper !~ /exonerate/i) {
 	    unless (-e $args_dict->{"picard_mergesamfiles_jar"}) {
 		unless (-e $args_dict->{"picard_jar"}) {
@@ -362,7 +362,7 @@ sub check_mapper {
 		    print STDERR "$args_dict->{'usage'}\n";
 		    exit(1);
 		}
-		
+
 	    }
 	    unless (-e $args_dict->{"picard_sortsam_jar"}) {
 		unless (-e $args_dict->{"picard_jar"}) {
@@ -370,16 +370,16 @@ sub check_mapper {
 		    print STDERR "$args_dict->{'usage'}\n";
 		    exit(1);
 		}
-		
+
 	    }
 	}
-	
+
 	#$args_dict->{"mapper_args"} = $mapper_args;
-	
+
 	if ($args_dict->{"mapper_args"} =~ //) {
-	    
+
 	}
-    
+
     return ($mapper,$mapper_args,$mapper_path);
 }
 
@@ -393,7 +393,7 @@ sub run_whole_pipeline {
 
 	my $genomeindex_object = GenomeIndex->new();
 	$genomeindex_object->start($args_dict);
-	
+
 	my $dataprocess_object = DataProcess->new();
 	$dataprocess_object->start($args_dict);
 
@@ -405,17 +405,12 @@ sub run_whole_pipeline {
 	    my $trimming_object = HadoopTrimming->new();
 	    $trimming_object->start($args_dict);
 	}
-	
+
 	my $mapping_object = HadoopMapping->new();
 	$mapping_object->start($args_dict);
 
-	my $datadownload_object = DataDownload->new();
-	$datadownload_object->start($args_dict);
-		
-	my $datamerge_object = DataMerge->new();
-	$datamerge_object->start($args_dict);
-
-	
+	my $datadownloadandmerge_object = DataDownloadAndMerge->new();
+	$datadownloadandmerge_object->start($args_dict);
 }
 
 
@@ -433,77 +428,78 @@ sub data_cleanup {
 sub get_steps {
 	my ($args_dict) = @_;
 	my $step_hash = {};
-	
+
 	if ($args_dict->{"only_index"}) {
 	    my $genomeindex_object = GenomeIndex->new();
 	    $step_hash->{1} = $genomeindex_object;
 	}
-	
+
 	if ($args_dict->{"only_process"}) {
 		my $dataprocess_object = DataProcess->new();
 		#$dataprocess_object->process($args_dict);
 		$step_hash->{2} = $dataprocess_object;
 	}
-	
+
 	if ($args_dict->{"only_hdfs_upload"}) {
-		
+
 		my $dataupload_object = DataUpload->new();
 		#$dataupload_object->upload($args_dict);
 		$step_hash->{3} = $dataupload_object;
 	}
-	
+
 	if ($args_dict->{"only_trim"}) {
-	
+
 		my $trimming_object = HadoopTrimming->new();
-	
+
 		#$trimming_object->trim($args_dict);
 		$step_hash->{4} = $trimming_object;
 	}
-	
+
 	if ($args_dict->{"only_map"}) {
 
 		my $mapping_object = HadoopMapping->new();
 		#$mapping_object->map($args_dict);
 		$step_hash->{5} = $mapping_object;
 	}
-	
-	
-	if ($args_dict->{"only_hdfs_download"}) {
-		#print "step4\n";
-		my $datadownload_object = DataDownload->new();
-		#$datadownload_object->download($args_dict);
-		$step_hash->{6} = $datadownload_object;
-	}
-	
-	if ($args_dict->{"only_merging"}) {
-		
-		my $datamerge_object = DataMerge->new();
-		#$datamerge_object->merge($args_dict);
-		$step_hash->{7} = $datamerge_object;
-	}
-	
-	
+
+
+    if ( $args_dict->"only_hdfs_download" and $args_dict{"only_merge"} ) {
+        my $datadownloadandmerge_object = DataDownloadAndMerge->new();
+        $step_hash{6} = $datadownloadandmerge_object;
+    }
+    else {
+        if ( $args_dict->{"only_hdfs_download"} ) {
+            my $datadownload_object = DataDownload->new();
+            $step_hash->{6} = $datadownload_object;
+        }
+        if ( $args_dict->{"only_merge"} ) {
+            my $datamerge_object = DataMerge->new();
+            $step_hash->{7} = $datamerge_object;
+        }
+    }
+
+
 	if ($args_dict->{"only_download_reads"}) {
 	    my $read_download_object = DownloadTrimmedRead->new();
 	    $step_hash->{8} = $read_download_object;
-	    
+
 	}
 	if ($args_dict->{"only_delete_temp"}) {
 		my $datacleanup_object = DataCleanup->new();
 		#$datacleanup_object->clean($args_dict);
 		$step_hash->{9} = $datacleanup_object;
 	}
-	
+
 	return $step_hash;
-	
+
 }
 
 
 sub check_genome_index {
     my ($args_dict,$step_hash) = @_;
-    
+
     $args_dict->{"upload_index"} = 1;
-	    
+
     if ($args_dict->{'refindex_archive'} ne "" and exists$args_dict->{'refindex_archive'}) {
 	if ($args_dict->{'refindex_archive'} =~ /^hdfs\:\/\/\//) {
 	    $args_dict->{"upload_index"}=0;
@@ -514,7 +510,7 @@ sub check_genome_index {
 	}
 	else {
 	    if ($args_dict->{'refindex_archive'} =~ /.zip$/) {
-		
+
 		my $file_count = `unzip -l $args_dict->{"refindex_archive"} | wc -l`;
 		$file_count =~ s/\s*//;
 		chomp($file_count);
@@ -527,7 +523,7 @@ sub check_genome_index {
 		}
 		#print $args_dict->{"upload_index"}, "\n";
 		#exit();
-		
+
 	    }
 	    else {
 		if (system("tar -tvf $args_dict->{'refindex_archive'}")!=0) {
@@ -538,16 +534,16 @@ sub check_genome_index {
 		    $args_dict->{"upload_index"}=0;
 		}
 	    }
-	
+
 	}
-			
+
     }
     else {
-			
+
 	$args_dict->{"upload_index"}=1;
     }
 
-		
+
 }
 
 
