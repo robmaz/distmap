@@ -4,6 +4,7 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use File::Which;
+use File::Temp;
 
 use FindBin qw/$RealBin/;
 use lib "$RealBin/bin";
@@ -106,6 +107,10 @@ Usage: perl $script
                           MANDATORY unless the launcher script can be found in the path.
         Example: --readtools /usr/local/bin/readtools
 
+--tmp-dir           Change the default folder for local temporary files. OPTIONAL,
+                    defaults to the output folder.
+				Example: --tmp-dir /Volumes/Temp2
+
 --mapper-args        		Arguments for mapping:
 				BWA mapping for aln command:
 					Example --mapper-args "-o 1 -n 0.01 -l 200 -e 12 -d 12"
@@ -188,6 +193,7 @@ my $picard_mergesamfiles_jar="";
 my $picard_sortsam_jar="";
 my $picard_mark_duplicates_jar="";
 my $readtools = `which readtools`;
+my $tmp_dir = "";
 my $output_format="bam";
 my $job_desc="";
 my $queue_name="pg1";
@@ -250,6 +256,7 @@ GetOptions(
 	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# to ckeck
 	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# to check
 	"readtools=s"         => \$readtools,
+	"tmp-dir=s"           => \$tmp_dir,
 	"mapper-args=s"				=> \@mapper_args,
 	"bwa-sampe-args=s"			=> \$bwa_sampe_args,
 	"output-format=s"			=> \$output_format,
@@ -280,6 +287,12 @@ unless ( `$readtools --version` gt "1.1.0" ) {
   die "distmap: only found ReadTools \"$readtools\", which does not provide version >= 1.1.0";
 }
 
+unless ( $tmp_dir eq "" or
+  ( -d $tmp_dir and -w $tmp_dir and -x $tmp_dir ) ) {
+	die "distmap: \"$tmp_dir\" is not a usable temporary folder (permissions?)";
+}
+
+
 if($verbose) {
 	print STDERR "Following inputs are provided to run $script:\n";
 	print STDERR "  reference genome fasta:\t$reference_fasta\n";
@@ -299,6 +312,7 @@ if($verbose) {
 	print STDERR "  picard SortSam.jar:\t$picard_sortsam_jar\n";
 	print STDERR "  picard MarkDuplicates.jar:\t$picard_mark_duplicates_jar\n";
 	print STDERR "  readtools:\t$readtools\n";
+	print STDERR "  tmpdir:\t$tmp_dir\n";
 	print STDERR "  mapper arguments:\t@mapper_args\n";
 	print STDERR "  bwa sampe arguments:\t$bwa_sampe_args\n";
 	print STDERR "  output format:\t$output_format\n";
@@ -423,6 +437,7 @@ else {
 }
 
 $args_dict->{"readtools"} = $readtools;
+$args_dict->{"tmp_dir"} = $tmp_dir;
 
 my $step_hash = {};
 $step_hash = Utility::get_steps($args_dict);
@@ -637,6 +652,7 @@ sub check_inputs {
 	#$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
 
 	$args_dict->{"readtools"} = $readtools;
+	$args_dict->{"tmp_dir"} = $tmp_dir;
 
 	$mapper_args =~ s/\"//g;
 	$args_dict->{"mapper_args"} = \@mapper_args;
@@ -832,6 +848,14 @@ DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
  ReadTools path, either to the jar or to the launcher script. MANDATORY unless
  the launcher script is in the path.
  Example: --readtools /usr/local/share/java/ReadTools.jar
+
+=item B<--tmp-dir>
+
+ Path to a folder to use for temporary files. A temporary folder with a unique name
+ will be created in this folder. OPTIONAL, you may want to set this if the default
+ location (the output folder) does not provide enough space for sorting while merging
+ with ReadTools.
+ Example: --tmp-dir /Volumes/Temp2
 
 =item B<--mapper-args>
 
