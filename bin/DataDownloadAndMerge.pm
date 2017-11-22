@@ -95,8 +95,9 @@ sub paired_end_data {
             my $output_file =
                 $args_dict->{"final_output_file"} . "."
               . $args_dict->{"output_format"};
-            my $tmp_dir = tempdir( "readtools.DDR.XXXXX",
-                                              DIR => $args_dict->{"tmp_dir"},
+            my $tmp_dir = ( $args_dict->{"tmp_dir"} or $local_output_dir );
+            $tmp_dir = tempdir( ".readtools.DDR.XXXXX",
+                                              DIR => $tmp_dir,
                                               CLEANUP => 1 );
             my $download_command =
 qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir );
@@ -164,8 +165,9 @@ sub single_end_data {
             my $output_file =
                 $args_dict->{"final_output_file"} . "."
               . $args_dict->{"output_format"};
-              my $tmp_dir = tempdir( "readtools.DDR.XXXXX",
-                                                DIR => $args_dict->{"tmp_dir"},
+            my $tmp_dir = ( $args_dict->{"tmp_dir"} or $local_output_dir );
+            $tmp_dir = tempdir( ".readtools.DDR.XXXXX",
+                                                DIR => $tmp_dir,
                                                 CLEANUP => 1 );
               my $download_command =
   qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir );
