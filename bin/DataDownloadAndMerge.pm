@@ -95,8 +95,11 @@ sub paired_end_data {
             my $output_file =
                 $args_dict->{"final_output_file"} . "."
               . $args_dict->{"output_format"};
+            my $tmp_dir = tempdir( "readtools.DDR.XXXXX",
+                                              DIR => $args_dict->{"tmp_dir"},
+                                              CLEANUP => 1 );
             my $download_command =
-qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file );
+qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir );
 
             print STDERR "Data merge/download from hdfs file system started ",
               localtime(), "\n";
@@ -161,8 +164,11 @@ sub single_end_data {
             my $output_file =
                 $args_dict->{"final_output_file"} . "."
               . $args_dict->{"output_format"};
-            my $download_command =
-qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file );
+              my $tmp_dir = tempdir( "readtools.DDR.XXXXX",
+                                                DIR => $args_dict->{"tmp_dir"},
+                                                CLEANUP => 1 );
+              my $download_command =
+  qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir );
 
             print STDERR "Data merge/download from hdfs file system started ",
               localtime(), "\n";
