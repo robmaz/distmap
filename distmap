@@ -21,6 +21,7 @@ use DownloadTrimmedRead;
 use DataCleanup;
 
 my $script = "distmap";
+
 my $version = "3.1.0-alpha";
 
 my $usage = qq{
