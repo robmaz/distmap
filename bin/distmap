@@ -6,7 +6,9 @@ use Pod::Usage;
 use File::Which;
 use File::Temp;
 
-use lib "/usr/lib/distmap";
+# This location will have to be adjusted by the installer
+my LibDir = "/usr/lib/distmap";
+use lib $LibDir;
 use Utility;
 use GenomeIndex;
 use DataProcess;
