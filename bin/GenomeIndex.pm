@@ -226,9 +226,6 @@ sub copy_exec {
 	if (-e $args_dict->{"picard_sortsam_jar"}) {
 		copy($args_dict->{"picard_sortsam_jar"}, "$bin_dir_path/");
 	}
-	if (-e $args_dict->{"picard_mark_duplicates_jar"}) {
-		copy($args_dict->{"picard_mark_duplicates_jar"}, "$bin_dir_path/");
-	}
 	
 	if (-e $args_dict->{"picard_jar"}) {
 		copy($args_dict->{"picard_jar"}, "$bin_dir_path/");

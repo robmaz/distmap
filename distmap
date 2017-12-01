@@ -192,7 +192,6 @@ my $bwa_sampe_args="";
 my $picard_jar="";
 my $picard_mergesamfiles_jar="";
 my $picard_sortsam_jar="";
-my $picard_mark_duplicates_jar="";
 my $readtools = `which readtools`;
 my $tmp_dir = "";
 my $output_format="bam";
@@ -311,7 +310,6 @@ if($verbose) {
 	print STDERR "  mapper path:\t@mapper_path\n";
 	print STDERR "  picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
 	print STDERR "  picard SortSam.jar:\t$picard_sortsam_jar\n";
-	print STDERR "  picard MarkDuplicates.jar:\t$picard_mark_duplicates_jar\n";
 	print STDERR "  readtools:\t$readtools\n";
 	print STDERR "  tmpdir:\t$tmp_dir\n";
 	print STDERR "  mapper arguments:\t@mapper_args\n";
@@ -427,14 +425,10 @@ $args_dict->{"picard_jar"} = $picard_jar;
 if ($picard_jar ne "" and -e $picard_jar) {
 	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
 	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-	$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
-
-
 }
 else {
 	$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
 	$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
-	$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
 }
 
 $args_dict->{"readtools"} = $readtools;
@@ -638,19 +632,14 @@ sub check_inputs {
 	if ($picard_jar ne "" and -e $picard_jar) {
 		$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
 		$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-		$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
-
-
 	}
 	else {
 		$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
 		$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
-		$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
 	}
 
 	#$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
 	#$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
-	#$args_dict->{"picard_mark_duplicates_jar"} = $picard_mark_duplicates_jar;
 
 	$args_dict->{"readtools"} = $readtools;
 	$args_dict->{"tmp_dir"} = $tmp_dir;
