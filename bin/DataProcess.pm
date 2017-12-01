@@ -347,9 +347,6 @@ sub fastq2tab_pe_java {
 	my $current_directory = cwd();
 
 	my $script_dirname  = dirname($0);
-	#my $jar_file_path = "$script_dirname/bin/JDistmap.jar";
-	# ReadTools v1.0+ is too large to be distributed with distmap
-	#my $jar_file_path = "$script_dirname/bin/ReadTools-1.0.0.jar";
 
 	my $block_size = $args_dict->{"block_size"};
 
@@ -367,8 +364,6 @@ sub fastq2tab_pe_java {
 		my $read1_fastq=$f->[0];
 		my $read2_fastq=$f->[1];
 
-		#my $cmd = "java -Xmx4g -jar $jar_file_path UploadFastq HADOOP_HOME=$args_dict->{'hadoop_home'} I=$read1_fastq I=$read2_fastq O=file:///$input_dir BZ2=true BLOCK_SIZE=$block_size_byte MAPPER=BWA";
-		#my $cmd = "java -Xmx4g -jar $jar_file_path ReadsToDistmap --input $read1_fastq --input2 $read2_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte";
 		my $cmd = "JAVA_OPTS=-Xmx4g $readtools ReadsToDistmap --input $read1_fastq --input2 $read2_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte";
 
 		print "$cmd\n";
@@ -377,7 +372,6 @@ sub fastq2tab_pe_java {
 
 		my $source_file = "$input_dir1/fastq_file1.bz2";
 		my $destination_file = "$input_dir1/fastq_file".$file_count.".bz2";
-		#$ENV{"HADOOP_HOME"}/bin/hdfs dfs -mv /JDistmap1_input_input/fastq_paired_end/fastq_file1.bz2 /JDistmap1_input_input/fastq_paired_end/fastq_file2.bz2
 
 		my $cmd1 = "$args_dict->{'hdfs_exe'} dfs -mv $source_file $destination_file";
 
@@ -410,7 +404,6 @@ sub fastq2tab_se_java {
 	my $current_directory = cwd();
 
 	my $script_dirname  = dirname($0);
-	# my $jar_file_path = "$script_dirname/bin/JDistmap.jar";
 
 	my $block_size = $args_dict->{"block_size"};
 
@@ -427,9 +420,6 @@ sub fastq2tab_se_java {
 		my $output_file = "$output_dir/fastq_file".$index;
 		my $read1_fastq=$f->[0];
 
-		#java -Xmx4g -jar $ENV{"DISTMAP_HOME"}/bin/JDistmap.jar UploadFastq HADOOP_HOME=$ENV{"HADOOP_HOME"} I=/Volumes/Temp/Ram/c_elegans/new_analysis/fastq/Pool_192a_C71EHANXX_1_20150612B_20150617_ALL_1.fq.gz I=/Volumes/Temp/Ram/c_elegans/new_analysis/fastq/Pool_192a_C71EHANXX_1_20150612B_20150617_ALL_2.fq.gz O=Pool192a_input BZ2=true BLOCK_SIZE=134217728 MAPPER=BWA
-
-		# my $cmd = "java -Xmx4g -jar $jar_file_path UploadFastq HADOOP_HOME=$args_dict->{'hadoop_home'} I=$read1_fastq O=$input_dir BZ2=true BLOCK_SIZE=$block_size_byte MAPPER=BWA";
 		my $cmd = "JAVA_OPTS=-Xmx4g $readtools ReadsToDistmap --input $read1_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte";
 
 		#print "$cmd\n";
@@ -438,7 +428,6 @@ sub fastq2tab_se_java {
 
 		my $source_file = "$input_dir1/fastq_file1.bz2";
 		my $destination_file = "$input_dir1/fastq_file".$file_count.".bz2";
-		#$ENV{"HADOOP_HOME"}/bin/hdfs dfs -mv /JDistmap1_input_input/fastq_paired_end/fastq_file1.bz2 /JDistmap1_input_input/fastq_paired_end/fastq_file2.bz2
 
 		my $cmd1 = "$args_dict->{'hdfs_exe'} dfs -mv $source_file $destination_file";
 
