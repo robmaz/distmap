@@ -6,16 +6,8 @@ use Pod::Usage;
 use File::Which;
 use File::Temp;
 
-<<<<<<< HEAD:bin/distmap
 use FindBin qw/$RealBin/;
 use lib "$RealBin/../lib/perl5";
-=======
-# This is also in @INC, but leave it here so that it
-# can be easily adjusted in case the installer puts the
-# modules in some private folder
-my LibDir = "/usr/local/lib/perl5";
-use lib $LibDir;
->>>>>>> 77a0c675218c3d283cf800723678c659fec7e09d:distmap
 use Utility;
 use GenomeIndex;
 use DataProcess;
