@@ -356,22 +356,16 @@ sub check_mapper {
 	}
 
 	if ($mapper !~ /exonerate/i) {
-	    unless (-e $args_dict->{"picard_mergesamfiles_jar"}) {
-		unless (-e $args_dict->{"picard_jar"}) {
-		    print STDERR "\n\tERROR: --picard-mergesamfiles-jar $args_dict->{'picard_mergesamfiles_jar'} file does not exists\n";
-		    print STDERR "$args_dict->{'usage'}\n";
-		    exit(1);
+		if (-e $args_dict->{"picard_jar"}) {
+			print STDERR "\n\tWARNING: --picard-jar $args_dict->{'picard_jar'} does not exists.\n";
+			if (-e $args_dict->{"picard_mergesamfiles_jar"} or -e $args_dict->{"picard_sortsam_jar"}) {
+				print STDERR "\n\tERROR: --picard-mergesamfiles-jar $args_dict->{'picard_mergesamfiles_jar'} and/or --picard-sortsam-jar $args_dict->{'picard_sortsam_jar'} file does not exists\n";
+				print STDERR "$args_dict->{'usage'}\n";
+				exit(1)
+			} else {
+				print STDERR "\n\tWARNING: using DEPRECATED options --picard-mergesamfiles-jar and --picard-sortsam-jar.\n";
+			}
 		}
-
-	    }
-	    unless (-e $args_dict->{"picard_sortsam_jar"}) {
-		unless (-e $args_dict->{"picard_jar"}) {
-		    print STDERR "\n\tERROR: --picard-sortsam-jar $args_dict->{'picard_sortsam_jar'} file does not exists\n";
-		    print STDERR "$args_dict->{'usage'}\n";
-		    exit(1);
-		}
-
-	    }
 	}
 
 	#$args_dict->{"mapper_args"} = $mapper_args;

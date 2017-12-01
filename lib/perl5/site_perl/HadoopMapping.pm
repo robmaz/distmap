@@ -279,19 +279,19 @@ sub get_mapper_command {
 			
 
 			if (exists$args_dict->{'bwa_sampe_args'} and  defined($args_dict->{'bwa_sampe_args'}) and $args_dict->{'bwa_sampe_args'} ne "") {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --bwa-sampe-options '$args_dict->{bwa_sampe_args}' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --bwa-sampe-options '$args_dict->{bwa_sampe_args}' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 			}
 			else {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 			}
 		}
 		else {
 			
 			if (exists$args_dict->{'bwa_sampe_args'} and  defined($args_dict->{'bwa_sampe_args'}) and $args_dict->{'bwa_sampe_args'} ne "") {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --bwa-sampe-options '$args_dict->{bwa_sampe_args}' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --bwa-sampe-options '$args_dict->{bwa_sampe_args}' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 			}
 			else {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bwa --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 			}
 			
 		}
@@ -315,19 +315,19 @@ sub get_mapper_command {
 				
 		if ($mapper_args ne "") {
 			if ($args_dict->{'gsnap_output_split'}) {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --gsnap-output-split --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --gsnap-output-split --verbose";
 			}
 			else {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 	
 			}
 		}
 		else {
 			if ($args_dict->{'gsnap_output_split'}) {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --gsnap-output-split --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --gsnap-output-split --verbose";
 			}
 			else {
-				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+				$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/gsnap --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 	
 			}
 			
@@ -342,7 +342,7 @@ sub get_mapper_command {
 				
 		if ($mapper_args ne "") {
 
-			$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/novoalign --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+			$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/novoalign --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 	
 		}
 
@@ -353,7 +353,7 @@ sub get_mapper_command {
 		$reference_file = "reference";
 		$args_dict->{"index_name"} = $reference_file;
 		$args_dict->{"mapper_script_name"} = "tophat_mapping.pl";
-		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/tophat --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/tophat --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 
 	}
 	
@@ -363,7 +363,7 @@ sub get_mapper_command {
 		$args_dict->{"index_name"} = $reference_file;
 		$args_dict->{"mapper_script_name"} = "bowtie_mapping.pl";
 		
-		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bowtie --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bowtie --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 
 	}
 	elsif ($mapper_name =~ /bowtie2$/i) {
@@ -372,7 +372,7 @@ sub get_mapper_command {
 		$args_dict->{"mapper_script_name"} = "bowtie_mapping.pl";
 		
 
-		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bowtie2 --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/bowtie2 --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 		#print "command: $mapper_command\n";
 	}
 	
@@ -381,7 +381,7 @@ sub get_mapper_command {
 		$args_dict->{"index_name"} = $reference_file;
 		$args_dict->{"mapper_script_name"} = "soap_mapping.pl";
 		
-		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/soap --soap2sam-path $args_dict->{'extracted_execarch'}/bin/soap2sam.pl --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-dir $args_dict->{'extracted_refarch'}/ref --ref-fasta $args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/soap --soap2sam-path $args_dict->{'extracted_execarch'}/bin/soap2sam.pl --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --quality-encoding illumina --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 
 	}
 	
@@ -393,12 +393,12 @@ sub get_mapper_command {
 		
 		if ($mapper_args ne "") {
 
-		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/ngm --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+		$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/ngm --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --mapper-args '$mapper_args' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 		print "$mapper_command\n";
 		#exit();
 		}
 		else {
-			$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/ngm --picard-sartsam-jar $args_dict->{'extracted_execarch'}/bin/SortSam.jar --output-format $hadoop_mapping_format --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
+			$mapper_command = "$args_dict->{'mapper_script_name'} --output-dir $output_folder --ref-fasta $args_dict->{'extracted_refarch'}/ref/$args_dict->{'index_name'} --mapper-path $args_dict->{'extracted_execarch'}/bin/ngm --picard-sartsam-jar \"$args_dict->{'extracted_execarch'}/bin/$args_dict->{'picard_sortsam_jar'}\" --output-format $hadoop_mapping_format --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --verbose";
 		print "$mapper_command\n";
 		#exit();
 		}

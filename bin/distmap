@@ -97,11 +97,16 @@ Usage: perl $script
                                    paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
                                    or 10 if --fails-as-input is selected, or 3 for single-end reads)
 
---picard-mergesamfiles-jar     PICARD MergeSamFiles.jar full path. It will be used to merge all
-				SAM or BAM files. MANDATORY parameter.
+--picard-jar		PICARD picard.jar full path. It will be used to merge, convert and sort all SAM/BAM files. MANDATORY parameter.
+					Example: --picard-jar /usr/local/picard.jar
+
+--picard-mergesamfiles-jar     PICARD MergeSamFiles.jar full path (old versions). It will be used to merge all
+				SAM or BAM files.
+				DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
 				Example: --picard-mergesamfiles-jar /usr/local/hadoop/picard-tools-1.56/MergeSamFiles.jar
 
---picard-sortsam-jar     	PICARD SortSam.jar full path. It will be used to for SAM BAM conversion. MANDATORY parameter.
+--picard-sortsam-jar     	PICARD SortSam.jar full path (old versions). It will be used to for SAM BAM conversion.
+				DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
 				Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
 
 --readtools               Full path to either ReadTools.jar or the readtools launcher script.
@@ -190,8 +195,9 @@ my @mapper_args=();
 
 my $bwa_sampe_args="";
 my $picard_jar="";
-my $picard_mergesamfiles_jar="";
-my $picard_sortsam_jar="";
+my $picard_mergesamfiles_jar=""; # DEPRECATED
+my $picard_sortsam_jar=""; # DEPRECATED
+my $picard_mark_duplicates_jar="";
 my $readtools = `which readtools`;
 my $tmp_dir = "";
 my $output_format="bam";
@@ -252,9 +258,9 @@ GetOptions(
 
 	"mapper=s" 				=> \@mapper,		# to check
 	"mapper-path=s"				=> \@mapper_path,
-	"picard-jar=s"				=> \$picard_jar,
-	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# to ckeck
-	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# to check
+	"picard-jar=s"				=> \$picard_jar, # to check
+	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# DEPRECATED
+	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# DEPRECATED
 	"readtools=s"         => \$readtools,
 	"tmp-dir=s"           => \$tmp_dir,
 	"mapper-args=s"				=> \@mapper_args,
@@ -298,6 +304,13 @@ unless ( $tmp_dir eq "" or
   	pod2usage(-msg=>"\n\tERROR: \"$tmp_dir\" is not a usable temporary folder (permissions?)");
 }
 
+# checking picard arguments
+if ( $picard_jar ne "" ) {
+	if ($picard_mergesamfiles_jar ne "" or $picard_sortsam_jar ne "") {
+		die "distmap: provided both a picard.jar (\"$picard_jar\") and MergeSamFiles.jar/SortSam.jar (\"$picard_mergesamfiles_jar\"/\"$picard_sortsam_jar\")";
+	}
+} 
+
 
 if($verbose) {
 	print STDERR "Following inputs are provided to run $script:\n";
@@ -314,8 +327,9 @@ if($verbose) {
 	print STDERR "  hadoop home:\t$hadoop_home\n";
 	print STDERR "  mapper name:\t@mapper\n";
 	print STDERR "  mapper path:\t@mapper_path\n";
-	print STDERR "  picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
-	print STDERR "  picard SortSam.jar:\t$picard_sortsam_jar\n";
+	print STDERR "  picard jar:\t$picard_jar\n";
+	print STDERR "  (DEPRECATED) picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
+	print STDERR "  (DEPRECATED) picard SortSam.jar:\t$picard_sortsam_jar\n";
 	print STDERR "  readtools:\t$readtools\n";
 	print STDERR "  tmpdir:\t$tmp_dir\n";
 	print STDERR "  mapper arguments:\t@mapper_args\n";
@@ -428,13 +442,14 @@ $args_dict->{"trim_script_path"} = $trim_script_path;
 
 $args_dict->{"picard_jar"} = $picard_jar;
 
-if ($picard_jar ne "" and -e $picard_jar) {
-	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
-	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-}
-else {
+if ($picard_mergesamfiles_jar ne "" and $picard_sortsam_jar ne "") {
 	$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
 	$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
+}
+else {
+	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
+	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
+	$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
 }
 
 $args_dict->{"readtools"} = $readtools;
@@ -635,17 +650,14 @@ sub check_inputs {
 
 	$args_dict->{"picard_jar"} = $picard_jar;
 
-	if ($picard_jar ne "" and -e $picard_jar) {
-		$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
-		$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-	}
-	else {
+	if ($picard_mergesamfiles_jar ne "" and $picard_sortsam_jar ne "") {
 		$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
 		$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
 	}
-
-	#$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
-	#$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
+	else {
+		$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
+		$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
+	}
 
 	$args_dict->{"readtools"} = $readtools;
 	$args_dict->{"tmp_dir"} = $tmp_dir;
@@ -828,15 +840,21 @@ DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
         paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
         or 10 if --fails-as-input is selected, or 3 for single-end reads)
 
+=item B<--picard-jar>
+
+ PICARD picard.jar full path. It will be used to merge, convert and sort all SAM/BAM files. MANDATORY parameter.
+ Example: --picard-jar /usr/local/picard.jar
+
 =item B<--picard-mergesamfiles-jar>
 
- PICARD MergeSamFiles.jar full path. It will be used to merge all
- SAM or BAM files. MANDATORY parameter.
+PICARD MergeSamFiles.jar full path (old versions). It will be used to merge all SAM or BAM files.
+ DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
  Example: --picard-mergesamfiles-jar /usr/local/hadoop/picard-tools-1.56/MergeSamFiles.jar
 
 =item B<--picard-sortsam-jar>
 
- PICARD SortSam.jar full path. It will be used to for SAM BAM conversion. MANDATORY parameter.
+ PICARD SortSam.jar full path (old versions). It will be used to for SAM BAM conversion.
+ DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
  Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
 
 =item B<--readtools>
