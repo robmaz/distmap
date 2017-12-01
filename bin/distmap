@@ -6,11 +6,8 @@ use Pod::Usage;
 use File::Which;
 use File::Temp;
 
-# This is also in @INC, but leave it here so that it
-# can be easily adjusted in case the installer puts the
-# modules in some private folder
-my LibDir = "/usr/local/lib/perl5";
-use lib $LibDir;
+use FindBin qw/$RealBin/;
+use lib "$RealBin/../lib/perl5";
 use Utility;
 use GenomeIndex;
 use DataProcess;
