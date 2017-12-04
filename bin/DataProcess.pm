@@ -468,9 +468,6 @@ sub copy_exec {
 	if (-e $args_dict->{"picard_sortsam_jar"}) {
 		copy($args_dict->{"picard_sortsam_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/");
 	}
-	if (-e $args_dict->{"picard_mark_duplicates_jar"}) {
-		copy($args_dict->{"picard_mark_duplicates_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/");
-	}
 
 	if (-e $args_dict->{"picard_jar"}) {
 		copy($args_dict->{"picard_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/");
