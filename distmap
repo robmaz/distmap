@@ -66,7 +66,7 @@ Usage: perl $script
 
 --no-trim            		This option will skip the trimming
 
---trim-script-path		Give the full path of the trim-fastq.pl fro popoolation/basic-pipeline. Kofler et. al (2011)
+--trim-script-path		Give the full path of the trim-fastq.pl from popoolation/basic-pipeline (Kofler et. al 2011) or ReadTools.jar (version 0.3.0 or lower). DEPRECATED: trimming should be performed locally with ReadTools version 1.1.0 or higher
 
 --trim-args			Give the trimming arguments EXAMPLE: --trim-args '--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output'
 
@@ -917,7 +917,12 @@ DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
 
 =item B<--trim-script-path>
 
- Give the full path of the trim-fastq.pl from popoolation/basic-pipeline. Kofler et. al (2011)
+ Give the full path of the trimmin script. The script might be one of:
+
+    1. trim-fastq.pl from popoolation/basic-pipeline. Kofler et. al (2011)
+    2. ReadTool.jar (version 0.3.0 or lower).
+
+ DEPRECATED: trimming should be performed locally with ReadTools version 1.1.0 or higher.
 
 
 
