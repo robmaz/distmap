@@ -270,7 +270,7 @@ GetOptions(
 
 pod2usage(-verbose=>2) if $help;
 
-if ( $hadoop_home ne "" ) {
+if ( defined $hadoop_home and $hadoop_home ne "" ) {
     # if $hadoop_home is set, make sure there is no trailing slash
     $hadoop_home =~ s/\/$//;
 }
@@ -280,16 +280,22 @@ else {
     $hadoop_home =~ s/\/bin\/hadoop$//;
 }
 
+if ( $hadoop_home eq "" ) {
+	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
+}
+
+
 if ( $readtools =~ /\.jar$/ ) {
   $readtools = "eval java \\\$JAVA_OPTS -jar $readtools";
 }
-unless ( `$readtools --version` gt "1.1.0" ) {
-  die "distmap: only found ReadTools \"$readtools\", which does not provide version >= 1.1.0";
+
+unless ( $readtools ne "" and `$readtools --version` gt "1.1.0" ) {
+	pod2usage(-msg=>"\n\tERROR: only found ReadTools \"$readtools\", which does not provide version >= 1.1.0");
 }
 
 unless ( $tmp_dir eq "" or
   ( -d $tmp_dir and -w $tmp_dir and -x $tmp_dir ) ) {
-	die "distmap: \"$tmp_dir\" is not a usable temporary folder (permissions?)";
+  	pod2usage(-msg=>"\n\tERROR: \"$tmp_dir\" is not a usable temporary folder (permissions?)");
 }
 
 
