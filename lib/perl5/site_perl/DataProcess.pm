@@ -41,22 +41,8 @@ sub start {
 	my $time_stamp_start = Utility::get_time_stamp();
 	print STDERR "\nStarted at:  $time_stamp_start\n";
 
-	print STDERR "Writng fastq files into tab text file\n";
+	print STDERR "Writing fastq files into tab text file\n";
 	$self->file_process($args_dict);
-
-
-
-	#
-	#
-	#my $mappers_exe_archive = $args_dict->{"mappers_exe_archive"};
-	#
-	#unless ($args_dict->{'mappers_exe_archive'} ne "" and exists$args_dict->{'mappers_exe_archive'}) {
-		#print STDERR "Copying executables\n";
-		#$self->copy_exec($args_dict);
-	#	print STDERR "Creating Archive\n";
-	#	$self->create_archive($args_dict);
-	#}
-
 
 	################### Time end #########################
 	my $end_time = time();
@@ -79,12 +65,9 @@ sub file_process {
 	if (scalar(@$files_pair_list)>0) {
 		Utility::createdir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'fastq_dir_pe'}");
 
-		#$self->fastq2tab_pe($files_pair_list,$args_dict);
-
 		$self->fastq2tab_pe_java($files_pair_list,$args_dict);
 
 		my $read_type =$args_dict->{'fastq_dir_pe'};
-		#$self->compress_fastq_file($args_dict,$read_type);
 
 		$args_dict->{"pe_file"} = scalar(@$files_pair_list);
 	}
@@ -92,13 +75,9 @@ sub file_process {
 	if (scalar(@$files_single_list)>0) {
 		Utility::createdir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'fastq_dir_pe'}");
 
-		#$self->fastq2tab_se($files_single_list,$args_dict);
-
 		$self->fastq2tab_se_java($files_single_list,$args_dict);
 
 		my $read_type =$args_dict->{'fastq_dir_se'};
-		#$self->compress_fastq_file($args_dict,$read_type);
-
 
 		$args_dict->{"se_file"} = scalar(@$files_single_list);
 	}
@@ -198,134 +177,11 @@ sub check_files {
 
 
 sub fastq2tab_pe {
-	my ($self,$file_list,$args_dict) = @_;
-
-	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'fastq_dir_pe'}";
-	my $index=1;
-	foreach my $f (@$file_list) {
-		my $output_file = "$output_dir/fastq_file".$index;
-		my $read1_fastq=$f->[0];
-		my $read2_fastq=$f->[1];
-
-		open (my $ofh,">".$output_file) or die "could not open $_";
-
-		my $fh1 = undef;
-		my $fh2 = undef;
-
-		if ($read1_fastq=~/\.gz$/i) {
-			open $fh1, "gzip -dc $read1_fastq |" or die "Could not open file gzipped file $read1_fastq - do you have zlib $!";
-		}
-		else {
-			open $fh1, "<", $read1_fastq or die "Could not open file handle, $!";
-		}
-
-		if ($read2_fastq=~/\.gz$/i) {
-			open $fh2, "gzip -dc $read2_fastq |" or die "Could not open file gzipped file $read2_fastq - do you have zlib $!";
-		}
-		else {
-			open $fh2, "<", $read2_fastq or die "Could not open file handle, $!";
-		}
-
-		my $line_f1;
-		my $line_f2;
-		my $counter = 0;
-
-		while (defined($line_f1 = <$fh1>)&& defined($line_f2 = <$fh2>)){
-
-
-			my $temp;
-			$counter++;
-
-			my $read_name = $line_f1;
-			chomp($read_name);
-
-			$read_name =~ s/(.*)(\/[0-9])/$1/;
-			$temp = $read_name."\t";
-
-			$line_f1 = <$fh1>;
-			my $seq_data = $line_f1;
-			chomp($seq_data);
-			$temp .= $seq_data."\t";
-
-			$line_f1 = <$fh1>;
-			$line_f1 = <$fh1>;
-			my $q_data = $line_f1;
-			chomp($q_data);
-			$temp .= $q_data."\t";
-
-			$line_f2 = <$fh2>;
-			$seq_data = $line_f2;
-			chomp($seq_data);
-			$temp .= $seq_data."\t";
-
-			$line_f2 = <$fh2>;
-			$line_f2 = <$fh2>;
-			$q_data = $line_f2;
-			chomp($q_data);
-			$temp .= $q_data."\n";
-
-			print $ofh $temp;
-
-		}
-
-		print STDERR "file$index: $counter Paired-end reads\n";
-		$index++;
-	}
+  die("fastq2tab_pe: OBSOLETE, should not be here!")
 }
 
 sub fastq2tab_se {
-	my ($self,$file_list,$args_dict) = @_;
-
-	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'fastq_dir_se'}";
-	my $index=1;
-	foreach my $f (@$file_list) {
-		my $output_file = "$output_dir/fastq_file".$index;
-		my $read_fastq=$f->[0];
-
-		open (my $ofh,">".$output_file) or die "could not open $_";
-
-		my $fh = undef;
-		if ($read_fastq=~/\.gz$/i) {
-			open $fh, "gzip -dc $read_fastq |" or die "Could not open file gzipped file $read_fastq - do you have zlib $!";
-		}
-		else {
-			open $fh, "<", $read_fastq or die "Could not open file handle, $!";
-		}
-
-		my $line_f;
-		my $counter = 0;
-
-		while (defined($line_f = <$fh>)){
-
-
-			my $temp;
-			$counter++;
-
-			my $read_name = $line_f;
-			chomp($read_name);
-
-			$read_name =~ s/(.*)(\/[0-9])/$1/;
-			$temp = $read_name."\t";
-
-			$line_f = <$fh>;
-			my $seq_data = $line_f;
-			chomp($seq_data);
-			$temp .= $seq_data."\t";
-
-			$line_f = <$fh>;
-			$line_f = <$fh>;
-			my $q_data = $line_f;
-			chomp($q_data);
-			$temp .= $q_data."\n";
-
-			print $ofh $temp;
-
-		}
-
-		print STDERR "file$index: $counter Single-end reads\n";
-		$index++;
-	}
-
+	die("fastq2tab_se: OBSOLETE, should not be here!")
 }
 
 
@@ -338,6 +194,8 @@ sub fastq2tab_pe_java {
 	my $readtools = $args_dict->{'readtools'};
 
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
+
+	my $trimming_flag = $args_dict->{"trimming_flag"};
 
 	if (system ("$hdfs_exe dfs -test -d $input_dir1")==0) {
 		system("$hdfs_exe dfs -rm -r $input_dir1") == 0 || warn "Error in deleting the $input_dir1 folder on hdfs file system. $input_dir1 does not exists\n";
@@ -364,7 +222,7 @@ sub fastq2tab_pe_java {
 		my $read1_fastq=$f->[0];
 		my $read2_fastq=$f->[1];
 
-		my $cmd = "JAVA_OPTS=-Xmx4g $readtools ReadsToDistmap --input $read1_fastq --input2 $read2_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte";
+		my $cmd = "JAVA_OPTS=-Xmx4g $readtools ReadsToDistmap --input $read1_fastq --input2 $read2_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte $trimming_flag";
 
 		print "$cmd\n";
 		#print "$file_count\n";
@@ -396,6 +254,8 @@ sub fastq2tab_se_java {
 
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
 
+	my $trimming_flag = $args_dict->{"trimming_flag"};
+
 	if (system ("$hdfs_exe dfs -test -d $input_dir1")==0) {
 		system("$hdfs_exe dfs -rm -r $input_dir1") == 0 || warn "Error in deleting the $input_dir1 folder on hdfs file system. $input_dir1 does not exists\n";
 	}
@@ -420,7 +280,7 @@ sub fastq2tab_se_java {
 		my $output_file = "$output_dir/fastq_file".$index;
 		my $read1_fastq=$f->[0];
 
-		my $cmd = "JAVA_OPTS=-Xmx4g $readtools ReadsToDistmap --input $read1_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte";
+		my $cmd = "JAVA_OPTS=-Xmx4g $readtools ReadsToDistmap --input $read1_fastq --output $hdfs/$input_dir1/fastq_file1.bz2 --hdfsBlockSize $block_size_byte $trimming_flag";
 
 		#print "$cmd\n";
 		#print "$file_count\n";

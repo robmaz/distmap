@@ -25,7 +25,7 @@ sub check_hadoop {
     my $mapred_exe="";
     my $yarn_exe="";
 
-    opendir(DIR, "$streaming_home") || die "Can't opedir $streaming_home: $!\n";
+    opendir(DIR, "$streaming_home") || die "Can't opendir $streaming_home: $!\n";
     my @file_list = readdir(DIR);
     closedir(DIR);
 

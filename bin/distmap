@@ -206,7 +206,7 @@ my $hadoop_scheduler="Fair";
 my $mappers_exe_archive = "";
 
 my $trim_script_path="";
-my $trim_args="";
+my $trim_args=""; # TODO: standard readtools trimming args
 
 my $verbose = 0;
 my $test = 0;
@@ -336,16 +336,17 @@ if($verbose) {
 # respect trim_args if given on the command line, else
 if ($trim_args eq "")
 {
-	$trim_args = "--quality-threshold $qualThreshold --minimum-length $minLength";
-	if ($discardRemainingNs) {
-		$trim_args .= " --discard-internal-N";
-	}
-	if ($trimQuality) {
-		$trim_args .= " --no-trim-quality";
-	}
-	if ($no5ptrim) {
-		$trim_args .= " --no-5p-trim";
-	}
+	# TODO: fix args for readtools trimming
+	# $trim_args = "--quality-threshold $qualThreshold --minimum-length $minLength";
+	# if ($discardRemainingNs) {
+	# 	$trim_args .= " --discard-internal-N";
+	# }
+	# if ($trimQuality) {
+	# 	$trim_args .= " --no-trim-quality";
+	# }
+	# if ($no5ptrim) {
+	# 	$trim_args .= " --no-5p-trim";
+	# }
 }
 
 ###
@@ -424,12 +425,7 @@ else {
     $args_dict = check_inputs();
 
     if ( $args_dict->{"trimming_flag"} ) {
-        unless ( -e $args_dict->{"trim_script_path"} ) {
-            print
-"\n\tERROR: trimming script (trim-fastq.pl) path not correct: \n\t$args_dict->{'trim_script_path'}\n\n";
-            $args_dict->{"trimming_flag"} = "";
-            exit(1);
-        }
+        #
     }
 
     Utility::check_genome_index($args_dict);
@@ -574,7 +570,7 @@ sub check_inputs {
     $args_dict->{"trimming_flag"} = "";
   }
   else {
-    $args_dict->{"trimming_flag"} = "--trim";
+    $args_dict->{"trimming_flag"} = $trim_args; # TODO: trimming_flag will be passed to readtools as is
   }
 
 	### Get HADOOP executables and Streaming jar
