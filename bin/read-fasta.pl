@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 use strict;
 use warnings;
 use Getopt::Long;
@@ -41,7 +41,7 @@ foreach (@$sequence) {
      print $ofh ">$id\n";
      print $ofh "$_->{sequence}\n";
      my $seq = split_sequence($_->{sequence});
-     
+
      #foreach my $s (@$seq) {
      #     print $ofh "$s\n";
      #}
@@ -51,16 +51,16 @@ foreach (@$sequence) {
 close $ofh;
 
    sub get_fasta_seq {
-	
+
 	my ($file) = @_;
-	
+
 	my $sequence = [];
-	open(FILE, $file) || die("Couldn't read file $file\n");  
-	
+	open(FILE, $file) || die("Couldn't read file $file\n");
+
 	local $/ = "\n>";  # read by FASTA record
-	
+
 	my $header = "";
-	
+
 	while (my $seq = <FILE>) {
 	    chomp $seq;
 	    if($seq =~ m/^>*.+\n/) {
@@ -69,7 +69,7 @@ close $ofh;
 	    }
 	    $seq =~ s/^>*.+\n//;  # remove FASTA header
 	    $seq =~ s/\n//g;  # remove endlines
-	    
+
 	    if($header =~ /^\>/) {
 		$header =~ s/^\>//;
 	    }
@@ -83,25 +83,25 @@ close $ofh;
 		sequence=>$seq
 	    };
 	    push (@$sequence,$e);
-	    
+
 	}
-	
+
 	return $sequence;
 
     }
-    
+
     sub split_sequence  {
 	my ($sequence) = @_;
 	my $seq = [];
-	
+
 	my $length=60;
-	    
+
 	    # Print sequence in lines of $length
 	    my $j=0;
 	    for(my $pos = 0;$pos<length($sequence);$pos+=$length)
 	    {
 		    $seq->[$j]=uc(substr($sequence,$pos,$length));
-		    $j++;	
+		    $j++;
 	    }
 	    return $seq;
     }

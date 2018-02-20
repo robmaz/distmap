@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 use strict;
 use warnings;
 use Getopt::Long;
@@ -77,7 +77,7 @@ while(<>){
 	#	$read1 .= $col[1]."\n";
 	#	print $ofh1 $read1;
 	#	$read_type1="se"
-	#	
+	#
 	#}
 	#else {
 	#	die "Bad number of fasta columns ; expected 2:\n$_\n";
@@ -96,14 +96,13 @@ Utility::runCommand("$hdfs dfs -put $exonerate_output $output_dir >&2", "hdfs df
 #Utility::runCommand("$hadoop fs -put $read1_fastq $output_dir >&2", "hadoop fs -put") == 0 || die "hadoop fs -put command failed";
 
 #open my $sfh,"<$exonerate_output" or die "Could not open $exonerate_output for write $!";
-#	
+#
 #	while(<$sfh>){
 #		#chomp;
 #		print "$_";
-#	
+#
 #	}
 #	close $sfh;
-#	
+#
 
 print STDERR "END_OF exonerate_mapping\n";
-

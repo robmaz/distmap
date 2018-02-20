@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 use strict;
 use warnings;
 use Getopt::Long;
@@ -85,11 +85,11 @@ my $read_type1="";
 while(<>){
 	my $line = $_;
 	chomp($line);
-	
+
 	my @col = split(/\t/,$line);
-	
+
 	#print STDERR scalar(@col),"\t@col\n";
-	
+
 	if (scalar(@col)==3) {
 		my $readname = $col[0];
 		my $read1 = $readname."/1"."\n";
@@ -98,13 +98,13 @@ while(<>){
 		$read1 .= $col[2]."\n";
 		print $ofh1 $read1;
 		$read_type1="se"
-		
+
 	}
 	elsif (scalar(@col)==5) {
 		my $readname = $col[0];
 		my $read1 = $readname."/1"."\n";
 		my $read2 = $readname."/2"."\n";
-		
+
 		$read1 .= $col[1]."\n";
 		$read1 .= "+\n";
 		$read1 .= $col[2]."\n";
@@ -134,9 +134,9 @@ if ($mapper_path =~ /bowtie2$/i) {
 	}
 	else {
 		my $cmd1 = "$mapper_path $mapper_args -x $ref_dir/$ref_fasta -U $read1_fastq";
-		Utility::runCommand($cmd1, "bowtie2 mapping of $read1_fastq") == 0 || die "Error bowtie mapping of $read1_fastq and $read2_fastq";	
+		Utility::runCommand($cmd1, "bowtie2 mapping of $read1_fastq") == 0 || die "Error bowtie mapping of $read1_fastq and $read2_fastq";
 	}
-	
+
 	print STDERR "END_OF bowtie2_mapping\n";
 
 }
@@ -151,9 +151,9 @@ else {
 	}
 	else {
 		my $cmd1 = "$mapper_path $mapper_args -S $ref_dir/$ref_fasta $read1_fastq";
-		Utility::runCommand($cmd1, "bowtie mapping of $read1_fastq") == 0 || die "Error bowtie mapping of $read1_fastq and $read2_fastq";	
+		Utility::runCommand($cmd1, "bowtie mapping of $read1_fastq") == 0 || die "Error bowtie mapping of $read1_fastq and $read2_fastq";
 	}
-	
+
 	#if ($output_format =~ /bam/i) {
 	#	my $cmd2 = "$hadoop jar $sartsam_jar I=$sam_output O=$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT";
 	#	Utility::runCommand($cmd2, "converting SAM into BAM") == 0 || die "Error in converting SAM into BAM";
@@ -162,15 +162,15 @@ else {
 	#
 	#else {
 	#	open my $sfh,"<$sam_output" or die "Could not open $sam_output for write $!";
-	#	
+	#
 	#	while(<$sfh>){
 	#		chomp;
 	#		print "$_\n";
-	#	
+	#
 	#	}
 	#	close $sfh;
 	#}
-	
+
 	print STDERR "END_OF bowtie_mapping\n";
 
 }
