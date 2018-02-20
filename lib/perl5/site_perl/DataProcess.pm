@@ -10,7 +10,7 @@ use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError);
 use IO::Uncompress::Gunzip;
 use Cwd;
 use FindBin qw/$RealBin/;
-use lib "$RealBin/bin";
+use lib "$RealBin/../lib/perl5/site_perl";
 use Utility;
 
 ##
@@ -73,7 +73,7 @@ sub file_process {
 
 	my $files_pair_list = [];
 	my $files_single_list = [];
-	($files_pair_list,$files_single_list) = $self->check_files($args_dict->{"input_files"},$args_dict->{"usage"});
+	($files_pair_list,$files_single_list) = $self->check_files($args_dict);
 
 
 	if (scalar(@$files_pair_list)>0) {
@@ -138,10 +138,10 @@ sub compress_fastq_file {
 }
 
 sub check_files {
-	my ($self,$files,$usage) = @_;
+	my ($self,$args_dict) = @_;
 
 	my @files = ();
-	@files = @{$files};
+	@files = @{$args_dict->{"input_files"}};
 
 
 	my $files_pair_list = [];
@@ -188,7 +188,7 @@ sub check_files {
 
 	if (scalar(@$files_pair_list)<1 and scalar(@$files_single_list)<1) {
 		print STDERR "\t--input option not valid. Fastq files do not exists\n";
-		print STDERR "$usage\n";
+		print STDERR "$args_dict->{"usage"}\n";
 		exit(1);
 
 	}

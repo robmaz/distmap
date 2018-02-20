@@ -61,17 +61,17 @@ Usage: perl $script
 --only-hdfs-upload          	Step3: This option assume that data processing is done and only upload reads and archieve created in
 				data process step will be loaded into HDFS file system and exit. OPTIONAL parameter
 
---only-trim            		Step4: This option will assume that data is already loaded into HDFS and will only
-				run read trimming on cluster
+--only-trim             OBSOLETE: this option does nothing, trimming is now performed while uploading into the HDFS
 
 --no-trim            		This option will skip the trimming
 
---trim-script-path		Give the full path of the trim-fastq.pl from popoolation/basic-pipeline (Kofler et. al 2011) or ReadTools.jar (version 0.3.0 or lower). DEPRECATED: trimming should be performed locally with ReadTools version 1.1.0 or higher
+--trim-script-path		OBSOLETE: trimming will be performed by ReadTools while uploading into the HDFS
 
 --trim-args			Give the trimming arguments EXAMPLE: --trim-args '--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output'
 
 --only-map            		Step5: This option will assume that data is already loaded into HDFS and will only
 				run map on cluster
+
 --only-hdfs-download          	Step4: This option assume that mapping already done on cluster and files will be downloaded
 				from cluster to local output directory. OPTIONAL parameter
 
@@ -85,9 +85,10 @@ Usage: perl $script
 --mapper              		Mapper name [bwa,tophat,gsnap,bowtie,soap]. MANDATORY parameter.
 				Example: --mapper bwa
 
---mapper-path         		Mapper executable full path. Mapper executables should be in
-				same loaction on all nodes (slaves). MANDATORY parameter.
+--mapper-path         		Mapper executable full path. Mapper executables should be in the
+				same location on all nodes (slaves). MANDATORY parameter.
 				Example: --mapper-path /usr/local/hadoop/bwa
+
 --gsnap-output-split		GSNAP has a feature to split different type of maaping output in different
                                 SAM files.
 
@@ -97,17 +98,13 @@ Usage: perl $script
                                    paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
                                    or 10 if --fails-as-input is selected, or 3 for single-end reads)
 
---picard-jar		PICARD picard.jar full path. It will be used to merge, convert and sort all SAM/BAM files. MANDATORY parameter.
-					Example: --picard-jar /usr/local/picard.jar
+--picard		Full path to either picard.jar or the picard launcher script. MANDATORY unless the launcher
+            script can be found in the path.
+					Example: --picard /usr/local/bin/picard
 
---picard-mergesamfiles-jar     PICARD MergeSamFiles.jar full path (old versions). It will be used to merge all
-				SAM or BAM files.
-				DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
-				Example: --picard-mergesamfiles-jar /usr/local/hadoop/picard-tools-1.56/MergeSamFiles.jar
+--picard-mergesamfiles-jar     OBSOLETE: picard is distributed in a single file now. Use --picard-jar instead.
 
---picard-sortsam-jar     	PICARD SortSam.jar full path (old versions). It will be used to for SAM BAM conversion.
-				DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
-				Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
+--picard-sortsam-jar     	OBSOLETE: picard is distributed in a single file now. Use --picard-jar instead.
 
 --readtools               Full path to either ReadTools.jar or the readtools launcher script.
                           MANDATORY unless the launcher script can be found in the path.
@@ -194,9 +191,9 @@ my @mapper_path=();
 my @mapper_args=();
 
 my $bwa_sampe_args="";
-my $picard_jar="";
-my $picard_mergesamfiles_jar=""; # DEPRECATED
-my $picard_sortsam_jar=""; # DEPRECATED
+my $picard=`which picard`;
+my $picard_mergesamfiles_jar=""; # OBSOLETE
+my $picard_sortsam_jar=""; # OBSOLETE
 my $picard_mark_duplicates_jar="";
 my $readtools = `which readtools`;
 my $tmp_dir = "";
@@ -258,9 +255,9 @@ GetOptions(
 
 	"mapper=s" 				=> \@mapper,		# to check
 	"mapper-path=s"				=> \@mapper_path,
-	"picard-jar=s"				=> \$picard_jar, # to check
-	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# DEPRECATED
-	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# DEPRECATED
+	"picard=s"				=> \$picard, # to check
+	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# OBSOLETE
+	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# OBSOLETE
 	"readtools=s"         => \$readtools,
 	"tmp-dir=s"           => \$tmp_dir,
 	"mapper-args=s"				=> \@mapper_args,
@@ -295,21 +292,18 @@ if ( $readtools =~ /\.jar$/ ) {
   $readtools = "eval java \\\$JAVA_OPTS -jar $readtools";
 }
 
-unless ( $readtools ne "" and `$readtools --version` gt "1.1.0" ) {
-	pod2usage(-msg=>"\n\tERROR: only found ReadTools \"$readtools\", which does not provide version >= 1.1.0");
+unless ( $readtools ne "" and `$readtools --version` gt "1.2.1" ) {
+	pod2usage(-msg=>"\n\tERROR: only found ReadTools \"$readtools\", which does not provide version >= 1.2.1");
+}
+
+if ( $picard =~ /\.jar$/ ) {
+  $readtools = "eval java \\\$JAVA_OPTS -jar $picard";
 }
 
 unless ( $tmp_dir eq "" or
   ( -d $tmp_dir and -w $tmp_dir and -x $tmp_dir ) ) {
   	pod2usage(-msg=>"\n\tERROR: \"$tmp_dir\" is not a usable temporary folder (permissions?)");
 }
-
-# checking picard arguments
-if ( $picard_jar ne "" ) {
-	if ($picard_mergesamfiles_jar ne "" or $picard_sortsam_jar ne "") {
-		die "distmap: provided both a picard.jar (\"$picard_jar\") and MergeSamFiles.jar/SortSam.jar (\"$picard_mergesamfiles_jar\"/\"$picard_sortsam_jar\")";
-	}
-} 
 
 
 if($verbose) {
@@ -328,8 +322,8 @@ if($verbose) {
 	print STDERR "  mapper name:\t@mapper\n";
 	print STDERR "  mapper path:\t@mapper_path\n";
 	print STDERR "  picard jar:\t$picard_jar\n";
-	print STDERR "  (DEPRECATED) picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
-	print STDERR "  (DEPRECATED) picard SortSam.jar:\t$picard_sortsam_jar\n";
+	print STDERR "  (OBSOLETE) picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
+	print STDERR "  (OBSOLETE) picard SortSam.jar:\t$picard_sortsam_jar\n";
 	print STDERR "  readtools:\t$readtools\n";
 	print STDERR "  tmpdir:\t$tmp_dir\n";
 	print STDERR "  mapper arguments:\t@mapper_args\n";
@@ -338,64 +332,11 @@ if($verbose) {
 	print STDERR "  job description:\t$job_desc\n";
 	exit(0);
 }
-#elsif ($help) {
-#	print "$usage\n";#
-#	exit(0);
-#}
-#elsif ($mapper eq "exonerate") {
-#	pod2usage(-msg=>"\n\tERROR: --input; 'read1.fastq,read2.fast' one or more input files must be provided\n",-verbose=>1) if scalar(@input_files)<1;
-#	pod2usage(-msg=>"\n\tERROR: --reference-fasta; A reference fasta file must be provided\n",-verbose=>1) unless -e $reference_fasta;
-#	pod2usage(-msg=>"\n\tERROR: --output; An output directory must be provided\n",-verbose=>1) unless $output_directory;
-#	pod2usage(-msg=>"\n\tERROR: --mapper; One mapper name must be provided [bwa, gsnap, tophat, bowtie, soap]\n",-verbose=>1) if scalar(@mapper)<1;
-#	pod2usage(-msg=>"\n\tERROR: --mapper-path; Mapper's executable file full path must be provided\n",-verbose=>1) if scalar(@mapper_path)<1;
-#	pod2usage(-msg=>"\n\tERROR: --job-desc; A meaningful job description must be provided in double quote or single quote Example: 'Exonerate run 1' \n",-verbose=>1) unless $job_desc;
-#	pod2usage(-msg=>"\n\tERROR: --queue-name; A valid queue name must be provided. Options [pg1, pg2, pg3]\n",-verbose=>1) unless $queue_name;
-#
-#}
-#else {
-#	pod2usage(-msg=>"\n\tERROR: --input; 'read1.fastq,read2.fast' one or more input files must be provided\n",-verbose=>1) if scalar(@input_files)<1;
-#	pod2usage(-msg=>"\n\tERROR: --reference-fasta; A reference fasta file must be provided\n",-verbose=>1) unless -e $reference_fasta;
-#	pod2usage(-msg=>"\n\tERROR: --output; An output directory must be provided\n",-verbose=>1) unless $output_directory;
-#	pod2usage(-msg=>"\n\tERROR: --mapper; One mapper name must be provided [bwa, gsnap, tophat, bowtie, soap]\n",-verbose=>1) unless $mapper;
-#	pod2usage(-msg=>"\n\tERROR: --mapper-path; Mapper's executable file full path must be provided\n",-verbose=>1) unless -e $mapper_path;
-#	#pod2usage(-msg=>"\n\tERROR: --picard-mergesamfiles-jar; PICARD MergeSamFiles.jar full path must be provided \n",-verbose=>1) unless -e $picard_mergesamfiles_jar;
-#	#pod2usage(-msg=>"\n\tERROR: --picard-sortsam-jar; PICARD ShortSam.jar file full path must be provided\n",-verbose=>1) unless -e $picard_sortsam_jar;
-#	pod2usage(-msg=>"\n\tERROR: --job-desc; A meaningful job description must be provided in double quote or single quote Example: 'My fastq file BWA mapping' \n",-verbose=>1) unless $job_desc;
-#	pod2usage(-msg=>"\n\tERROR: --queue-name; A valid queue name must be provided. Options [pg1, pg2, pg3]\n",-verbose=>1) unless $queue_name;
-#
-#}
 
-
-#print "$hadoop_home\n";
-#exit();
-
-## assign HADOOP_HOME based on mapper's executables
-foreach my $mapper_path (@mapper_path) {
-	if (-x $mapper_path) {
-		$hadoop_home=$ENV{"HADOOP_HOME"};
-	}
-}
-
-#print "hadoop_home: $hadoop_home\n";
-
-$trim_args="";
-
-
-if ($trim_script_path =~ /.pl$/) {
-	$trim_args .= "--quality-threshold $qualThreshold --min-length $minLength --fastq-type $fastqtype";
-	if ($discardRemainingNs) {
-		$trim_args .= " --discard-internal-N";
-	}
-	if ($trimQuality) {
-		$trim_args .= " --no-trim-quality";
-	}
-	if ($no5ptrim) {
-		$trim_args .= " --no-5p-trim";
-	}
-
-}
-else {
-	$trim_args .= "--quality-threshold $qualThreshold --minimum-length $minLength";
+# respect trim_args if given on the command line, else
+if ($trim_args eq "")
+{
+	$trim_args = "--quality-threshold $qualThreshold --minimum-length $minLength";
 	if ($discardRemainingNs) {
 		$trim_args .= " --discard-internal-N";
 	}
@@ -407,11 +348,7 @@ else {
 	}
 }
 
-
-
-####
-#$only_trim
-
+###
 
 my $args_dict = {};
 
@@ -437,20 +374,17 @@ $args_dict->{"extracted_refarch"} = "Genome_Index_Archive";
 $args_dict->{"mapper_path"} = \@mapper_path;
 $args_dict->{"reference_fasta"} = $reference_fasta;
 
+$args_dict->{"picard"} = $picard;
 
-$args_dict->{"trim_script_path"} = $trim_script_path;
-
-$args_dict->{"picard_jar"} = $picard_jar;
-
-if ($picard_mergesamfiles_jar ne "" and $picard_sortsam_jar ne "") {
-	$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
-	$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
-}
-else {
-	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
-	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-	$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
-}
+# if ($picard_mergesamfiles_jar ne "" and $picard_sortsam_jar ne "") {
+# 	$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
+# 	$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
+# }
+# else {
+# 	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
+# 	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
+# 	$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
+# }
 
 $args_dict->{"readtools"} = $readtools;
 $args_dict->{"tmp_dir"} = $tmp_dir;
@@ -470,7 +404,6 @@ if (scalar(keys %$step_hash)==1 and $args_dict->{"only_index"}) {
 	}
 
 }
-
 elsif (scalar(keys %$step_hash)==1 and $args_dict->{"only_delete_temp"}) {
 	#print "only_delete_temp------\n";
 	Utility::create_dir($args_dict);
@@ -486,91 +419,42 @@ elsif (scalar(keys %$step_hash)==1 and $args_dict->{"only_delete_temp"}) {
 	}
 
 }
-
 else {
 
+    $args_dict = check_inputs();
 
-$args_dict = check_inputs();
+    if ( $args_dict->{"trimming_flag"} ) {
+        unless ( -e $args_dict->{"trim_script_path"} ) {
+            print
+"\n\tERROR: trimming script (trim-fastq.pl) path not correct: \n\t$args_dict->{'trim_script_path'}\n\n";
+            $args_dict->{"trimming_flag"} = "";
+            exit(1);
+        }
+    }
 
-foreach my $k (keys %$args_dict) {
-	#print "$k => ",$args_dict->{$k},"\n";
+    Utility::check_genome_index($args_dict);
 
-}
+#### checking the mappers integrity. If multiple mappers are using in a single command . Implemented on 12-04-2016
 
+    if ( scalar( keys %$step_hash ) > 0 ) {
+        if ( ( $args_dict->{"only_index"} ) or ( $args_dict->{"only_map"} ) ) {
+            check_mapper_integritiy($args_dict);
+        }
+    }
+    else {
+        check_mapper_integritiy($args_dict);
+    }
 
-
-
-
-#print @{$args_dict->{"mapper"}},"\n";
-#
-#if ($args_dict->{"only_map"}) {
-#	if (scalar(@{$args_dict->{"mapper"}})==scalar(@{$args_dict->{"mapper_path"}}) and scalar(@{$args_dict->{"mapper_path"}})==scalar(@{$args_dict->{"mapper_args"}})) {
-#		print "mappers are correct\n";
-#	}
-#}
-#exit();
-#($mapper,$mapper_args,$mapper_path) =
-#Utility::check_mapper($args_dict);
-#exit();
-#print "trim_args: ", $args_dict->{"trim_args"}, "\n";
-#print "TRIM: ",$args_dict->{"trimming_flag"} ,"\n";
-#print "SCRIPT: ", $args_dict->{"trim_script_path"}, "\n";
-
-if ($args_dict->{"trimming_flag"}) {
-	unless (-e $args_dict->{"trim_script_path"}) {
-		print "\n\tERROR: trimming script (trim-fastq.pl) path not correct: \n\t$args_dict->{'trim_script_path'}\n\n";
-		$args_dict->{"trimming_flag"}="";
-		exit(1);
-	}
-}
-else {
-
-}
-
-
-
-
-
-#foreach (keys %$args_dict) {
-	#print "$_\t$args_dict->{$_}\n";
-#}
-
-
-Utility::check_genome_index($args_dict);
-#my $step_hash = {};
-#$step_hash = Utility::get_steps($args_dict);
-
-#### checking the mappers integritiy. If multiple mappers are using in a single command . Implemented on 12-04-2016
-
-if (scalar(keys %$step_hash)>0) {
-	if (($args_dict->{"only_index"}) or ($args_dict->{"only_map"})) {
-
-		check_mapper_integritiy($args_dict);
-
-	}
-
-}
-else {
-	check_mapper_integritiy($args_dict);
-}
-
-if (scalar(keys %$step_hash)>0) {
-	foreach my $step ( sort { $a <=> $b } keys %$step_hash) {
-		#print "$step $step_hash->{$step}\n";
-
-		$step_hash->{$step}->start($args_dict);
-	}
-}
-else {
-	#print "whole",$args_dict->{"trimming_flag"},"\n";
-	#print "trim: ", $args_dict->{"no_trim"}," | ", $args_dict->{"only_trim"},"\n";
-	Utility::run_whole_pipeline($args_dict);
-}
-
-
+    if ( scalar( keys %$step_hash ) > 0 ) {
+        foreach my $step ( sort { $a <=> $b } keys %$step_hash ) {
+            $step_hash->{$step}->start($args_dict);
+        }
+    }
+    else {
+        Utility::run_whole_pipeline($args_dict);
+    }
 }
 exit;
-
 
 
 sub check_mapper_integritiy {
@@ -648,16 +532,7 @@ sub check_inputs {
 	$args_dict->{"mapper"} = \@mapper;
 	$args_dict->{"mapper_path"} = \@mapper_path;
 
-	$args_dict->{"picard_jar"} = $picard_jar;
-
-	if ($picard_mergesamfiles_jar ne "" and $picard_sortsam_jar ne "") {
-		$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
-		$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
-	}
-	else {
-		$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
-		$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-	}
+	$args_dict->{"picard"} = $picard;
 
 	$args_dict->{"readtools"} = $readtools;
 	$args_dict->{"tmp_dir"} = $tmp_dir;
@@ -679,26 +554,15 @@ sub check_inputs {
 
 	$job_priority = uc($job_priority);
 
-	if ($hadoop_scheduler=~ /Fair/i) {
-		$args_dict->{"queue_name"} = "mapreduce.job.queuename=$queue_name";
-	}
-	else {
-		$args_dict->{"queue_name"} = "mapreduce.job.queuename=$queue_name"; #mapred.job.queue.name
-	}
+	$args_dict->{"queue_name"} = "mapreduce.job.queuename=$queue_name";
+
 	$args_dict->{"job_priority"} = "mapreduce.job.priority=$job_priority";
 
-
-	#print $args_dict->{"mapper"}, "\n";
-	#my $mapper_list = $args_dict->{"mapper"};
-
-	#print "Hi: @$mapper_list\n";
-	#exit();
 	if ($args_dict->{"mapper"}->[0] =~ /gsnap/i ) {
 		$args_dict->{"block_size"} = "128m";
 	}
 	else {
-		#$args_dict->{"block_size"} = "64m";
-		$args_dict->{"block_size"} = "8m";
+		$args_dict->{"block_size"} = "32m";
 	}
 	$args_dict->{"exec_arch"} = "DistMap_Mapper_Archive.tgz";
 	$args_dict->{"extracted_execarch"} = "execarch";
@@ -706,22 +570,12 @@ sub check_inputs {
 	$args_dict->{"ref_arch"} = "Genome_Index_Archive.tgz";
 	$args_dict->{"extracted_refarch"} = "Genome_Index_Archive";
 
-	#if ($args_dict->{"mapper"} =~ /gsnap/i) {
-	#	$args_dict->{"number_of_processors"} = $number_of_processors-5;
-	#}
-
-	if ($args_dict->{"only_trim"}) {
-		$args_dict->{"trimming_flag"} = "--trim";
-	}
-	else {
-		if ($args_dict->{"no_trim"}) {
-			$args_dict->{"trimming_flag"} = "";
-		}
-		else {
-			$args_dict->{"trimming_flag"} = "--trim";
-		}
-	}
-
+  if ( $args_dict->{"no_trim"} ) {
+    $args_dict->{"trimming_flag"} = "";
+  }
+  else {
+    $args_dict->{"trimming_flag"} = "--trim";
+  }
 
 	### Get HADOOP executables and Streaming jar
 	Utility::check_hadoop($args_dict);
@@ -840,22 +694,18 @@ DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
         paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
         or 10 if --fails-as-input is selected, or 3 for single-end reads)
 
-=item B<--picard-jar>
+=item B<--picard>
 
- PICARD picard.jar full path. It will be used to merge, convert and sort all SAM/BAM files. MANDATORY parameter.
- Example: --picard-jar /usr/local/picard.jar
+ Full path to either picard.jar or the picard lajuncher script. MANDATORY unless picard is in the path.
+ Example: --picard /usr/local/bin/picard
 
 =item B<--picard-mergesamfiles-jar>
 
-PICARD MergeSamFiles.jar full path (old versions). It will be used to merge all SAM or BAM files.
- DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
- Example: --picard-mergesamfiles-jar /usr/local/hadoop/picard-tools-1.56/MergeSamFiles.jar
+OBSOLETE: picard is distributed in a single file now. Use --picard instead.
 
 =item B<--picard-sortsam-jar>
 
- PICARD SortSam.jar full path (old versions). It will be used to for SAM BAM conversion.
- DEPRECATED PARAMETER: picard is distributed in a single file now. Use --picard-jar instead.
- Example: --picard-sortsam-jar /usr/local/hadoop/picard-tools-1.56/SortSam.jar
+ OBSOLETE: picard is distributed in a single file now. Use --picard instead.
 
 =item B<--readtools>
 
@@ -928,9 +778,7 @@ PICARD MergeSamFiles.jar full path (old versions). It will be used to merge all 
 
 =item B<--only-trim>
 
- Step3: This option will assume that data is already loaded into HDFS and will only
- run read trimming on cluster
-
+This option does nothing. Trimming is now done on upload to the HDFS.
 
 
 =item B<--no-trim>
@@ -938,22 +786,14 @@ PICARD MergeSamFiles.jar full path (old versions). It will be used to merge all 
  This option will skip the trimming
 
 
-
 =item B<--trim-script-path>
 
- Give the full path of the trimmin script. The script might be one of:
-
-    1. trim-fastq.pl from popoolation/basic-pipeline. Kofler et. al (2011)
-    2. ReadTool.jar (version 0.3.0 or lower).
-
- DEPRECATED: trimming should be performed locally with ReadTools version 1.1.0 or higher.
-
+ OBSOLETE: trimming is now always done with ReadTools.
 
 
 =item B<--trim-args>
 
  Give the trimming arguments EXAMPLE: --trim-args "--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output"
-
 
 
 =item B<--verbose>
@@ -1003,12 +843,12 @@ toggle switch: switch of trimming of quality
 
 =item B<--no-5p-trim>
 
-togle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
+toggle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
 Duplicates are usually identified by the 5' mapping position which should thus not be modified by trimming. default=off
 
 =item B<--disable-zipped-output>
 
-Dissable zipped output
+Disable zipped output
 
 
 
