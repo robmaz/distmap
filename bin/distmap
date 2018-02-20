@@ -19,6 +19,7 @@ use DataMerge;
 use DataDownloadAndMerge;
 use DownloadTrimmedRead;
 use DataCleanup;
+use ReadToolsUtils;
 
 my $script = "distmap";
 
@@ -63,11 +64,11 @@ Usage: perl $script
 
 --only-trim             OBSOLETE: this option does nothing, trimming is now performed while uploading into the HDFS
 
---no-trim            		This option will skip the trimming
+--no-trim            		OBSOLETE: This option does nothing. Trimming is now done on upload to the HDFS.
 
 --trim-script-path		OBSOLETE: trimming will be performed by ReadTools while uploading into the HDFS
 
---trim-args			Give the trimming arguments EXAMPLE: --trim-args '--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output'
+--trim-args			Give the trimming arguments (ReadTools syntax) EXAMPLE: --trim-args "--trimmer MottQualityTrimmer --mottQualityThreshold 20 --readFilter ReadLengthReadFilter --minReadLength 50 --disable5pTrim"
 
 --only-map            		Step5: This option will assume that data is already loaded into HDFS and will only
 				run map on cluster
@@ -195,7 +196,7 @@ my $picard=`which picard`;
 my $picard_mergesamfiles_jar=""; # OBSOLETE
 my $picard_sortsam_jar=""; # OBSOLETE
 my $picard_mark_duplicates_jar="";
-my $readtools = `which readtools`;
+my $readtools_arg = `which readtools`; # TODO: should this be called after parsing if not provided? I think that it is more consistent.
 my $tmp_dir = "";
 my $output_format="bam";
 my $job_desc="";
@@ -220,7 +221,7 @@ my $help = 0;
     my $minLength=40;
     my $fastqtype="illumina";
     my $discardRemainingNs=0;
-    my $trimQuality=0;
+    my $trimQuality=0; ## TODO: be careful with this argument (it is really no-trim-quality switch)
     my $no5ptrim=0;
     my $nozip=0;
 
@@ -258,7 +259,7 @@ GetOptions(
 	"picard=s"				=> \$picard, # to check
 	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# OBSOLETE
 	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# OBSOLETE
-	"readtools=s"         => \$readtools,
+	"readtools=s"         => \$readtools_arg,
 	"tmp-dir=s"           => \$tmp_dir,
 	"mapper-args=s"				=> \@mapper_args,
 	"bwa-sampe-args=s"			=> \$bwa_sampe_args,
@@ -288,12 +289,13 @@ if ( $hadoop_home eq "" ) {
 }
 
 
-if ( $readtools =~ /\.jar$/ ) {
-  $readtools = "eval java \\\$JAVA_OPTS -jar $readtools";
-}
-
-unless ( $readtools ne "" and `$readtools --version` gt "1.2.1" ) {
-	pod2usage(-msg=>"\n\tERROR: only found ReadTools \"$readtools\", which does not provide version >= 1.2.1");
+if ( $readtools_arg eq "" ) {
+	pod2usage(-msg=>"\n\tERROR: no ReadTools found. Use --readtools or add a wrapper/jar to your PATH");
+} else {
+	$readtools = ReadToolsUtils::get_readtools_runnable_cmd($readtools_arg);
+	if ( `$readtools --version` gt ReadToolsUtils::VERSION ) {
+		pod2usage(-msg=>"\n\tERROR: Unsupported ReadTools (\"$readtools_arg\") - required >= " . ReadToolsUtils::VERSION );
+	}
 }
 
 if ( $picard =~ /\.jar$/ ) {
@@ -324,7 +326,7 @@ if($verbose) {
 	print STDERR "  picard:\t$picard\n";
 	print STDERR "  (OBSOLETE) picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
 	print STDERR "  (OBSOLETE) picard SortSam.jar:\t$picard_sortsam_jar\n";
-	print STDERR "  readtools:\t$readtools\n";
+	print STDERR "  readtools:\t$readtools_arg ($readtools)\n";
 	print STDERR "  tmpdir:\t$tmp_dir\n";
 	print STDERR "  mapper arguments:\t@mapper_args\n";
 	print STDERR "  bwa sampe arguments:\t$bwa_sampe_args\n";
@@ -333,20 +335,11 @@ if($verbose) {
 	exit(0);
 }
 
-# respect trim_args if given on the command line, else
-if ($trim_args eq "")
-{
-	# TODO: fix args for readtools trimming
-	# $trim_args = "--quality-threshold $qualThreshold --minimum-length $minLength";
-	# if ($discardRemainingNs) {
-	# 	$trim_args .= " --discard-internal-N";
-	# }
-	# if ($trimQuality) {
-	# 	$trim_args .= " --no-trim-quality";
-	# }
-	# if ($no5ptrim) {
-	# 	$trim_args .= " --no-5p-trim";
-	# }
+# respect trim_args if given on the command line
+## TODO: fix - the trim_args might be provided in the old perl format - is that still expected?
+if ($trim_args eq "") {
+	# TODO: this should be removed if all the parameters are removed
+	$trim_args = ReadToolsUtils::get_trimming_args($qualThreshold, $minLength, $discardRemainingNs, $trimQuality, $no5ptrim);
 }
 
 ###
@@ -774,22 +767,23 @@ OBSOLETE: picard is distributed in a single file now. Use --picard instead.
 
 =item B<--only-trim>
 
-This option does nothing. Trimming is now done on upload to the HDFS.
+OBSOLETE: This option does nothing. Trimming is now done on upload to the HDFS.
 
 
 =item B<--no-trim>
 
- This option will skip the trimming
+OBSOLETE: This option will skip the trimming.
+This argument will be removed in favor of --trim-args.
 
 
 =item B<--trim-script-path>
 
- OBSOLETE: trimming is now always done with ReadTools.
+OBSOLETE: trimming is now always done with ReadTools.
 
 
 =item B<--trim-args>
 
- Give the trimming arguments EXAMPLE: --trim-args "--quality-threshold 20 --min-length 50 --fastq-type illumina --no-5p-trim --disable-zipped-output"
+Give the trimming arguments (ReadTools syntax) EXAMPLE: --trim-args "--trimmer MottQualityTrimmer --mottQualityThreshold 20 --readFilter ReadLengthReadFilter --minReadLength 50 --disable5pTrim"
 
 
 =item B<--verbose>
@@ -807,7 +801,8 @@ To run a test for all dependency and all.
 
 =item B<--quality-threshold>
 
-minimum average quality; A modified Mott algorithm is used for trimming; the threshold is used for calculating a score: score = quality_at_base - threshold; default=20
+OBSOLETE: minimum average quality; A modified Mott algorithm is used for trimming; the threshold is used for calculating a score: score = quality_at_base - threshold; default=20
+This argument will be removed in favor of --trim-args.
 
 =item B<--fastq-type>
 
@@ -830,22 +825,24 @@ flag, if set reads having internal Ns will be discarded; default=off
 
 =item B<--min-length>
 
-The minimum length of the read after trimming; default=40
+OBSOLETE: The minimum length of the read after trimming; default=40
+This argument will be removed in favor of --trim-args.
 
 
 =item B<--no-trim-quality>
 
-toggle switch: switch of trimming of quality
+OBSOLETE: toggle switch: switch of trimming of quality.
+This argument will be removed in favor of --trim-args.
 
 =item B<--no-5p-trim>
 
-toggle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
+OBSOLETE: toggle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
 Duplicates are usually identified by the 5' mapping position which should thus not be modified by trimming. default=off
+This argument will be removed in favor of --trim-args.
 
 =item B<--disable-zipped-output>
 
-Disable zipped output
-
+OBSOLETE: This option is ignored.
 
 
 =back
