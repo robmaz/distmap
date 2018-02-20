@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import os
 import sys
 import re
@@ -17,14 +17,14 @@ def read_read_id(read_file):
             if not re.search('^@',l):
                 l=l.strip()
                 col = l.split("\t")
-                
+
                 read_id = col[0].lstrip().rstrip()
-                
+
                 print read_id
                 read_dict[read_id] = read_id
-    
+
     fh.close()
-    
+
     return read_dict
 
 read_dict = read_read_id(read_file)
@@ -42,12 +42,12 @@ while True:
     s1 = fh1.readline().lstrip().rstrip()
     h12 = fh1.readline().lstrip().rstrip()
     q1 = fh1.readline().lstrip().rstrip()
-    
+
     h2 = fh2.readline().lstrip().rstrip()
     s2 = fh2.readline().lstrip().rstrip()
     h22 = fh2.readline().lstrip().rstrip()
     q2 = fh2.readline().lstrip().rstrip()
-    
+
     if h1=="" or h2=="":
         break
     #FCD20ENACXX:3:2107:9999:7489#GGCTACAT
@@ -58,13 +58,13 @@ while True:
             print >> ofh1, s1
             print >> ofh1, h12
             print >> ofh1, q1
-            
+
             print >> ofh2, h2
             print >> ofh2, s2
             print >> ofh2, h22
             print >> ofh2, q2
-            
-            
+
+
             del(read_dict[h1[1:-2]])
 
 
@@ -72,4 +72,3 @@ fh1.close()
 fh2.close()
 ofh1.close()
 ofh2.close()
-    

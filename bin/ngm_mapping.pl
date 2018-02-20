@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 use strict;
 use warnings;
 use Getopt::Long;
@@ -88,7 +88,7 @@ my $read_type1="";
 while(<>){
 	my $line = $_;
 	chomp($line);
-	
+
 	my @col = split(/\t/,$line);
 	if (scalar(@col)==3) {
 		my $readname = $col[0];
@@ -98,13 +98,13 @@ while(<>){
 		$read1 .= $col[2]."\n";
 		print $ofh1 $read1;
 		$read_type1="se"
-		
+
 	}
 	elsif (scalar(@col)==5) {
 		my $readname = $col[0];
 		my $read1 = $readname."/1"."\n";
 		my $read2 = $readname."/2"."\n";
-		
+
 		$read1 .= $col[1]."\n";
 		$read1 .= "+\n";
 		$read1 .= $col[2]."\n";
@@ -135,7 +135,7 @@ my $ref= $ref_fasta;
 
 
 if ($read_type1 =~ /(pe|pair)/i) {
-	
+
 	#$ENV{DISTMAP_HOME}/executables/ngm-0.4.13/ngm -b -r /Volumes/disk3/slaves-test/input/dmel_genome.fasta -1 /Volumes/disk3/slaves-test/input/read1_1M.fastq -2 /Volumes/disk3/slaves-test/input/read2_1M.fastq --sensitive -t 2 --local -o /Volumes/disk3/slaves-test/output/ngm_test1/ngm_mapres.bam
 
 
@@ -143,17 +143,17 @@ if ($read_type1 =~ /(pe|pair)/i) {
 	my $cmd1 = "$mapper_path  -p -1 $read1_fastq -2 $read2_fastq -r $ref  --bam --sensitive -t 2 --local $mapper_args";
 	print STDERR "cmd1: $cmd1\n";
 	Utility::runCommand($cmd1, "ngm of $read1_fastq and $read2_fastq") == 0 || die "Error bwa aln of $read1_fastq and $read2_fastq";
-	
+
 	#Utility::runCommand("$hdfs dfs -put $bam_output $output_dir/ >&2", "hdfsp dfs -put") == 0 || die "hdfs dfs -put command failed";
 
 }
 else {
 
 	my $cmd1 = "$mapper_path -q $read1_fastq -r $ref --bam --local $mapper_args -o $bam_output";
-	
+
 	print STDERR "cmd1: $cmd1\n";
 	Utility::runCommand($cmd1, "ngm of $read1_fastq") == 0 || die "Error bwa aln of $read1_fastq";
-	
+
 	Utility::runCommand("$hdfs dfs -put $bam_output $output_dir/ >&2", "hdfsp dfs -put") == 0 || die "hdfs dfs -put command failed";
 }
 
@@ -161,4 +161,3 @@ else {
 
 
 print STDERR "END_OF NEM_mapping\n";
-

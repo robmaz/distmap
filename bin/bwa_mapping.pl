@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 use strict;
 use warnings;
 use Getopt::Long;
@@ -90,7 +90,7 @@ my $bwasw_mapping=0;
 
 
 if ($mapper_args =~ /\-\-bwamem/i) {
-	
+
 	print STDERR "$mapper_args\n";
 	$mapper_args =~ s/\-\-bwamem//im;
 	$mem_mapping=1;
@@ -108,7 +108,7 @@ elsif ($mapper_args =~ /bwamem/i) {
 
 
 if ($mapper_args =~ /\-\-bwasw/i) {
-	
+
 	print STDERR "$mapper_args\n";
 	$mapper_args =~ s/\-\-bwasw//im;
 	$bwasw_mapping=1;
@@ -133,7 +133,7 @@ my $read_type1="";
 while(<>){
 	my $line = $_;
 	chomp($line);
-	
+
 	my @col = split(/\t/,$line);
 	if (scalar(@col)==3) {
 		my $readname = $col[0];
@@ -143,13 +143,13 @@ while(<>){
 		$read1 .= $col[2]."\n";
 		print $ofh1 $read1;
 		$read_type1="se"
-		
+
 	}
 	elsif (scalar(@col)==5) {
 		my $readname = $col[0];
 		my $read1 = $readname."/1"."\n";
 		my $read2 = $readname."/2"."\n";
-		
+
 		$read1 .= $col[1]."\n";
 		$read1 .= "+\n";
 		$read1 .= $col[2]."\n";
@@ -180,18 +180,18 @@ my $ref= $ref_fasta;
 
 if (system("$hdfs dfs -test -e $output_dir/$bam_output")==0) {
 	exit();
-	
+
 }
 
 #my $index_command = "$mapper_path index ref.fa > $output_dir/";
-	
+
 #print STDERR "index_command: $index_command\n";
 #Utility::runCommand($index_command, "bwa index command is running") == 0 || die "Error bwa index command";
 
 
 
 if ($read_type1 =~ /(pe|pair)/i) {
-	
+
 	if ($mem_mapping) {
 		my $cmd1 = "$mapper_path mem $mapper_args -M $ref $read1_fastq $read2_fastq";
 		print STDERR "cmd1: $cmd1\n";
@@ -210,8 +210,8 @@ if ($read_type1 =~ /(pe|pair)/i) {
 		print STDERR "cmd1: $cmd1\n";
 		print STDERR "cmd2: $cmd2\n";
 		print STDERR "cmd3: $cmd3\n";
-		
-	
+
+
 		Utility::runCommand($cmd1, "bwa aln of $read1_fastq") == 0 || die "Error bwa aln of $read1_fastq";
 		Utility::runCommand($cmd2, "bwa aln of $read2_fastq") == 0 || die "Error bwa aln of $read2_fastq";
 		Utility::runCommand($cmd3, "bwa sampe of $read1_sai_file and $read2_sai_file") == 0 || die "Error bwa sampe of $read1_sai_file and $read2_sai_file";
@@ -235,7 +235,7 @@ else {
 		Utility::runCommand($cmd1, "bwa aln of $read1_fastq") == 0 || die "Error bwa aln of $read1_fastq";
 		Utility::runCommand($cmd3, "bwa sampe of $read1_sai_file") == 0 || die "Error bwa sampe of $read1_sai_file";
 	}
-	
+
 }
 
 
@@ -249,25 +249,24 @@ else {
 #		my $picard_jar="execarch/bin/picard.jar SortSam";
 #		$cmd4 = "java -Xmx5g -Dsnappy.disable=true -jar $picard_jar I=$sam_output O=$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT";
 #	}
-#	
+#
 #	print STDERR "SAM2BAM: $cmd4\n";
-#	
+#
 #	Utility::runCommand($cmd4, "converting SAM into BAM") == 0 || die "Error in converting SAM into BAM";
-#	
+#
 #	Utility::runCommand("$hdfs dfs -put $bam_output $output_dir/ >&2", "hdfsp dfs -put") == 0 || die "hdfs dfs -put command failed";
-#	
+#
 #}
 #else {
 #	open my $sfh,"<$sam_output" or die "Could not open $sam_output for write $!";
-#	
+#
 #	while(<$sfh>){
 #		chomp;
 #		print "$_\n";
-#	
+#
 #	}
 #	close $sfh;
 #}
 
 
 print STDERR "END_OF bwa_mapping\n";
-
