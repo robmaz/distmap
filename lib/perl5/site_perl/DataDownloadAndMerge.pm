@@ -4,7 +4,7 @@ use warnings;
 
 package DataDownloadAndMerge;
 use FindBin qw/$RealBin/;
-use lib "$RealBin/bin";
+use lib "$RealBin/../lib/perl5/site_perl";
 use Utility;
 use File::Basename;
 
