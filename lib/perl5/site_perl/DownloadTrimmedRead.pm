@@ -7,8 +7,8 @@ use IO::Compress::Gzip;
 use File::stat;
 use POSIX q/strftime/;
 use Cwd 'abs_path';
+use FindBin qw/$RealBin/;
 use lib "$RealBin/../lib/perl5/site_perl";
-use lib "$RealBin/bin";
 use Utility;
 
 

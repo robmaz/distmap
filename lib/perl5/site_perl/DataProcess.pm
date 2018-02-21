@@ -167,7 +167,7 @@ sub check_files {
 
 	if (scalar(@$files_pair_list)<1 and scalar(@$files_single_list)<1) {
 		print STDERR "\t--input option not valid. Fastq files do not exists\n";
-		print STDERR "$args_dict->{"usage"}\n";
+		print STDERR "$args_dict->{'usage'}\n";
 		exit(1);
 
 	}
@@ -177,11 +177,11 @@ sub check_files {
 
 
 sub fastq2tab_pe {
-  die("fastq2tab_pe: OBSOLETE, should not be here!")
+  die("fastq2tab_pe: OBSOLETE, should not be here!");
 }
 
 sub fastq2tab_se {
-	die("fastq2tab_se: OBSOLETE, should not be here!")
+	die("fastq2tab_se: OBSOLETE, should not be here!");
 }
 
 

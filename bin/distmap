@@ -321,7 +321,7 @@ if($verbose) {
 	print STDERR "  hadoop home:\t$hadoop_home\n";
 	print STDERR "  mapper name:\t@mapper\n";
 	print STDERR "  mapper path:\t@mapper_path\n";
-	print STDERR "  picard jar:\t$picard_jar\n";
+	print STDERR "  picard:\t$picard\n";
 	print STDERR "  (OBSOLETE) picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
 	print STDERR "  (OBSOLETE) picard SortSam.jar:\t$picard_sortsam_jar\n";
 	print STDERR "  readtools:\t$readtools\n";
