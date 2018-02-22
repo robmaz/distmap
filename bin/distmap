@@ -297,7 +297,7 @@ unless ( $readtools ne "" and `$readtools --version` gt "1.2.1" ) {
 }
 
 if ( $picard =~ /\.jar$/ ) {
-  $readtools = "eval java \\\$JAVA_OPTS -jar $picard";
+  $picard = "eval java \\\$JAVA_OPTS -jar $picard";
 }
 
 unless ( $tmp_dir eq "" or
