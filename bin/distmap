@@ -64,7 +64,7 @@ Usage: perl $script
 
 --only-trim             OBSOLETE: this option does nothing, trimming is now performed while uploading into the HDFS
 
---no-trim            		OBSOLETE: This option does nothing. Trimming is now done on upload to the HDFS.
+--no-trim            		DEPRECATED: This option will skip the trimming (done on upload to the HDFS).
 
 --trim-script-path		OBSOLETE: trimming will be performed by ReadTools while uploading into the HDFS
 
@@ -288,14 +288,15 @@ if ( $hadoop_home eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
 }
 
-
+# error if ReadTools is not found 
 if ( $readtools_arg eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: no ReadTools found. Use --readtools or add a wrapper/jar to your PATH");
-} else {
-	$readtools = ReadToolsUtils::get_readtools_runnable_cmd($readtools_arg);
-	if ( `$readtools --version` gt ReadToolsUtils::VERSION ) {
-		pod2usage(-msg=>"\n\tERROR: Unsupported ReadTools (\"$readtools_arg\") - required >= " . ReadToolsUtils::VERSION );
-	}
+}
+
+## get the readtools command to be run
+my $readtools = ReadToolsUtils::get_readtools_runnable_cmd($readtools_arg);
+if ( `$readtools --version` lt ReadToolsUtils::VERSION ) {
+	pod2usage(-msg=>"\n\tERROR: Unsupported ReadTools (\"$readtools_arg\") - required >= " . ReadToolsUtils::VERSION );
 }
 
 if ( $picard =~ /\.jar$/ ) {
@@ -315,7 +316,7 @@ if($verbose) {
 	print STDERR "  local output directory:\t$output_directory\n";
 	print STDERR "  only fastq file process:\t$only_process\n";
 	print STDERR "  only hdfs upload:\t$only_hdfs_upload\n";
-	print STDERR "  only trim reads:\t$only_trim\n";
+	print STDERR "  (DEPRECATED) only trim reads:\t$only_trim\n";
 	print STDERR "  only mapping reads:\t$only_map\n";
 	print STDERR "  only hdfs download:\t$only_hdfs_download\n";
 	print STDERR "  only merging the hadoop mapping output files :\t$only_merging\n";
@@ -772,7 +773,7 @@ OBSOLETE: This option does nothing. Trimming is now done on upload to the HDFS.
 
 =item B<--no-trim>
 
-OBSOLETE: This option will skip the trimming.
+DEPRECATED: This option will skip the trimming.
 This argument will be removed in favor of --trim-args.
 
 
@@ -801,7 +802,7 @@ To run a test for all dependency and all.
 
 =item B<--quality-threshold>
 
-OBSOLETE: minimum average quality; A modified Mott algorithm is used for trimming; the threshold is used for calculating a score: score = quality_at_base - threshold; default=20
+DEPRECATED: minimum average quality; A modified Mott algorithm is used for trimming; the threshold is used for calculating a score: score = quality_at_base - threshold; default=20
 This argument will be removed in favor of --trim-args.
 
 =item B<--fastq-type>
@@ -825,24 +826,24 @@ flag, if set reads having internal Ns will be discarded; default=off
 
 =item B<--min-length>
 
-OBSOLETE: The minimum length of the read after trimming; default=40
+DEPRECATED: The minimum length of the read after trimming; default=40
 This argument will be removed in favor of --trim-args.
 
 
 =item B<--no-trim-quality>
 
-OBSOLETE: toggle switch: switch of trimming of quality.
+DEPRECATED: toggle switch: switch of trimming of quality.
 This argument will be removed in favor of --trim-args.
 
 =item B<--no-5p-trim>
 
-OBSOLETE: toggle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
+DEPRECATED: toggle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
 Duplicates are usually identified by the 5' mapping position which should thus not be modified by trimming. default=off
 This argument will be removed in favor of --trim-args.
 
 =item B<--disable-zipped-output>
 
-OBSOLETE: This option is ignored.
+DEPRECATED: This option is ignored.
 
 
 =back
