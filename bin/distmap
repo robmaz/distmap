@@ -455,127 +455,65 @@ sub check_inputs {
 }
 
 
+# here the file ends and the documentation starts
+__END__
+
 =head1 NAME
 
-DistMap_v1.2/distmap - This pipeline maps NGS reads on a local hadoop cluster.
+distmap - wrapper around different NGS mappers for distributed computation using Hadoop
+
+
 
 =head1 SYNOPSIS
 
- DistMap_v1.2/distmap --reference-fasta /reads/dmel_genome.fasta --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq" --mapper bwa --mapper-path /executables/bwa --picard-mergesamfiles-jar /executables/MergeSamFiles.jar --picard-sortsam-jar /executables/SortSam.jar --mapper-args "-l 200" --output-format sam --hadoop-scheduler Fair --queue-name pg1 --job-priority VERY_HIGH --output /reads/bwa/bwa_mapping --job-desc "BWA mapping 5M 1"
+B<distmap> [--help | -h] --reference-fasta I<FILE> --output I<PATH> --input "I<INPUT>"
+--mapper I<MAPPER> --mapper-path I<FILE> --mapper-args "I<ARGS>"
+[--hadoop-home I<PATH>] [--readtools I<FILE>] [--picard I<FILE>] [I<OPTIONS>...]
 
 
-=head1 DistMap OPTIONS
+
+=head1 DESCRIPTION
+
+DistMap is an integrated pipeline to map FASTQ formatted short reads on a local
+Hadoop cluster framework. It takes all input from local disk and return single
+SAM or BAM mapping file in local disk. User does not need to upload or download
+data in Hadoop manually.
+
+
+
+=head1 OPTIONS
+
+
+=head2 MANDATORY OPTIONS
 
 =over 4
 
-=item B<--reference-fasta>
+=item B<--reference-fasta> I<FILE>
 
- Reference fasta file full path. MANDATORY parameter.
+ Reference fasta file full path.
 
-=item B<--input>
+=item B<--output> I<PATH>
 
- provide input fasta files. Either as a pair or single Fastq file.
- For Paired-end data --input 'read1.fastq,read2.fastq'
- For Single-end data --input 'read.fastq'
- Multiple inputs are possible to repeat --input parameter
+ Full path of output folder where final output will be kept.
 
- --input 'sample1_1.fastq,sample1_2.fastq' --input 'sample2_1.fastq,sample2_2.fastq'
- This is important to give single or a pair input file within
- single or double quote and if paired file, it must be comma
- seperated. MANDATORY parameter.
+=item B<--input> "I<INPUT>"
 
-=item B<--output>
+ Quoted (single or double quote) input fasta file(s), either as a single or
+ paired FASTQ file. For paired file, it must be comma separated. Examples:
 
- Full path of output folder where final output will be kept. MANDATORY parameter.
+ 	For paired-end data B<--input> I<'read1.fastq,read2.fastq'>
+ 	For single-end data B<--input> I<'read.fastq'>
+ 	Multiple inputs are possible by repeating B<--input> (e.g.,
+ 	B<--input> I<'sample1_1.fastq,sample1_2.fastq'> B<--input> I<'sample2_1.fastq,sample2_2.fastq'>)
 
-=item B<--only-index>
- Step1: This option will create genome index and create archieve to upload on HDFS. OPTIONAL parameter
+=item B<--mapper> I<FILE>
 
+ Mapper name [bwa,tophat,gsnap,bowtie,soap].
 
-=item B<--only-process>
+=item B<--mapper-path> I<FILE>
+ Mapper executable full path.
 
- Step2: This option will 1) convert FASTQ files into 1 line format, 2) create genome index
- and 3) create archieve to send for job and exit. OPTIONAL parameter
-
-=item B<--only-hdfs-upload>
-
- Step3 This option assume that data processing is done and only upload reads and archieve created in
- data process step will be loaded into HDFS file system and exit. OPTIONAL parameter
-
-=item B<--only-map>
-
- Step4: This option will assume that data is already loaded into HDFS and will only
- run map on cluster
-
-=item B<--only-hdfs-download>
-
- Step5: This option assume that mapping already done on cluster and files will be downloaded
- from cluster to local output directory. OPTIONAL parameter
-
-=item B<--only-merge>
-
- Step6: This option assume that data already in local directory from HDFS
- and now will be merged and create a single SAM or BAM output file. OPTIONAL parameter
-
-=item B<--only-delete-temp>
-
- Step7: This is the last step of piepline. This option will delete the
- mapping data from HDFS file system as well as from local temp directory.
- OPTIONAL parameter
-
-=item B<--hadoop-home>
-
- Give the full path of hadoop folder. MANDATORY parameter.
- hadoop home path should be identical in master, secondary namenode and all slaves.
- Example: --hadoop-home /usr/local/hadoop
-
-=item B<--mapper>
-
- Mapper name [bwa,tophat,gsnap,bowtie,soap]. MANDATORY parameter.
- Example: --mapper bwa
-
-=item B<--mapper-path>
- Mapper executable full path. MANDATORY parameter.
- Example: --mapper-path /usr/local/hadoop/bwa
-
-=item B<--gsnap-output-split>
-
- GSNAP has a feature to split different type of maaping output in different SAM files.
-
-	or detail do gsnap --help and you can see --split--output.
-	--split-output=STRING   Basename for multiple-file output, separately for nomapping,
-        halfmapping_uniq, halfmapping_mult, unpaired_uniq, unpaired_mult,
-        paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
-        or 10 if --fails-as-input is selected, or 3 for single-end reads)
-
-=item B<--picard>
-
- Full path to either picard.jar or the picard lajuncher script. MANDATORY unless picard is in the path.
- Example: --picard /usr/local/bin/picard
-
-=item B<--picard-mergesamfiles-jar>
-
-OBSOLETE: picard is distributed in a single file now. Use --picard instead.
-
-=item B<--picard-sortsam-jar>
-
- OBSOLETE: picard is distributed in a single file now. Use --picard instead.
-
-=item B<--readtools>
-
- ReadTools path, either to the jar or to the launcher script. MANDATORY unless
- the launcher script is in the path.
- Example: --readtools /usr/local/share/java/ReadTools.jar
-
-=item B<--tmp-dir>
-
- Path to a folder to use for temporary files. A temporary folder with a unique name
- will be created in this folder. OPTIONAL, you may want to set this if the default
- location (the output folder) does not provide enough space for sorting while merging
- with ReadTools.
- Example: --tmp-dir /Volumes/Temp2
-
-=item B<--mapper-args>
+=item B<--mapper-args> "I<ARGS>"
 
  Arguments for mapping:
 	BWA mapping for aln command:
@@ -601,126 +539,267 @@ OBSOLETE: picard is distributed in a single file now. Use --picard instead.
 		Note: Define SOAPaligner parameters correctly accoring to the version is used here.
 		For detail about parameters visit [http://soap.genomics.org.cn/soapaligner.html]
 
- Please note that processor parameters not required in arguments. Example in case of BWA mapping dont give -t parameter.
+ Please note that processor parameters not required in arguments.
+ Example in case of BWA mapping dont give -t parameter.
  This parameter is given by DistMap internally.
 
-=item B<--bwa-sampe-args>
+=back
+
+
+=head2 PSEUDO-MANDATORY OPTIONS
+
+=over 4
+
+=item B<--hadoop-home> I<PATH>
+
+ Give the full path of hadoop folder. Required unless environmental variable HADOOP_HOME
+ is present.
+ The Hadoop home should be identical in master, secondary namenode and all slaves.
+
+=item B<--readtools> I<PATH>
+
+ Full path to either ReadTools.jar or the readtools launcher script. Required unless launcher script
+ is in the PATH.
+
+=item B<--picard> I<PATH>
+
+ Full path to either picard.jar or the picard launcher script. Required unless launcher script
+ is in the PATH.
+
+=back
+
+
+=head2 PIPELINE OPTIONS
+
+=over 4
+
+=item B<--only-index>
+ Step1: This option will create genome index and create archieve to upload on HDFS.
+
+=item B<--only-process>
+
+ Step2: This option will 1) convert FASTQ files into 1 line format, 2) create genome index
+ and 3) create archieve to send for job and exit.
+
+=item B<--only-hdfs-upload>
+
+ Step3 This option assume that data processing is done and only upload reads and archieve created in
+ data process step will be loaded into HDFS file system and exit.
+
+=item B<--only-map>
+
+ Step4: This option will assume that data is already loaded into HDFS and will only
+ run map on cluster.
+
+=item B<--only-hdfs-download>
+
+ Step5: This option assume that mapping already done on cluster and files will be downloaded
+ from cluster to local output directory.
+
+=item B<--only-merge>
+
+ Step6: This option assume that data already in local directory from HDFS
+ and now will be merged and create a single SAM or BAM output file.
+
+=item B<--only-delete-temp>
+
+ Step7: This is the last step of piepline. This option will delete the
+ mapping data from HDFS file system as well as from local temp directory.
+
+=item B<--trim-args> "I<ARGS>"
+
+Give the trimming arguments (ReadTools syntax).
+EXAMPLE:
+	B<--trim-args> "I<--trimmer MottQualityTrimmer --mottQualityThreshold 20 --readFilter ReadLengthReadFilter --minReadLength 50 --disable5pTrim>"
+ 
+
+=back
+
+
+=head2 OPTIONAL OPTIONS
+
+=over 4
+
+=item B<--tmp-dir> I<PATH>
+
+ Path to a folder to use for temporary files. A temporary folder with a unique name
+ will be created in this folder. OPTIONAL, you may want to set this if the default
+ location (the output folder) does not provide enough space for sorting while merging
+ with ReadTools.
+ Example: --tmp-dir /Volumes/Temp2
+
+=item B<--output-format> I<FORMAT>
+
+ Output file format either SAM or BAM.
+ Default: BAM
+
+=item B<--job-desc> "I<DESC>"
+
+ Give a job description which will be dispalyed in JobTracker webpage.
+ Default: <mapper name> mapping.
+
+=item B<--queue-name> I<QUEUE>
+
+ If your hadoop has Capacity Scheduler then provide --queue-name.
+ Example: --queue-name pg1
+
+=item B<--gsnap-output-split>
+
+ GSNAP has a feature to split different type of mapping output in different SAM files.
+
+	or detail do gsnap --help and you can see --split--output.
+	--split-output=STRING   Basename for multiple-file output, separately for nomapping,
+        halfmapping_uniq, halfmapping_mult, unpaired_uniq, unpaired_mult,
+        paired_uniq, paired_mult, concordant_uniq, and concordant_mult results (up to 9 files,
+        or 10 if --fails-as-input is selected, or 3 for single-end reads)
+
+=item B<--bwa-sampe-args> "I<ARGS>"
 
  Arguments for BWA sampe or samse module.
 	bwa sampe for paired-end reads
 	bwa samse for single-end reads
 	Example --bwa-sampe-args "-a 500 -s"
 
-=item B<--output-format>
-
- Output file format either SAM or BAM.
- Default: BAM
-
-=item B<--job-desc>
-
- Give a job description which will be dispalyed in JobTracker webpage.
- Default: <mapper name> mapping.
-
-
-=item B<--queue-name>
-
- If your hadoop has Capacity Scheduler then provide --queue-name.
- Example: --queue-name pg1
-
-
-
-
-=item B<--only-trim>
-
-OBSOLETE: This option does nothing. Trimming is now done on upload to the HDFS.
-
-
-=item B<--no-trim>
-
-DEPRECATED: This option will skip the trimming.
-This argument will be removed in favor of --trim-args.
-
-
-=item B<--trim-script-path>
-
-OBSOLETE: trimming is now always done with ReadTools.
-
-
-=item B<--trim-args>
-
-Give the trimming arguments (ReadTools syntax) EXAMPLE: --trim-args "--trimmer MottQualityTrimmer --mottQualityThreshold 20 --readFilter ReadLengthReadFilter --minReadLength 50 --disable5pTrim"
-
-
-=item B<--verbose>
-
-To print inputs on screen.
-
 =item B<--help>
 
-To run a test for all dependency and all.
-
-
-=head1 TRIMMING OPTIONS
-
-=over 4
-
-=item B<--quality-threshold>
-
-DEPRECATED: minimum average quality; A modified Mott algorithm is used for trimming; the threshold is used for calculating a score: score = quality_at_base - threshold; default=20
-This argument will be removed in favor of --trim-args.
-
-=item B<--fastq-type>
-
-The encoding of the quality characters; Must either be 'sanger' or 'illumina';
-
- Using the notation suggested by Cock et al (2009) the following applies:
- 'sanger'   = fastq-sanger: phred encoding; offset of 33
- 'solexa'   = fastq-solexa: -> NOT SUPPORTED
- 'illumina' = fastq-illumina: phred encoding: offset of 64
-
- See also:
- Cock et al (2009) The Sanger FASTQ file format for sequecnes with quality socres,
- and the Solexa/Illumina FASTQ variants;
-
-default=illumina
-
-=item B<--discard-internal-N>
-
-flag, if set reads having internal Ns will be discarded; default=off
-
-=item B<--min-length>
-
-DEPRECATED: The minimum length of the read after trimming; default=40
-This argument will be removed in favor of --trim-args.
-
-
-=item B<--no-trim-quality>
-
-DEPRECATED: toggle switch: switch of trimming of quality.
-This argument will be removed in favor of --trim-args.
-
-=item B<--no-5p-trim>
-
-DEPRECATED: toggle switch; Disable 5'-trimming (quality and 'N'); May be useful for the identification of duplicates when using trimming of reads.
-Duplicates are usually identified by the 5' mapping position which should thus not be modified by trimming. default=off
-This argument will be removed in favor of --trim-args.
-
-=item B<--disable-zipped-output>
-
-DEPRECATED: This option is ignored.
-
+ Print help.
 
 =back
 
-=head1 Details
 
- DistMap is an integrated pipeline to map FASTQ formatted short reads on a local Hadoop cluster framework.
- It takes all input from local disk and return single SAM or BAM mapping file in local disk. User does not need to upload or download data in Hadoop manually.
+=head2 DEPRECATED OPTIONS
+
+Arguments still in use, but that might disappear in the following version.
+
+=over 4
+
+=item B<--no-trim>
+
+ This option will skip the trimming. Next version will decide if trimming
+ will be performed by using B<--trim-args>
+
+=item B<--verbose>
+
+ To print inputs on screen and exit. Next version will have a B<--dry-run>
+ argument for showing the pipeline to be performed and arguments.
+
+=item B<--quality-threshold> I<INT>
+
+ Minimum average quality for Mott's trimming algorithm (default=20).
+ Next version will use B<--trim-args> to provide this trimming feature.
+
+=item B<--discard-internal-N>
+
+ Flag, if set reads having internal Ns will be discarded while trimming.
+ Next version will use B<--trim-args> to provide this triming feature.
+
+=item B<--min-length> I<INT>
+
+The minimum length of the read after trimming (default=40).
+Next version will use B<--trim-args> to provide this trimming feature.
+
+=item B<--no-trim-quality>
+
+ Toggle switch: switch of trimming of quality.
+ Next version will use B<--trim-args> to provide this trimming feature.
+
+=item B<--no-5p-trim>
+
+ Toggle switch; Disable 5'-trimming (quality and 'N').
+ Next version will use B<--trim-args> to provide this trimming feature.
+
+=back
+
+
+=head2 OBSOLETE OPTIONS
+
+Unused arguments maintained for previous version compatibility.
+
+=over 4
+
+=item B<--picard-mergesamfiles-jar> I<PATH>
+
+ picard is distributed in a single file now. Use B<--picard> instead.
+
+=item B<--picard-sortsam-jar> I<PATH>
+
+ picard is distributed in a single file now. Use B<--picard> instead.
+
+=item B<--only-trim>
+
+This option does nothing. Trimming is now done on upload to the HDFS.
+
+=item B<--trim-script-path> I<FILE>
+
+Trimming is now always done with ReadTools.
+
+=item B<--fastq-type> I<TYPE>
+
+This option does nothing. Quality encoding is directly detected by ReadTools.
+
+=item B<--disable-zipped-output>
+
+This option does nothing.
+
+=back
+
+
+
+=head1 EXAMPLES
+
+=over 6
+
+
+=item Mandatory parameters
+
+distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
+--input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
+--mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
+
+=item If pseudo-mandatory options are not in the PATH
+ 
+distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
+--input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
+--mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
+--hadoop-home /usr/local/hadoop
+--readtools /usr/local/share/java/ReadTools.jar
+--picard /usr/local/share/java/picard.jar
+
+=item Hadoop-related job management
+ 
+distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
+--input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
+--mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
+--queue-name pg1 --job-priority VERY_HIGH --job-desc "BWA mapping 5M 1"
+
+=item Trimming when uploading to HDFS
+ 
+distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
+--input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
+--mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
+--trim-args "--trimmer MottQualityTrimmer --mottQualityThreshold 20
+--readFilter ReadLengthReadFilter --minReadLength 50 --disable5pTrim"
+
+=back
+
 
 
 =head1 AUTHORS
 
- Ram Vinay Pandey
- Christian Schloetterer
+The original code for distmap was written by Ram Vinay Pandey and
+Christian Schloetterer as described in the citation.
+
+Version 3 is a major improvement of the code developped by Rupert
+Mazzucco and Daniel Gomez-Sanchez
+
+
+
+=head1 CITATION
+
+Please, cite Pandey RV, Schloetterer C (2013) DistMap: A Toolkit for
+Distributed Short Read Mapping on a Hadoop Cluster.
+PLOS ONE 8(8): e72614. https://doi.org/10.1371/journal.pone.0072614
+
+
 
 =cut
