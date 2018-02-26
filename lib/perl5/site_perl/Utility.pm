@@ -11,7 +11,7 @@ use POSIX ":sys_wait_h";
 
 sub check_hadoop {
 
-    my ($args_dict,$usage) = @_;
+    my $args_dict = @_;
     my $hadoop_home = $args_dict->{"hadoop_home"};
     if ($hadoop_home =~ /\/$/) {
         $hadoop_home =~ s/\/$//;
@@ -44,7 +44,6 @@ sub check_hadoop {
     ## Check hadoop executables
     unless ((-e $hadoop_exe) && (-x $hadoop_exe)) {
 	print STDERR "\tHADOOP executable $hadoop_exe does not exists.\n";
-	print STDERR "$usage\n";
 	exit(1);
     }
     unless (-x $hadoop_exe) {
@@ -54,7 +53,6 @@ sub check_hadoop {
     ## Check hdfs executables
     unless ((-e $hdfs_exe) && (-x $hdfs_exe)) {
 	print STDERR "\tHDFS executable $hdfs_exe does not exists.\n";
-	print STDERR "$usage\n";
 	exit(1);
     }
     unless (-x $hdfs_exe) {
@@ -63,7 +61,6 @@ sub check_hadoop {
 
     unless (-e $streaming_jar) {
 	print STDERR "\tHADOOP streaming jar file: $streaming_jar does not exists\n";
-	print STDERR "$usage\n";
 
 	exit(1);
     }
@@ -76,7 +73,7 @@ sub check_hadoop {
 }
 
 sub create_dir {
-    my ($args_dict,$usage) = @_;
+    my $args_dict = @_;
     my $output_dir = $args_dict->{"output_directory"};
 
     createdir($output_dir);
