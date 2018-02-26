@@ -16,7 +16,6 @@ via a command line argument, and use the cluster configured there.
 ## Requirements
 
 * [ReadTools](http://magicdgs.github.io/ReadTools/) >= 1.1.0
-* [samtools](http://samtools.sourceforge.net/)
 * [Picard Tools](http://broadinstitute.github.io/picard/)
 * Mappers:
   - [bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
