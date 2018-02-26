@@ -11,6 +11,7 @@ use Utility;
 
 
 sub new {
+	die("OBSOLETE: HadoopTrimming::new shouldn't be called");
 	my $class=shift;
 	my $self = {};
 	bless $self, $class;
@@ -19,8 +20,8 @@ sub new {
 
 
 sub start {
+	die("OBSOLETE: HadoopTrimming::start shouldn't be called");
 	my ($self,$args_dict) = @_;
-
 
 	################### Time start #########################
 	my $start_time = time();
@@ -56,6 +57,7 @@ sub start {
 #}
 
 sub paired_end_trimming {
+	die("OBSOLETE: HadoopTrimming::paired_end_trimming shouldn't be called");
 	my ($self,$args_dict) = @_;
 
 	$args_dict->{"read_folder"} = "fastq_paired_end";
@@ -106,6 +108,7 @@ sub paired_end_trimming {
 
 
 sub single_end_trimming {
+	die("OBSOLETE: HadoopTrimming::single_end_trimming shouldn't be called");
 	my ($self,$args_dict) = @_;
 
 	$args_dict->{"read_folder"} = "fastq_single_end";
@@ -152,6 +155,7 @@ sub single_end_trimming {
 
 
 sub get_file_list {
+	die("OBSOLETE: HadoopTrimming::get_file_list shouldn't be called");
 	my ($self,$dir) = @_;
 	opendir(DIR, $dir) || die("Cannot open directory");
 	my @files= readdir(DIR);
@@ -170,6 +174,7 @@ sub get_file_list {
 
 
 sub get_trim_command {
+	die("OBSOLETE: HadoopTrimming::get_trim_command shouldn't be called");
 	my ($self,$args_dict) = @_;
 
 	my $script_current_file = abs_path($0);
@@ -212,6 +217,7 @@ sub get_trim_command {
 
 
 sub download_merge_trimmed_reads {
+	die("OBSOLETE: HadoopTrimming::download_merge_trimmed_reads shouldn't be called");
 	my ($self,$args_dict) = @_;
 	my $script_current_file = abs_path($0);
 	my ( $name, $path, $extension ) = File::Basename::fileparse ( $script_current_file, '\..*' );
@@ -235,6 +241,7 @@ sub download_merge_trimmed_reads {
 
 
 sub write_hadoop_trimming_job {
+	die("OBSOLETE: HadoopTrimming::write_hadoop_trimming_job shouldn't be called");
 	my ($self,$args_dict) = @_;
 
 	my $shell_script = "";

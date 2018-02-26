@@ -12,7 +12,6 @@ use Utility;
 use GenomeIndex;
 use DataProcess;
 use DataUpload;
-use HadoopTrimming;
 use HadoopMapping;
 use DataDownload;
 use DataMerge;

@@ -392,9 +392,10 @@ sub run_whole_pipeline {
 	$dataupload_object->start($args_dict);
 
 	if (!$args_dict->{"no_trim"})  {
-	    print "trim: ", $args_dict->{"no_trim"}," | ", $args_dict->{"only_trim"},"\n";
-	    my $trimming_object = HadoopTrimming->new();
-	    $trimming_object->start($args_dict);
+		print "WARNING: trimming is now done on upload to the HDFS.";
+	    # print "trim: ", $args_dict->{"no_trim"}," | ", $args_dict->{"only_trim"},"\n";
+	    # my $trimming_object = HadoopTrimming->new();
+	    # $trimming_object->start($args_dict);
 	}
 
 	my $mapping_object = HadoopMapping->new();
@@ -439,11 +440,11 @@ sub get_steps {
 	}
 
 	if ($args_dict->{"only_trim"}) {
+		print "WARNING: trimming is now done on upload to the HDFS (--only-trim does not have any effect)";
+		# my $trimming_object = HadoopTrimming->new();
 
-		my $trimming_object = HadoopTrimming->new();
-
-		#$trimming_object->trim($args_dict);
-		$step_hash->{4} = $trimming_object;
+		# $trimming_object->trim($args_dict);
+		# $step_hash->{4} = $trimming_object;
 	}
 
 	if ($args_dict->{"only_map"}) {
