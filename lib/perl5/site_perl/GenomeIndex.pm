@@ -7,7 +7,7 @@ use Cwd 'abs_path';
 use Archive::Tar;
 use Cwd;
 use FindBin qw/$RealBin/;
-use lib "$RealBin/../lib/perl5/site_perl";
+use lib "$RealBin";
 use Utility;
 
 

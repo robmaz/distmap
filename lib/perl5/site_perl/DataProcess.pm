@@ -10,7 +10,7 @@ use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError);
 use IO::Uncompress::Gunzip;
 use Cwd;
 use FindBin qw/$RealBin/;
-use lib "$RealBin/../lib/perl5/site_perl";
+use lib "$RealBin";
 use Utility;
 
 ##

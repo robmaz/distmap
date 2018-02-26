@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package DataDownload;
 use FindBin qw/$RealBin/;
-use lib "$RealBin/../lib/perl5/site_perl";
+use lib "$RealBin";
 use Utility;
 use File::Basename;
 
