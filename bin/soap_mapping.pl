@@ -34,7 +34,6 @@ my $soap2sam_path = "";
 my $mapper_args = "";
 my $hadoop="";
 my $hdfs="";
-my $sartsam_jar = "";
 my $output_format = "bam";
 my $quality_encoding;
 my $verbose = 0;
@@ -48,7 +47,6 @@ GetOptions(
     "soap2sam-path=s"   	=>\$soap2sam_path,
     "hadoop=s"   		=>\$hadoop,
     "hdfs=s"   			=>\$hdfs,
-    "picard-sartsam-jar=s"	=>\$sartsam_jar,
     "output-format=s"		=>\$output_format,
     "mapper-args=s"		=>\$mapper_args,
     "quality-encoding=s"	=>\$quality_encoding,
@@ -64,7 +62,6 @@ if($verbose) {
 	print STDERR "  reference directory: $ref_dir\n";
 	print STDERR "  mapper path: $mapper_path\n";
 	print STDERR "  soap2sam.pl path: $soap2sam_path\n";
-	print STDERR "  picard sartsam jar: $sartsam_jar\n";
 	print STDERR "  output format: $output_format\n";
 	print STDERR "  GSNAP arguments: $mapper_args\n";
 	print STDERR "  quality encoding: $quality_encoding\n";
@@ -144,6 +141,7 @@ else {
 }
 
 if ($output_format =~ /bam/i) {
+	## TODO: WARNING: this won't work anymore and will fail!!!
 	my $cmd2 = "$hadoop jar $sartsam_jar I=$sam_output O=$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT";
 	Utility::runCommand($cmd2, "converting SAM into BAM") == 0 || die "Error in converting SAM into BAM";
 	Utility::runCommand("$hdfs dfs -put $bam_output $output_dir >&2", "hdfs dfs -put") == 0 || die "hdfs dfs -put command failed";
