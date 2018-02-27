@@ -59,6 +59,7 @@ my $trim_args="";
 ### others
 my $tmp_dir = "";
 my $output_format="bam";
+my $refindex_archive="";
 my $queue_name="pg1";
 my $job_desc="";
 my $gsnap_output_split=0; # TODO - make conditional
@@ -87,7 +88,6 @@ my $nozip=0;
 
 ## UNDOCUMENTED - TODO: documment
 my $only_download_reads=0;
-my $refindex_archive="";
 my $mappers_exe_archive = "";
 
 ## TODO - supposedly options but not in the GetOptions block!!! cannot be specified
@@ -126,6 +126,7 @@ GetOptions(
 	## other
 	"tmp-dir=s"						=> \$tmp_dir,
 	"output-format=s"				=> \$output_format,
+	"reference-index-archive=s"		=> \$refindex_archive,
 	"queue-name=s"					=> \$queue_name,
 	"job-desc=s"					=> \$job_desc,
 	"gsnap-output-split"			=> \$gsnap_output_split, # TODO - this should be a conditional argument on GSNAP mapper (throw otherwise)
@@ -156,7 +157,6 @@ GetOptions(
 	
 	## TODO: undocummented options!!!
 	"only-download-trimmed-reads"	=> \$only_download_reads,
-	"reference-index-archive=s"		=> \$refindex_archive,
 	"mappers-exe-archive=s"			=>\$mappers_exe_archive
 
 ) or pod2usage(-msg=>"Wrong options",-verbose=>1);
@@ -661,6 +661,20 @@ EXAMPLE:
 
  Output file format either SAM or BAM.
  Default: BAM
+
+=item B<--reference-index-archive> I<FILE>
+
+Path to the genome index archive (I<Genome_Index_Archive.tgz>, generated with previous
+runs or the B<--only-index> option). Providing the file avoids re-indexing the reference
+with the same mapper.
+
+B<IMPORTANT:> the archive should be generated with the same version of the mapper
+provided by B<--mapper-path>.
+
+EXAMPLE:
+ 	B<--reference-index-archive> I</home/DistMap_output/Genome_Index_Archive.tgz>
+
+Note: Please make sure that the genome Index was created with the SAME VERSION of mapper(s) which you are using for mapping. Different versions of mappers will result in problems.
 
 =item B<--job-desc> "I<DESC>"
 
