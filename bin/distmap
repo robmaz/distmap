@@ -20,9 +20,8 @@ use DownloadTrimmedRead;
 use DataCleanup;
 use ReadToolsUtils;
 
-## TODO - make a constant!!
-## TODO - add an argument to print the version!!
-my $version = "3.1.0-alpha";
+# current version
+use constant VERSION => "3.1.0-alpha";
 
 ## TODO - make a constant!!
 ## TODO - should be exposed? or maybe depends on other variable (e.g., priority?)
@@ -66,6 +65,7 @@ my $gsnap_output_split=0; # TODO - make conditional
 my $bwa_sampe_args=""; # TODO - make conditional
 
 my $help = 0;
+my $version = 0;
 
 ## DEPRECATED (log warning if used?) - TODO: remove
 my $no_trim=0;
@@ -133,6 +133,7 @@ GetOptions(
 	"bwa-sampe-args=s"				=> \$bwa_sampe_args, # TODO - this should be a conditional argument on BWA-ALN mapper (throw otherwise)
 	"help"							=>\$help, # TODO: cannot be collapsed on the String with -h?
 	"h"								=>\$help,
+	"version|v"						=>\$version,
 
 	# DEPRECATED (log warning if used?) - TODO: remove support
 	## triming
@@ -161,6 +162,11 @@ GetOptions(
 
 ) or pod2usage(-msg=>"Wrong options",-verbose=>1);
 
+# if --version is specified, print it and exit
+if ($version) {
+	print VERSION, "\n";
+	exit(0)
+}
 # print the help if requrested and exit
 pod2usage(-verbose=>2) if $help;
 
@@ -499,7 +505,8 @@ distmap - wrapper around different NGS mappers for distributed computation using
 
 =head1 SYNOPSIS
 
-B<distmap> [--help | -h] --reference-fasta I<FILE> --output I<PATH> --input "I<INPUT>"
+B<distmap> [--help | -h] [--version | -v]
+--reference-fasta I<FILE> --output I<PATH> --input "I<INPUT>"
 --mapper I<MAPPER> --mapper-path I<FILE> --mapper-args "I<ARGS>"
 [--hadoop-home I<PATH>] [--readtools I<FILE>] [--picard I<FILE>] [I<OPTIONS>...]
 
@@ -706,6 +713,10 @@ Note: Please make sure that the genome Index was created with the SAME VERSION o
 =item B<--help>
 
  Print help.
+
+=item B<--version>, B<-v>
+
+Print version and exit.
 
 =back
 
