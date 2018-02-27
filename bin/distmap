@@ -103,7 +103,7 @@ GetOptions(
 	"trim-args"				=> \$trim_args,
 	"only-map" 				=> \$only_map,
 	"only-hdfs-download" 			=> \$only_hdfs_download,
-	"only-merge" 				=> \$only_merging,
+	"only-merge" 				=> \$only_merging, # DEPRECATED
 	"only-delete-temp" 			=> \$only_delete_temp,
 	"only-download-trimmed-reads"		=> \$only_download_reads,
 	"reference-index-archive=s"         	=> \$refindex_archive,
@@ -183,7 +183,7 @@ if($verbose) {
 	print STDERR "  (DEPRECATED) only trim reads:\t$only_trim\n";
 	print STDERR "  only mapping reads:\t$only_map\n";
 	print STDERR "  only hdfs download:\t$only_hdfs_download\n";
-	print STDERR "  only merging the hadoop mapping output files :\t$only_merging\n";
+	print STDERR "  (DEPRECATED) only merging the hadoop mapping output files :\t$only_merging\n";
 	print STDERR "  only delete temperory files and folders:\t$only_delete_temp\n";
 	print STDERR "  hadoop home:\t$hadoop_home\n";
 	print STDERR "  mapper name:\t@mapper\n";
@@ -592,17 +592,13 @@ data in Hadoop manually.
 
 =item B<--only-hdfs-download>
 
- Step5: This option assume that mapping already done on cluster and files will be downloaded
- from cluster to local output directory.
-
-=item B<--only-merge>
-
- Step6: This option assume that data already in local directory from HDFS
- and now will be merged and create a single SAM or BAM output file.
+Step5: This option assume that mapping already done on cluster and files will be downloaded
+and merged from the cluster to the local output directory using ReadTools, generating a
+sorted SAM/BAM file (see B<--output-format>)
 
 =item B<--only-delete-temp>
 
- Step7: This is the last step of piepline. This option will delete the
+ Step6: This is the last step of piepline. This option will delete the
  mapping data from HDFS file system as well as from local temp directory.
 
 =item B<--trim-args> "I<ARGS>"
@@ -671,6 +667,11 @@ EXAMPLE:
 Arguments still in use, but that might disappear in the following version.
 
 =over 4
+
+=item B<--only-merge>
+
+This option would launch Step5 in the same way as B<--only-hdfs-download>.
+Next version will remove this option in favor of B<--only-hdfs-download>
 
 =item B<--no-trim>
 

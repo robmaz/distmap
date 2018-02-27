@@ -12,6 +12,7 @@ use Cwd 'abs_path';
 
 
 sub new {
+	die("OBSOLETE: DataMerge::new shouldn't be called. Use DataDownloadAnMerge instead");
 	my $class=shift;
 	my $self = {};
 	bless $self, $class;
@@ -20,6 +21,7 @@ sub new {
 
 
 sub start {
+	die("OBSOLETE: DataMerge::start shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
     print STDERR "=======================================================================\n";
@@ -48,6 +50,7 @@ sub start {
 
 
 sub compare_fastq_bam_reads {
+	die("OBSOLETE: DataMerge::compare_fastq_bam_reads shouldn't be called. Use DataDownloadAnMerge instead");
 	my ($self,$args_dict,$fastq_dir,$final_output_file,$output_dir) = @_;
 
 	my $fastq_file_std = "$output_dir/fastq_count1";
@@ -201,6 +204,7 @@ sub compare_fastq_bam_reads {
 
 
 sub download_merge_trimmed_reads {
+	die("OBSOLETE: DataMerge::download_merge_trimmed_reads shouldn't be called. Use DataDownloadAnMerge instead");
 	my ($self,$args_dict) = @_;
 	my $script_current_file = abs_path($0);
 	my ( $name, $path, $extension ) = File::Basename::fileparse ( $script_current_file, '\..*' );
@@ -227,6 +231,7 @@ sub download_merge_trimmed_reads {
 
 
 sub paired_end_data {
+	die("OBSOLETE: DataMerge::paired_end_data shouldn't be called. Use DataDownloadAnMerge instead");
 	my ($self,$args_dict) = @_;
 
 	$args_dict->{"read_folder"} = "fastq_paired_end";
@@ -303,6 +308,7 @@ sub paired_end_data {
 
 
 sub single_end_data {
+	die("OBSOLETE: DataMerge::single_end_data shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
     $args_dict->{"read_folder"} = "fastq_single_end";
@@ -404,6 +410,7 @@ sub single_end_data {
 
 
 sub get_file_list {
+	die("OBSOLETE: DataMerge::get_file_list shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$dir) = @_;
     opendir(DIR, $dir) || die("Cannot open directory");
     my @files= readdir(DIR);
@@ -432,6 +439,7 @@ sub get_file_list {
 }
 
 sub bwa_output {
+	die("OBSOLETE: DataMerge::bwa_output shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict, $mapper_name) = @_;
 
     my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_output_folder'}";
@@ -566,6 +574,7 @@ sub bwa_output {
 }
 
 sub tophat_output {
+	die("OBSOLETE: DataMerge::tophat_output shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict, $mapper_name) = @_;
 
     my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_output_folder'}";
@@ -690,6 +699,7 @@ sub tophat_output {
 
 
 sub check_mapping_files {
+	die("OBSOLETE: DataMerge::check_mapping_files shouldn't be called. Use DataDownloadAnMerge instead");
 	my ($self,$temp_output_folder) = @_;
 
 	my $files_to_discard = {};
@@ -976,6 +986,7 @@ sub check_mapping_files {
 
 
 sub exonerate_output {
+	die("OBSOLETE: DataMerge::exonerate_output shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
     my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_output_folder'}";

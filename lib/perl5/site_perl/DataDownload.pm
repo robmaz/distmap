@@ -9,6 +9,7 @@ use File::Basename;
 
 
 sub new {
+	die("OBSOLETE: DataDownload::new shouldn't be called. Use DataDownloadAnMerge instead");
 	my $class=shift;
 	my $self = {};
 	bless $self, $class;
@@ -17,7 +18,7 @@ sub new {
 
 
 sub start {
-
+	die("OBSOLETE: DataDownload::start shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
     print STDERR "\n\n";
@@ -47,6 +48,7 @@ sub start {
 #
 
 sub paired_end_data {
+	die("OBSOLETE: DataDownload::paired_end_data shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
     $args_dict->{"read_folder"} = "fastq_paired_end";
@@ -110,6 +112,7 @@ sub paired_end_data {
 
 
 sub single_end_data {
+	die("OBSOLETE: DataDownload::single_end_data shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
     $args_dict->{"read_folder"} = "fastq_single_end";
@@ -186,6 +189,7 @@ sub single_end_data {
 
 
 sub get_file_list {
+	die("OBSOLETE: DataDownload::get_file_list shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$dir) = @_;
     opendir(DIR, $dir) || die("Cannot open directory");
     my @files= readdir(DIR);

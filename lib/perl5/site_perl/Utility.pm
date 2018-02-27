@@ -454,22 +454,14 @@ sub get_steps {
 		$step_hash->{5} = $mapping_object;
 	}
 
-
-    if ( $args_dict->{"only_hdfs_download"} and $args_dict->{"only_merge"} ) {
-        my $datadownloadandmerge_object = DataDownloadAndMerge->new();
-        $step_hash->{6} = $datadownloadandmerge_object;
-    }
-    else {
-        if ( $args_dict->{"only_hdfs_download"} ) {
-            my $datadownload_object = DataDownload->new();
-            $step_hash->{6} = $datadownload_object;
-        }
-        if ( $args_dict->{"only_merge"} ) {
-            my $datamerge_object = DataMerge->new();
-            $step_hash->{7} = $datamerge_object;
-        }
-    }
-
+	if ( $args_dict->{"only_hdfs_download"} or $args_dict->{"only_merge"} ) {
+		print "--only-hdfs-download now merges also the data in the same step";
+		if ( $args_dict->{"only_merge"} ) {
+			print "WARNING: --only-merge is deprecated. Use --only-hdfs-download instead";
+		}
+		my $datadownloadandmerge_object = DataDownloadAndMerge->new();
+		$step_hash->{6} = $datadownloadandmerge_object;
+	}
 
 	if ($args_dict->{"only_download_reads"}) {
 	    my $read_download_object = DownloadTrimmedRead->new();
