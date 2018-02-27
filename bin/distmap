@@ -789,7 +789,7 @@ distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mappi
 The original code for distmap was written by Ram Vinay Pandey and
 Christian Schloetterer as described in the citation.
 
-Version 3 is a major improvement of the code developped by Rupert
+Version 3 is a major improvement of the code developed by Rupert
 Mazzucco and Daniel Gomez-Sanchez
 
 
