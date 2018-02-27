@@ -41,7 +41,6 @@ my @mapper_path=();
 my @mapper_args=();
 
 ## PSEUDO-REQUIRED
-### TODO: should this be called after parsing if not provided? I think that it would be more consistent.
 my $hadoop_home=$ENV{"HADOOP_HOME"};
 my $picard=`which picard`;
 my $readtools_arg = `which readtools`;
@@ -94,7 +93,6 @@ my $mappers_exe_archive = "";
 ## TODO - add to the parsing or remove support for them and default always!
 ## TODO - they appear in the example!!
 my $job_priority="VERY_HIGH";
-my $hadoop_scheduler="Fair"; # this is not used at all (remove?)
 
 ## UNUSED variable!! - TODO: remove?
 my $test = 0;
