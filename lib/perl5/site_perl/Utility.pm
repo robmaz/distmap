@@ -341,7 +341,7 @@ sub check_mapper {
 
 	#$args_dict->{"mapper_args"} = $mapper_args;
 
-	if ($args_dict->{"mapper_args"} =~ //) {
+	if ($args_dict->{"mapper_args"} =~ // ) {
 
 	}
 
@@ -438,8 +438,9 @@ sub get_steps {
 	}
 
 	if ($args_dict->{"only_download_reads"}) {
-	    my $read_download_object = DownloadTrimmedRead->new();
-	    $step_hash->{8} = $read_download_object;
+		die("OBSOLETE: --only-download-trimmed-reads is not supported anymore (and has not work for a while). Use ReadTools for trimming if you need the raw reads, or convert output from mapping using Picard/ReadTools");
+	    # my $read_download_object = DownloadTrimmedRead->new();
+	    # $step_hash->{8} = $read_download_object;
 
 	}
 	if ($args_dict->{"only_delete_temp"}) {

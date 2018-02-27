@@ -13,6 +13,7 @@ use Utility;
 
 
 sub new {
+	die("OBSOLETE: DownloadTrimmedRead::new shouldn't be called.");
 	my $class=shift;
 	my $self = {};
 	bless $self, $class;
@@ -21,6 +22,7 @@ sub new {
 
 
 sub start {
+	die("OBSOLETE: DownloadTrimmedRead::start shouldn't be called.");
 	my ($self,$args_dict) = @_;
 
 
@@ -54,6 +56,7 @@ sub start {
 
 
 sub paired_end_trimming {
+	die("OBSOLETE: DownloadTrimmedRead::paired_end_trimming shouldn't be called.");
 	my ($self,$args_dict) = @_;
 
 	$args_dict->{"read_folder"} = "fastq_paired_end";
@@ -84,6 +87,7 @@ sub paired_end_trimming {
 
 
 sub single_end_trimming {
+	die("OBSOLETE: DownloadTrimmedRead::single_end_trimming shouldn't be called.");
 	my ($self,$args_dict) = @_;
 
 	$args_dict->{"read_folder"} = "fastq_single_end";
@@ -112,6 +116,7 @@ sub single_end_trimming {
 
 
 sub get_file_list {
+	die("OBSOLETE: DownloadTrimmedRead::get_file_list shouldn't be called.");
 	my ($self,$dir) = @_;
 	opendir(DIR, $dir) || die("Cannot open directory");
 	my @files= readdir(DIR);
@@ -132,6 +137,7 @@ sub get_file_list {
 
 
 sub download_merge_trimmed_reads {
+	die("OBSOLETE: DownloadTrimmedRead::download_merge_trimmed_reads shouldn't be called.");
 	my ($self,$args_dict) = @_;
 	my $script_current_file = abs_path($0);
 	my ( $name, $path, $extension ) = File::Basename::fileparse ( $script_current_file, '\..*' );
@@ -178,6 +184,7 @@ sub download_merge_trimmed_reads {
 
 
 sub merge_trimmed_reads {
+	die("OBSOLETE: DownloadTrimmedRead::merge_trimmed_reads shouldn't be called.");
     my ($self,$args_dict) = @_;
 
     my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}"."_trimming";
@@ -251,6 +258,7 @@ sub merge_trimmed_reads {
 
 
 sub write_fastq {
+	die("OBSOLETE: DownloadTrimmedRead::write_fastq shouldn't be called.");
 	my ($self,$ofh1,$ofh2,$fh) = @_;
 
 	my $read_name = "";
@@ -311,6 +319,7 @@ sub write_fastq {
 }
 
 	sub getofhcreater{
+		die("OBSOLETE: DownloadTrimmedRead::getofhcreater shouldn't be called.");
 		my $self=shift;
 		my $nozip=shift;
 		my $outfile=shift;
@@ -329,6 +338,7 @@ sub write_fastq {
 
 
 sub check_mapping_files {
+	die("OBSOLETE: DownloadTrimmedRead::check_mapping_files shouldn't be called.");
 	my ($self,$temp_output_folder) = @_;
 
 	my $files_to_discard = {};
