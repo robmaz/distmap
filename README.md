@@ -15,8 +15,9 @@ via a command line argument, and use the cluster configured there.
 
 ## Requirements
 
-* [ReadTools](http://magicdgs.github.io/ReadTools/) >= 1.1.0
-* [Picard Tools](http://broadinstitute.github.io/picard/)
+* [Perl 5](https://dev.perl.org/perl5/)
+* [ReadTools](http://magicdgs.github.io/ReadTools/) >= 1.2.1
+* [Picard Tools](http://broadinstitute.github.io/picard/) >= 1.124
 * Mappers:
   - [bowtie](http://bowtie-bio.sourceforge.net/index.shtml)
   - [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
