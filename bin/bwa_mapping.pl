@@ -32,7 +32,6 @@ my $bam_output = $counter.$out_bam;
 my $output_dir = "";
 my $ref_fasta = "";
 my $mapper_path = "";
-my $samtools = "";
 my $hadoop="";
 my $hdfs="";
 my $sartsam_jar = "";

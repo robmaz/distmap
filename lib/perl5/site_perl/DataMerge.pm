@@ -125,12 +125,20 @@ sub compare_fastq_bam_reads {
 	}
 
 	exit();
-	#time /Volumes/cluster/DistMap_v1.2.1/executables/samtools-0.1.19/samtools index /Volumes/cluster/Ray/BGI_143b/DistMap_output_Paired_end_reads.bam
-	#time /Volumes/cluster/DistMap_v1.2.1/executables/samtools-0.1.19/samtools idxstats /Volumes/cluster/Ray/BGI_143b/DistMap_output_Paired_end_reads.bam | awk '{i+=$3+$4} END {print i}'
+	
+	## TODO - this code is not really used anywhere: the exit before would end the subroutine and in addition compare_fastq_bam_reads
+	## TODO - is not really used
 
-	my $samtools = $path."executables/samtools-0.1.19/samtools";
-	my $command1 = "$samtools index $final_output_file";
-	my $command2 = "$samtools idxstats $final_output_file | awk '{i+=\$3+\$4} END {print i}' > $mapped_file_std";
+	## TODO - this use to be done with samtools instead of picard, but it might be completely unnecessary with ReadTools download
+	## TODO - the picard.jar is supposed to be in the $path the same as samtools was (should be extracted in the same way)
+	## TODO - samtools was hardcoded to be in "$path."executables/samtools-0.1.19/samtools" and maybe there is a component in the args map
+	## TODO - which gets the picard.jar provided (or command in the PATH)
+	my $picard_jar = $path."picard.jar";
+	## TODO - this was "$samtools index $final_output_file" instead, but picard should provide the same result
+	my $command1 = "java -Xmx8g -Dsnappy.disable=true -jar $picard_jar BuildBamIndex I=$final_output_file VALIDATION_STRINGENCY=SILENT";
+	## TODO - this was "$samtools idxstats $final_output_file | awk '{i+=\$3+\$4} END {print i}' > $mapped_file_std" instead
+	## TODO - picard has a slightly different format, which requires chaning the awk command
+	my $command2 = "java -Xmx8g -Dsnappy.disable=true -jar $picard_jar BamIndexStats I=$final_output_file | awk '{i+=\$5+\$7} END {print i}' > $mapped_file_std";
 
 	print "$command1\n$command2\n";
 	system($command1);

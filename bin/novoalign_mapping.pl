@@ -33,7 +33,6 @@ my $output_dir = "";
 my $ref_fasta = "";
 my $ref_dir="";
 my $mapper_path = "";
-my $samtools = "";
 my $hadoop="";
 my $hdfs="";
 my $sartsam_jar = "";
