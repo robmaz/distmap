@@ -131,8 +131,7 @@ GetOptions(
 	"job-desc=s"					=> \$job_desc,
 	"gsnap-output-split"			=> \$gsnap_output_split, # TODO - this should be a conditional argument on GSNAP mapper (throw otherwise)
 	"bwa-sampe-args=s"				=> \$bwa_sampe_args, # TODO - this should be a conditional argument on BWA-ALN mapper (throw otherwise)
-	"help"							=>\$help, # TODO: cannot be collapsed on the String with -h?
-	"h"								=>\$help,
+	"help|h"						=>\$help,
 	"version|v"						=>\$version,
 
 	# DEPRECATED (log warning if used?) - TODO: remove support
@@ -168,7 +167,7 @@ if ($version) {
 	exit(0)
 }
 # print the help if requrested and exit
-pod2usage(-verbose=>2) if $help;
+pod2usage(-verbose=>2, -exitval=>0) if $help;
 
 
 ## ARGUMENTS CHECK
@@ -710,9 +709,9 @@ Note: Please make sure that the genome Index was created with the SAME VERSION o
 	bwa samse for single-end reads
 	Example --bwa-sampe-args "-a 500 -s"
 
-=item B<--help>
+=item B<--help>, B<-h>
 
- Print help.
+ Print help and exit.
 
 =item B<--version>, B<-v>
 
