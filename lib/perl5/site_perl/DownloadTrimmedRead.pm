@@ -189,7 +189,6 @@ sub merge_trimmed_reads {
 
     my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}"."_trimming";
 
-    my $picard_mergesamfiles_jar = $args_dict->{"picard_mergesamfiles_jar"};
     my $output_dir = $args_dict->{"output_directory"};
     my $output_format = $args_dict->{"output_format"};
 
