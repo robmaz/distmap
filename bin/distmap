@@ -20,124 +20,164 @@ use DownloadTrimmedRead;
 use DataCleanup;
 use ReadToolsUtils;
 
-my $script = "distmap";
+# current version
+use constant VERSION => "3.1.0-alpha";
 
-my $version = "3.1.0-alpha";
-
-### This number need to define. How many processors Hadoop can use on each nodes.
+## TODO - make a constant!!
+## TODO - should be exposed? or maybe depends on other variable (e.g., priority?)
+### This number need to define. How many processors Hadoop can use on each nodes
 my $number_of_processors = 3; #18;
 
 
+
+# ARGUMENT VARIABLES
+## REQUIRED
 my $reference_fasta="";
-my $refindex_archive="";
-my @input_files = ();
 my $output_directory="";
-
-my $only_index=0;
-my $only_process=0;
-my $only_trim=0;
-my $no_trim=0;
-my $only_map=0;
-my $only_hdfs_upload=0;
-my $only_hdfs_download =0;
-my $only_merging=0;
-my $only_delete_temp=0;
-my $only_download_reads=0;
-
-my $gsnap_output_split=0;
-#my $hadoop_home=$ENV{"HADOOP_HOME"};
-my $hadoop_home=$ENV{"HADOOP_HOME"};
-
-my $mapper="";
-my $mapper_path="";
+my @input_files = ();
 my $mapper_args="";
 my @mapper=();
 my @mapper_path=();
 my @mapper_args=();
 
-my $bwa_sampe_args="";
+## PSEUDO-REQUIRED
+my $hadoop_home=$ENV{"HADOOP_HOME"};
 my $picard=`which picard`;
-my $picard_mergesamfiles_jar=""; # OBSOLETE
-my $picard_sortsam_jar=""; # OBSOLETE
-my $picard_mark_duplicates_jar="";
-my $readtools_arg = `which readtools`; # TODO: should this be called after parsing if not provided? I think that it is more consistent.
+my $readtools_arg = `which readtools`;
+
+## OPTIONAL
+### pipeline
+my $only_index=0;
+my $only_process=0;
+my $only_hdfs_upload=0;
+my $only_map=0;
+my $only_hdfs_download =0;
+my $only_delete_temp=0;
+my $trim_args="";
+### others
 my $tmp_dir = "";
 my $output_format="bam";
-my $job_desc="";
+my $refindex_archive="";
 my $queue_name="pg1";
-my $job_priority="VERY_HIGH";
-my $hadoop_scheduler="Fair";
+my $job_desc="";
+my $gsnap_output_split=0; # TODO - make conditional
+my $bwa_sampe_args=""; # TODO - make conditional
 
+my $help = 0;
+my $version = 0;
+
+## DEPRECATED (log warning if used?) - TODO: remove
+my $no_trim=0;
+my $only_merging=0;
+my $qualThreshold=20;
+my $discardRemainingNs=0;
+my $minLength=40;
+my $trimQuality=0; ## TODO: be careful with this argument (it is really no-trim-quality switch)
+my $no5ptrim=0;
+my $verbose = 0;
+
+## OBSOLETE (log warning if used?) - TODO: remove
+my $picard_mergesamfiles_jar="";
+my $picard_sortsam_jar="";
+my $picard_mark_duplicates_jar=""; # TODO: is not even used - remove
+my $only_trim=0;
+my $trim_script_path="";
+my $fastqtype="illumina";
+my $nozip=0;
+
+## UNDOCUMENTED - TODO: documment
+my $only_download_reads=0;
 my $mappers_exe_archive = "";
 
-my $trim_script_path="";
-my $trim_args=""; # TODO: standard readtools trimming args
+## TODO - supposedly options but not in the GetOptions block!!! cannot be specified
+## TODO - add to the parsing or remove support for them and default always!
+## TODO - they appear in the example!!
+my $job_priority="VERY_HIGH";
 
-my $verbose = 0;
+## UNUSED variable!! - TODO: remove?
 my $test = 0;
-my $help = 0;
 
-
-
-#### Trimming parameters
-
-    my $qualThreshold=20;
-    my $minLength=40;
-    my $fastqtype="illumina";
-    my $discardRemainingNs=0;
-    my $trimQuality=0; ## TODO: be careful with this argument (it is really no-trim-quality switch)
-    my $no5ptrim=0;
-    my $nozip=0;
-
-
+## parse command line
 GetOptions(
-	"reference-fasta=s"			=>\$reference_fasta,	# to check
-	"input=s"                           	=> \@input_files,      # to check
-	"output=s"                          	=> \$output_directory,	# to check
-	"only-index" 				=> \$only_index,
-	"only-process" 				=> \$only_process,
-	"only-hdfs-upload" 			=> \$only_hdfs_upload,
-	"only-trim" 				=> \$only_trim,
-	"no-trim" 				=> \$no_trim,
+	# REQUIRED (to check)
+	"reference-fasta=s"				=>\$reference_fasta,
+	"output=s"						=> \$output_directory,
+	"input=s"						=> \@input_files,
+	"mapper=s"						=> \@mapper,
+	"mapper-path=s"					=> \@mapper_path,
+	"mapper-args=s"					=> \@mapper_args,
+
+	# PSEUDO-REQUIRED (to check in PATH)
+	"hadoop-home=s"					=>\$hadoop_home,
+	"picard=s"						=> \$picard,
+	"readtools=s"					=> \$readtools_arg,
+
+	# OPTIONAL
+	## pipeline
+	"only-index"					=> \$only_index,
+	"only-process"					=> \$only_process, # TODO - process/upload still different? (otherwise, deprecate)
+	"only-hdfs-upload"				=> \$only_hdfs_upload,
+	"only-map"						=> \$only_map,
+	"only-hdfs-download"			=> \$only_hdfs_download,
+	"only-delete-temp"				=> \$only_delete_temp,
+	"trim-args"						=> \$trim_args,
+	## other
+	"tmp-dir=s"						=> \$tmp_dir,
+	"output-format=s"				=> \$output_format,
+	"reference-index-archive=s"		=> \$refindex_archive,
+	"queue-name=s"					=> \$queue_name,
+	"job-desc=s"					=> \$job_desc,
+	"gsnap-output-split"			=> \$gsnap_output_split, # TODO - this should be a conditional argument on GSNAP mapper (throw otherwise)
+	"bwa-sampe-args=s"				=> \$bwa_sampe_args, # TODO - this should be a conditional argument on BWA-ALN mapper (throw otherwise)
+	"help|h"						=>\$help,
+	"version|v"						=>\$version,
+
+	# DEPRECATED (log warning if used?) - TODO: remove support
+	## triming
+	"no-trim"						=> \$no_trim,
+	"only-merge"					=> \$only_merging,
+	"quality-threshold=i"			=>\$qualThreshold,
+	"discard-internal-N"			=>\$discardRemainingNs,
+	"min-length=i"					=>\$minLength,
+	"no-trim-quality"				=>$trimQuality,
+	"no-5p-trim"					=>\$no5ptrim,
+	## others
+	"verbose"						=> \$verbose,
+
+	# OBSOLETE (log warning if used?) - TODO: remove
+	"picard-mergesamfiles-jar=s"	=> \$picard_mergesamfiles_jar,
+	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,
+	"only-trim"						=> \$only_trim,
 	"trim-script-path=s"			=> \$trim_script_path,
-	"trim-args"				=> \$trim_args,
-	"only-map" 				=> \$only_map,
-	"only-hdfs-download" 			=> \$only_hdfs_download,
-	"only-merge" 				=> \$only_merging, # DEPRECATED
-	"only-delete-temp" 			=> \$only_delete_temp,
-	"only-download-trimmed-reads"		=> \$only_download_reads,
-	"reference-index-archive=s"         	=> \$refindex_archive,
-	"quality-threshold=i"   		=>\$qualThreshold,
-	"min-length=i"          		=>\$minLength,
-	"fastq-type=s"          		=>\$fastqtype,
-	"discard-internal-N"    		=>\$discardRemainingNs,
-	"no-trim-quality"       		=>$trimQuality,
-	"no-5p-trim"            		=>\$no5ptrim,
-	"disable-zipped-output" 		=>\$nozip,
-	"hadoop-home=s" 			=>\$hadoop_home,
-	"mappers-exe-archive=s" 		=>\$mappers_exe_archive,
+	"fastq-type=s"					=>\$fastqtype,
+	"disable-zipped-output"			=>\$nozip,
+	
+	
+	## TODO: undocummented options!!!
+	"only-download-trimmed-reads"	=> \$only_download_reads,
+	"mappers-exe-archive=s"			=>\$mappers_exe_archive
 
-
-	"mapper=s" 				=> \@mapper,		# to check
-	"mapper-path=s"				=> \@mapper_path,
-	"picard=s"				=> \$picard, # to check
-	"picard-mergesamfiles-jar=s"		=> \$picard_mergesamfiles_jar,	# OBSOLETE
-	"picard-sortsam-jar=s"			=> \$picard_sortsam_jar,	# OBSOLETE
-	"readtools=s"         => \$readtools_arg,
-	"tmp-dir=s"           => \$tmp_dir,
-	"mapper-args=s"				=> \@mapper_args,
-	"bwa-sampe-args=s"			=> \$bwa_sampe_args,
-	"output-format=s"			=> \$output_format,
-	"job-desc=s"				=> \$job_desc,	# to check
-	"queue-name=s"				=> \$queue_name,	# to check
-	"gsnap-output-split"			=> \$gsnap_output_split,	# to check
-	"verbose"        		        => \$verbose,
-	"help"          		        =>\$help,
-	"h"          		        	=>\$help
 ) or pod2usage(-msg=>"Wrong options",-verbose=>1);
 
-pod2usage(-verbose=>2) if $help;
+# if --version is specified, print it and exit
+if ($version) {
+	print VERSION, "\n";
+	exit(0)
+}
+# print the help if requrested and exit
+pod2usage(-verbose=>2, -exitval=>0) if $help;
 
+
+## ARGUMENTS CHECK
+### TODO: check the required arguments:
+### TODO: - reference fasta exists (and other requirements for it; e.g., dictionary or index)
+### TODO: - output directory can be created (and other requirements for it; e.g., empty)
+### TODO: - inputs exist and are correctly formatted (and other requirements for it; e.g., even number for pair-end)
+### TODO: - mapper, mapper-path and mapper-args are correct (e.g., mapper and mapper-path pointing to same, mapper-args can be found in mapper help)
+
+
+## check pseudo-required arguments
+### HADOOP_HOME
 if ( defined $hadoop_home and $hadoop_home ne "" ) {
     # if $hadoop_home is set, make sure there is no trailing slash
     $hadoop_home =~ s/\/$//;
@@ -147,22 +187,22 @@ else {
     $hadoop_home = `which hadoop`;
     $hadoop_home =~ s/\/bin\/hadoop$//;
 }
-
 if ( $hadoop_home eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
 }
 
-# error if ReadTools is not found 
+### READTOOLS
+#### error if ReadTools is not found 
 if ( $readtools_arg eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: no ReadTools found. Use --readtools or add a wrapper/jar to your PATH");
 }
-
-## get the readtools command to be run
+#### get the readtools command to be run
 my $readtools = ReadToolsUtils::get_readtools_runnable_cmd($readtools_arg);
 if ( `$readtools --version` lt ReadToolsUtils::VERSION ) {
 	pod2usage(-msg=>"\n\tERROR: Unsupported ReadTools (\"$readtools_arg\") - required >= " . ReadToolsUtils::VERSION );
 }
 
+### PICARD
 if ( $picard =~ /\.jar$/ ) {
   $picard = "eval java \\\$JAVA_OPTS -jar $picard";
 }
@@ -172,9 +212,14 @@ unless ( $tmp_dir eq "" or
   	pod2usage(-msg=>"\n\tERROR: \"$tmp_dir\" is not a usable temporary folder (permissions?)");
 }
 
+### TODO: check optional arguments (e.g., tmp-dir exists or should be created)
+### TODO: log a warning for deprecated options and/or obsolete ones
 
+
+## print if verbose is found
 if($verbose) {
-	print STDERR "Following inputs are provided to run $script:\n";
+	print STDERR "WARNING: this list of inputs might be out-of-date (--verbose is deprecated)";
+	print STDERR "Following inputs are provided to run $0:\n";
 	print STDERR "  reference genome fasta:\t$reference_fasta\n";
 	print STDERR "  input fastq files:\t@input_files\n";
 	print STDERR "  local output directory:\t$output_directory\n";
@@ -189,8 +234,6 @@ if($verbose) {
 	print STDERR "  mapper name:\t@mapper\n";
 	print STDERR "  mapper path:\t@mapper_path\n";
 	print STDERR "  picard:\t$picard\n";
-	print STDERR "  (OBSOLETE) picard MergeSamFiles.jar:\t$picard_mergesamfiles_jar\n";
-	print STDERR "  (OBSOLETE) picard SortSam.jar:\t$picard_sortsam_jar\n";
 	print STDERR "  readtools:\t$readtools_arg ($readtools)\n";
 	print STDERR "  tmpdir:\t$tmp_dir\n";
 	print STDERR "  mapper arguments:\t@mapper_args\n";
@@ -201,14 +244,17 @@ if($verbose) {
 }
 
 # respect trim_args if given on the command line
-## TODO: fix - the trim_args might be provided in the old perl format - is that still expected?
 if ($trim_args eq "") {
 	# TODO: this should be removed if all the parameters are removed
 	$trim_args = ReadToolsUtils::get_trimming_args($qualThreshold, $minLength, $discardRemainingNs, $trimQuality, $no5ptrim);
 }
 
-###
-
+## TODO: this args_dict should be the one provided ot the GetOptions
+## TODO: this could be a hash %args_hash and then the variables should still be available
+## TODO: this will simplify the code and make it less error prone
+## TODO: the simplification would be something like (just some param examples):
+## my %h = ("reference-fasta" => "", 'output-format' => "bam", "only-trim" => 0);
+## GetOptions (\%h, 'eference-fasta=s', "output-format=s", "only-trim") or pod2usage(-msg=>"Wrong options",-verbose=>1);
 my $args_dict = {};
 
 
@@ -234,16 +280,6 @@ $args_dict->{"mapper_path"} = \@mapper_path;
 $args_dict->{"reference_fasta"} = $reference_fasta;
 
 $args_dict->{"picard"} = $picard;
-
-# if ($picard_mergesamfiles_jar ne "" and $picard_sortsam_jar ne "") {
-# 	$args_dict->{"picard_mergesamfiles_jar"} = $picard_mergesamfiles_jar;
-# 	$args_dict->{"picard_sortsam_jar"} = $picard_sortsam_jar;
-# }
-# else {
-# 	$args_dict->{"picard_mergesamfiles_jar"} = "$picard_jar MergeSamFiles";
-# 	$args_dict->{"picard_sortsam_jar"} = "$picard_jar SortSam";
-# 	$args_dict->{"picard_mark_duplicates_jar"} = "$picard_jar MarkDuplicates";
-# }
 
 $args_dict->{"readtools"} = $readtools;
 $args_dict->{"tmp_dir"} = $tmp_dir;
@@ -346,7 +382,9 @@ sub check_mapper_integritiy {
 
 
 
-
+## TODO: is this really necessary??
+## TODO: the inputs should be populated before, and here there is no real "check"
+## TODO: in addition, this is overriding stuff that shouldn't be overriden
 sub check_inputs {
 
 	my $args_dict = {};
@@ -390,7 +428,6 @@ sub check_inputs {
 	$args_dict->{"readtools"} = $readtools;
 	$args_dict->{"tmp_dir"} = $tmp_dir;
 
-	$mapper_args =~ s/\"//g;
 	$args_dict->{"mapper_args"} = \@mapper_args;
 	$args_dict->{"bwa_sampe_args"} = $bwa_sampe_args;
 	$args_dict->{"output_format"} = $output_format;
@@ -465,7 +502,8 @@ distmap - wrapper around different NGS mappers for distributed computation using
 
 =head1 SYNOPSIS
 
-B<distmap> [--help | -h] --reference-fasta I<FILE> --output I<PATH> --input "I<INPUT>"
+B<distmap> [--help | -h] [--version | -v]
+--reference-fasta I<FILE> --output I<PATH> --input "I<INPUT>"
 --mapper I<MAPPER> --mapper-path I<FILE> --mapper-args "I<ARGS>"
 [--hadoop-home I<PATH>] [--readtools I<FILE>] [--picard I<FILE>] [I<OPTIONS>...]
 
@@ -628,6 +666,20 @@ EXAMPLE:
  Output file format either SAM or BAM.
  Default: BAM
 
+=item B<--reference-index-archive> I<FILE>
+
+Path to the genome index archive (I<Genome_Index_Archive.tgz>, generated with previous
+runs or the B<--only-index> option). Providing the file avoids re-indexing the reference
+with the same mapper.
+
+B<IMPORTANT:> the archive should be generated with the same version of the mapper
+provided by B<--mapper-path>.
+
+EXAMPLE:
+ 	B<--reference-index-archive> I</home/DistMap_output/Genome_Index_Archive.tgz>
+
+Note: Please make sure that the genome Index was created with the SAME VERSION of mapper(s) which you are using for mapping. Different versions of mappers will result in problems.
+
 =item B<--job-desc> "I<DESC>"
 
  Give a job description which will be dispalyed in JobTracker webpage.
@@ -655,9 +707,13 @@ EXAMPLE:
 	bwa samse for single-end reads
 	Example --bwa-sampe-args "-a 500 -s"
 
-=item B<--help>
+=item B<--help>, B<-h>
 
- Print help.
+ Print help and exit.
+
+=item B<--version>, B<-v>
+
+Print version and exit.
 
 =back
 
@@ -719,11 +775,11 @@ Unused arguments maintained for previous version compatibility.
 
 =item B<--picard-mergesamfiles-jar> I<PATH>
 
- picard is distributed in a single file now. Use B<--picard> instead.
+This option does nothing. picard is distributed in a single file now. Use B<--picard> instead.
 
 =item B<--picard-sortsam-jar> I<PATH>
 
- picard is distributed in a single file now. Use B<--picard> instead.
+This option does nothing. picard is distributed in a single file now. Use B<--picard> instead.
 
 =item B<--only-trim>
 
