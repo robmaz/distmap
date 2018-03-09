@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 use strict;
 use warnings;
 use Getopt::Long;
@@ -191,8 +191,12 @@ if ( $hadoop_home eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
 }
 
+<<<<<<< HEAD
 ### READTOOLS
 #### error if ReadTools is not found 
+=======
+# error if ReadTools is not found
+>>>>>>> faaf392ad21dfeed05ba5eb85fc46b9dcf246e9b
 if ( $readtools_arg eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: no ReadTools found. Use --readtools or add a wrapper/jar to your PATH");
 }
@@ -644,7 +648,7 @@ sorted SAM/BAM file (see B<--output-format>)
 Give the trimming arguments (ReadTools syntax).
 EXAMPLE:
 	B<--trim-args> "I<--trimmer MottQualityTrimmer --mottQualityThreshold 20 --readFilter ReadLengthReadFilter --minReadLength 50 --disable5pTrim>"
- 
+
 
 =back
 
@@ -813,7 +817,7 @@ distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mappi
 --mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
 
 =item If pseudo-mandatory options are not in the PATH
- 
+
 distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
 --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
 --mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
@@ -822,14 +826,14 @@ distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mappi
 --picard /usr/local/share/java/picard.jar
 
 =item Hadoop-related job management
- 
+
 distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
 --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
 --mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"
 --queue-name pg1 --job-priority VERY_HIGH --job-desc "BWA mapping 5M 1"
 
 =item Trimming when uploading to HDFS
- 
+
 distmap --reference-fasta /reads/dmel_genome.fasta --output /reads/bwa/bwa_mapping
 --input "/reads/5M_reads_1.fastq,/reads/5M_reads_2.fastq"
 --mapper bwa --mapper-path /usr/local/hadoop/bwa --mapper-args "-l 200"

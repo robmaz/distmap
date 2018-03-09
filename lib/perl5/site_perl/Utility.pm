@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 use strict;
 use warnings;
 package Utility;
@@ -69,6 +69,9 @@ sub check_hadoop {
     $args_dict->{"mapred_exe"} = $mapred_exe;
     $args_dict->{"yarn_exe"} = $yarn_exe;
     $args_dict->{"streaming_jar"} = $streaming_jar;
+
+    # Construct a prefix path for all files put in the hdfs
+    my
 
 }
 

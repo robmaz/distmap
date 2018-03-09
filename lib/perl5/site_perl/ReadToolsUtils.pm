@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 package ReadToolsUtils;
 
 use strict;
@@ -17,15 +17,15 @@ Daniel Gomez Sanchez (L<magicDGS|https://github.com/magicDGS>)
 
 =head2 VERSION
 
-Minimum version supported (version >= ReadTools::Version). 
+Minimum version supported (version >= ReadTools::Version).
 
 =cut
 use constant VERSION => "1.2.1";
 
 
-## get the readtools runnable command 
+## get the readtools runnable command
 ## params:
-## - 
+## -
 =head2 readtools_runnable_cmd()
 
 Get the ReadTools runnable command. If the provided input
