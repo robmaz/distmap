@@ -151,8 +151,8 @@ GetOptions(
 	"trim-script-path=s"			=> \$trim_script_path,
 	"fastq-type=s"					=>\$fastqtype,
 	"disable-zipped-output"			=>\$nozip,
-	
-	
+
+
 	## TODO: undocummented options!!!
 	"only-download-trimmed-reads"	=> \$only_download_reads,
 	"mappers-exe-archive=s"			=>\$mappers_exe_archive
@@ -191,12 +191,9 @@ if ( $hadoop_home eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
 }
 
-<<<<<<< HEAD
+
 ### READTOOLS
-#### error if ReadTools is not found 
-=======
-# error if ReadTools is not found
->>>>>>> faaf392ad21dfeed05ba5eb85fc46b9dcf246e9b
+#### error if ReadTools is not found
 if ( $readtools_arg eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: no ReadTools found. Use --readtools or add a wrapper/jar to your PATH");
 }
