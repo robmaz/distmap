@@ -40,7 +40,7 @@ Ouput:
 
 =cut
 sub get_readtools_runnable_cmd {
-	my $readtools = @_;
+	chomp(my $readtools = $_[0]);
 	if ( $readtools =~ /\.jar$/ ) {
 		$readtools = "eval java \\\$JAVA_OPTS -jar $readtools";
 	}
