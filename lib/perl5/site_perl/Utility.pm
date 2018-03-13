@@ -73,7 +73,7 @@ sub check_hadoop {
 }
 
 sub create_dir {
-    my $args_dict = @_;
+    my $args_dict = $_[0];
     my $output_dir = $args_dict->{"output_directory"};
 
     createdir($output_dir);
