@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 use strict;
 use warnings;
 package DataMerge;
@@ -128,7 +128,7 @@ sub compare_fastq_bam_reads {
 	}
 
 	exit();
-	
+
 	## TODO - this code is not really used anywhere: the exit before would end the subroutine and in addition compare_fastq_bam_reads
 	## TODO - is not really used
 
