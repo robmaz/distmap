@@ -41,9 +41,9 @@ my @mapper_path=();
 my @mapper_args=();
 
 ## PSEUDO-REQUIRED
-my $hadoop_home=$ENV{"HADOOP_HOME"};
-my $picard=`which picard`;
-my $readtools_arg = `which readtools`;
+my $hadoop_home = $ENV{"HADOOP_HOME"};
+chomp(my $picard = `which picard`);
+chomp(my $readtools_arg = `which readtools`);
 
 ## OPTIONAL
 ### pipeline
@@ -184,13 +184,12 @@ if ( defined $hadoop_home and $hadoop_home ne "" ) {
 }
 else {
     # try to find "hadoop" in path and prune "/bin/hadoop" from the full path
-    $hadoop_home = `which hadoop`;
+    chomp($hadoop_home = `which hadoop`);
     $hadoop_home =~ s/\/bin\/hadoop$//;
 }
 if ( $hadoop_home eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
 }
-
 
 ### READTOOLS
 #### error if ReadTools is not found
