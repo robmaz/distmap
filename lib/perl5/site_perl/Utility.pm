@@ -11,7 +11,7 @@ use POSIX ":sys_wait_h";
 
 sub check_hadoop {
 
-    my $args_dict = @_;
+    my $args_dict = $_[0];
     my $hadoop_home = $args_dict->{"hadoop_home"};
     if ($hadoop_home =~ /\/$/) {
         $hadoop_home =~ s/\/$//;
