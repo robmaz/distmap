@@ -70,9 +70,6 @@ sub check_hadoop {
     $args_dict->{"yarn_exe"} = $yarn_exe;
     $args_dict->{"streaming_jar"} = $streaming_jar;
 
-    # Construct a prefix path for all files put in the hdfs
-    my
-
 }
 
 sub create_dir {
