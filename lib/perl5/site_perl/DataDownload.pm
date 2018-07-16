@@ -57,12 +57,12 @@ sub paired_end_data {
 
     my $hadoop_exe = $args_dict->{'hadoop_exe'};
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
-    my $output =  "/$args_dict->{'random_id'}"."_output";
+    my $output =  "/$args_dict->{'job_home'}"."_output";
     my $output_folder = "$output/$args_dict->{'read_folder'}"."_mapping";
 
-    my $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}");
+    my $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
 
-	my $hdfs_input_folder = "/$args_dict->{'random_id'}"."_input/fastq_paired_end";
+	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_paired_end";
 
 
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
@@ -90,13 +90,13 @@ sub paired_end_data {
 
 		#### Deleting the download folder if already exists
 
-		my $local_output_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}"."_mapping_".lc($mapper_name);
+		my $local_output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"."_mapping_".lc($mapper_name);
 		Utility::deletedir($local_output_dir);
 
 
 		my $output_folder = "$output/$args_dict->{'read_folder'}"."_mapping_".lc($mapper_name);
 
-		my $download_command = "$hdfs_exe dfs -D dfs.blocksize=$args_dict->{'block_size'} -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'random_id'}/";
+		my $download_command = "$hdfs_exe dfs -D dfs.blocksize=$args_dict->{'block_size'} -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'job_home'}/";
 
 		print STDERR "Data download from hdfs file system started ", localtime(), "\n";
 		system($download_command) == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
@@ -121,12 +121,12 @@ sub single_end_data {
 
     my $hadoop_exe = $args_dict->{'hadoop_exe'};
     my $hdfs_exe = $args_dict->{"hdfs_exe"};
-    my $output =  "/$args_dict->{'random_id'}"."_output";
+    my $output =  "/$args_dict->{'job_home'}"."_output";
     my $output_folder = "$output/$args_dict->{'read_folder'}"."_mapping";
 
-    my $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}");
+    my $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
 
-	my $hdfs_input_folder = "/$args_dict->{'random_id'}"."_input/fastq_single_end";
+	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_single_end";
 
 
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
@@ -147,9 +147,9 @@ sub single_end_data {
     if ($file_count>0 or $hdfs_file_count>0) {
 
         #### Deleting the download folder if already exists
-        #Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}"."_mapping");
+        #Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"."_mapping");
         #
-        #my $download_command = "$hdfs_exe dfs -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'random_id'}/";
+        #my $download_command = "$hdfs_exe dfs -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'job_home'}/";
         #
         #print STDERR "Data download from hdfs file system started ", localtime(), "\n";
         #system($download_command) == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
@@ -165,13 +165,13 @@ sub single_end_data {
 
 		#### Deleting the download folder if already exists
 
-		my $local_output_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}"."_mapping_".lc($mapper_name);
+		my $local_output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"."_mapping_".lc($mapper_name);
 		Utility::deletedir($local_output_dir);
 
 
 		my $output_folder = "$output/$args_dict->{'read_folder'}"."_mapping_".lc($mapper_name);
 
-		my $download_command = "$hdfs_exe dfs -D dfs.blocksize=$args_dict->{'block_size'} -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'random_id'}/";
+		my $download_command = "$hdfs_exe dfs -D dfs.blocksize=$args_dict->{'block_size'} -copyToLocal $output_folder $args_dict->{'output_directory'}/$args_dict->{'job_home'}/";
 
 		print STDERR "Data download from hdfs file system started ", localtime(), "\n";
 		system($download_command) == 0 || warn "Error in downloading data\n";

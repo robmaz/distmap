@@ -51,7 +51,7 @@ sub start {
 #	print STDERR "Step6: Cleaning the temperory files and folders\n";
 #	print STDERR "=======================================================================\n";
 #
-#	Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'random_id'}");
+#	Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}");
 #
 #}
 
@@ -61,18 +61,18 @@ sub paired_end_mapping {
 	$args_dict->{"read_folder"} = "fastq_paired_end";
 	$args_dict->{"read_type"} = "pe";
 	#$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_reads";
-	#my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($args_dict->{"mapper"})."_pe_hadoop.sh";
+	#my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/".lc($args_dict->{"mapper"})."_pe_hadoop.sh";
 	#$args_dict->{"shell_script"} = $shell_script;
 
 	my $file_count=0;
 
-	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}";
+	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
 	if (-d $to_read_dir) {
-		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}");
+		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
 	}
 
 
-	my $hdfs_input_folder = "/$args_dict->{'random_id'}"."_input/fastq_paired_end";
+	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_paired_end";
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
 	my @cmd =();
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
@@ -97,7 +97,7 @@ sub paired_end_mapping {
 
 			$args_dict->{"final_output_file"} = lc($mapper_name)."_DistMap_output_Paired_end_reads";
 
-			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($mapper_name)."_pe_hadoop.sh";
+			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/".lc($mapper_name)."_pe_hadoop.sh";
 			$args_dict->{"shell_script"} = $shell_script;
 
 			$self->get_mapper_command($args_dict, $mapper_name, $mapper_path, $mapper_args);
@@ -112,7 +112,7 @@ sub paired_end_mapping {
 			my $mapper_args = $args_dict->{"mapper_args"}->[$i];
 
 			$args_dict->{"final_output_file"} = lc($mapper_name)."_DistMap_output_Paired_end_reads";
-			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($mapper_name)."_pe_hadoop.sh";
+			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/".lc($mapper_name)."_pe_hadoop.sh";
 			$args_dict->{"shell_script"} = $shell_script;
 			system("sh $shell_script");
 
@@ -131,17 +131,17 @@ sub single_end_mapping {
 	$args_dict->{"read_folder"} = "fastq_single_end";
 	$args_dict->{"read_type"} = "se";
 	$args_dict->{"final_output_file"} = "DistMap_output_Single_end_reads";
-	my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($args_dict->{"mapper"})."_se_hadoop.sh";
+	my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/".lc($args_dict->{"mapper"})."_se_hadoop.sh";
 	$args_dict->{"shell_script"} = $shell_script;
 
 	my $file_count=0;
 
-	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}";
+	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
 	if (-d $to_read_dir) {
-		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}");
+		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
 	}
 
-	my $hdfs_input_folder = "/$args_dict->{'random_id'}"."_input/fastq_single_end";
+	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_single_end";
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
 	my @cmd =();
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
@@ -167,7 +167,7 @@ sub single_end_mapping {
 
 			$args_dict->{"final_output_file"} = lc($mapper_name)."_DistMap_output_Paired_end_reads";
 
-			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($mapper_name)."_se_hadoop.sh";
+			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/".lc($mapper_name)."_se_hadoop.sh";
 			$args_dict->{"shell_script"} = $shell_script;
 
 			$self->get_mapper_command($args_dict, $mapper_name, $mapper_path, $mapper_args);
@@ -182,7 +182,7 @@ sub single_end_mapping {
 			my $mapper_args = $args_dict->{"mapper_args"}->[$i];
 
 			$args_dict->{"final_output_file"} = lc($mapper_name)."_DistMap_output_Single_end_reads";
-			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'random_id'}/".lc($mapper_name)."_se_hadoop.sh";
+			my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/".lc($mapper_name)."_se_hadoop.sh";
 			$args_dict->{"shell_script"} = $shell_script;
 			system("sh $shell_script");
 
@@ -228,8 +228,8 @@ sub get_mapper_command {
 	##########################################################################################
 	# 				Hadoop input output folders
 
-	my $input =  "/$args_dict->{'random_id'}"."_input";
-	my $output =  "/$args_dict->{'random_id'}"."_output";
+	my $input =  "/$args_dict->{'job_home'}"."_input";
+	my $output =  "/$args_dict->{'job_home'}"."_output";
 	my $read_folder = "$input/$args_dict->{'read_folder'}";
 	my $input_folder = $read_folder; #"$read_folder/fastq";
 	my $archieve_folder = $input; #"$read_folder/archieve";
@@ -456,7 +456,7 @@ sub write_hadoop_mapping_job {
 	print $ofh "#!/bin/sh\n\n";
 	print $ofh "streaming_home=\"$args_dict->{'streaming_jar'}\"\n";
 	print $ofh "hadoop_home=\"$args_dict->{'hadoop_exe'}\"\n\n";
-	print $ofh "hdfs_home=\"$args_dict->{'hdfs_exe'}\"\n\n";
+	print $ofh "job_home=\"$args_dict->{'hdfs_exe'}\"\n\n";
 	print $ofh "input_folder=\"$args_dict->{'input_folder'}\"\n";
 	print $ofh "output_folder=\"$args_dict->{'output_folder'}/\"\n";
 	print $ofh "job=\"$args_dict->{'job_desc'}"."_Mapping_"."$args_dict->{'read_folder'}\"\n\n";
@@ -467,7 +467,7 @@ sub write_hadoop_mapping_job {
 	print $ofh "echo \"Step3: Short read mapping on cluster started\"\n";
 	print $ofh "echo \"===============================================================\"\n";
 	print $ofh "time\n";
-	print $ofh "time \$hdfs_home dfs -rm -r \$output_folder\n\n";
+	print $ofh "time \$job_home dfs -rm -r \$output_folder\n\n";
 
 	print $ofh "time \$hadoop_home  jar \$streaming_home \\\n";
 	#print $ofh "-archives 'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'job_arch'}"."#"."{'extracted_execarch'}' \\\n";
