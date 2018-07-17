@@ -86,9 +86,7 @@ sub create_dir {
     my @temp = split("/",$temp_d);
 
     #my $random_string = generate_random_string();
-    my $random_string="temp";
-    $random_string=$temp[-1];
-    my $output_dir1 = $random_string;
+    my $job_home = "user/".$ENV{"USER"}."/distmap/".$temp[-1];
     my $fastq_dir="fastq";
     my $fastq_dir_pe="fastq_paired_end";
     my $fastq_dir_se="fastq_single_end";
@@ -114,8 +112,8 @@ sub create_dir {
 #	createdir("$output_dir/$output_dir1/$input_fasta_dir");
     #}
     #else {
-	createdir("$output_dir/$output_dir1/$fastq_dir_pe");
-	createdir("$output_dir/$output_dir1/$fastq_dir_se");
+	createdir("$output_dir/$job_home/$fastq_dir_pe");
+	createdir("$output_dir/$job_home/$fastq_dir_se");
     #}
 
     createdir("$output_dir/$ref_dir");
@@ -123,7 +121,7 @@ sub create_dir {
     #createdir("$output_dir/$output_dir1/$tmp_dir_se");
     createdir("$output_dir/$bin_dir");
 
-   $args_dict->{"random_id"} = $random_string;
+   $args_dict->{"job_home"} = $job_home;
    $args_dict->{"fastq_dir_pe"} = $fastq_dir_pe;
    $args_dict->{"fastq_dir_se"} = $fastq_dir_se;
    $args_dict->{"input_fasta_dir"} = $input_fasta_dir;
@@ -139,8 +137,9 @@ sub create_dir {
 
 sub createdir {
     my ($dir) = @_;
-    unless (-d "$dir") { mkdir $dir || die "Could not create Directory $dir $!\n"; }
-
+    unless (-d "$dir") {
+        make_path($dir, { chmod => 0755 }) || die "Could not create Directory $dir $!\n";
+    }
 }
 
 sub deletedir {

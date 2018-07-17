@@ -200,7 +200,7 @@ sub create_archive {
 
 sub copy_exec {
 	my ($self,$args_dict) = @_;
-	#my $bin_dir_path = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}";
+	#my $bin_dir_path = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}";
 	my $bin_dir_path = "$args_dict->{'output_directory'}/$args_dict->{'bin_dir'}";
 	my $i=0;
 	foreach my $mapper (@{$args_dict->{"mapper_path"}}) {
@@ -344,10 +344,10 @@ sub bismark_index {
 
 	unless (-e $bowtie_path and -x $bowtie_path) {
 
-		$bowtie_path = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/bowtie";
+		$bowtie_path = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/bowtie";
 
 		unless (-e $bowtie_path and -x $bowtie_path) {
-			$bowtie_path = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/bowtie2";
+			$bowtie_path = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/bowtie2";
 		}
 		unless (-e $bowtie_path and -x $bowtie_path) {
 			print "\n\tERROR: bowtie-build or bowtie2-build not found  in the directory \"$path\"\n\n";
@@ -404,10 +404,10 @@ sub bowtie_index {
 	}
 
 	unless (-e $bowtie_build and -x $bowtie_build) {
-		$bowtie_build = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/bowtie-build";
+		$bowtie_build = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/bowtie-build";
 
 		unless (-e $bowtie_build and -x $bowtie_build) {
-			$bowtie_build = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'bin_dir'}/bowtie-build2";
+			$bowtie_build = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/bowtie-build2";
 		}
 		unless (-e $bowtie_build and -x $bowtie_build) {
 			print "\n\tERROR: bowtie-build or bowtie2-build not found  in the directory \"$path\"\n\n";

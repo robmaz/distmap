@@ -55,9 +55,9 @@ sub paired_end_data {
     $args_dict->{"read_output_folder"} = "$args_dict->{'read_folder'}"."_mapping";
 
     my $file_count=0;
-    my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}";
+    my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
     if (-d $to_read_dir) {
-	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}");
+	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
     }
 
     if ($file_count>0) {
@@ -85,9 +85,9 @@ sub single_end_data {
 
 
     my $file_count=0;
-    my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}";
+    my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
     if (-d $to_read_dir) {
-	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_folder'}");
+	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
     }
 
     if ($file_count>0) {
@@ -127,7 +127,7 @@ sub get_file_list {
 sub bwa_output {
     my ($self,$args_dict) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_output_folder'}";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
     my $picard_mergesamfiles_jar = $args_dict->{"picard_mergesamfiles_jar"};
     my $output_dir = $args_dict->{"output_directory"};
     my $output_format = $args_dict->{"output_format"};
@@ -169,7 +169,7 @@ sub bwa_output {
 	if (scalar(@$files_to_merge)>$merge_limit) {
 
 		my @final_temp_bam = ();
-		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}";
+		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}";
 
 		my $file_count = scalar(@$files_to_merge);
 
@@ -236,7 +236,7 @@ sub bwa_output {
 sub tophat_output {
     my ($self,$args_dict) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_output_folder'}";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
     my $picard_mergesamfiles_jar = $args_dict->{"picard_mergesamfiles_jar"};
     my $output_dir = $args_dict->{"output_directory"};
     my $output_format = $args_dict->{"output_format"};
@@ -286,7 +286,7 @@ sub tophat_output {
 	if (scalar(@$files_to_merge)>$merge_limit) {
 
 		my @final_temp_bam = ();
-		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}";
+		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}";
 
 		my $file_count = scalar(@$files_to_merge);
 
@@ -474,7 +474,7 @@ sub check_mapping_files {
 sub exonerate_output {
     my ($self,$args_dict) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'random_id'}/$args_dict->{'read_output_folder'}";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
     my $output_dir = $args_dict->{"output_directory"};
     my $output_format = $args_dict->{"output_format"};
 
