@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package Utility;
 use File::Basename;
-use File::Path;
+use File::Path qw(make_path, remove_tree);
 use POSIX ":sys_wait_h";
 
 
@@ -117,7 +117,7 @@ sub createdir {
 sub deletedir {
 
     my ($dir) = @_;
-    if (-d "$dir") { rmtree("$dir") || die "Could not delete Directory $dir $!\n"; }
+    if (-d "$dir") { remove_tree("$dir") || die "Could not delete Directory $dir $!\n"; }
 
 }
 
