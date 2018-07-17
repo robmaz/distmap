@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package Utility;
 use File::Basename;
-use File::Path qw(make_path, remove_tree);
+use File::Path qw(make_path remove_tree);
 use POSIX ":sys_wait_h";
 
 
