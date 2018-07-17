@@ -78,12 +78,8 @@ sub create_dir {
 
     createdir($output_dir);
 
-    my $temp_d = $output_dir;
-
-    my @temp = split("/",$temp_d);
-
-    #my $random_string = generate_random_string();
-    my $job_home = "user/".$ENV{"USER"}."/distmap/".$temp[-1];
+    my $local_home = "distmap/".basename($output_dir);
+    my $hdfs_home = "user/".$ENV{"USER"}.$local_home;
     my $fastq_dir="fastq";
     my $fastq_dir_pe="fastq_paired_end";
     my $fastq_dir_se="fastq_single_end";
@@ -94,40 +90,19 @@ sub create_dir {
     my $tmp_dir_se="tmp_single_end";
     my $bin_dir="bin";
 
-    #deletedir("$output_dir/$output_dir1");
-    #deletedir("$output_dir/$output_dir1/$fastq_dir_pe");
-    #deletedir("$output_dir/$output_dir1/$fastq_dir_se");
-    #deletedir("$output_dir/$output_dir1/$ref_dir");
-    #deletedir("$output_dir/$output_dir1/$tmp_dir_pe");
-    #deletedir("$output_dir/$output_dir1/$tmp_dir_se");
-    #deletedir("$output_dir/$output_dir1/$bin_dir");
-
-
-    createdir("$output_dir/$output_dir1");
-
- #   if ($args_dict->{"mapper"} =~ /exonerate/i) {
-#	createdir("$output_dir/$output_dir1/$input_fasta_dir");
-    #}
-    #else {
-	createdir("$output_dir/$job_home/$fastq_dir_pe");
-	createdir("$output_dir/$job_home/$fastq_dir_se");
-    #}
-
+	createdir("$output_dir/$local_home/$fastq_dir_pe");
+	createdir("$output_dir/$local_home/$fastq_dir_se");
     createdir("$output_dir/$ref_dir");
-    #createdir("$output_dir/$output_dir1/$tmp_dir_pe");
-    #createdir("$output_dir/$output_dir1/$tmp_dir_se");
     createdir("$output_dir/$bin_dir");
 
-   $args_dict->{"job_home"} = $job_home;
+   $args_dict->{"local_home"} = $local_home;
+   $args_dict->{"hdfs_home"} = $hdfs_home;
    $args_dict->{"fastq_dir_pe"} = $fastq_dir_pe;
    $args_dict->{"fastq_dir_se"} = $fastq_dir_se;
    $args_dict->{"input_fasta_dir"} = $input_fasta_dir;
    $args_dict->{"ref_dir"} = $ref_dir;
    #$args_dict->{"tmp_dir_pe"} = $tmp_dir_pe;
    $args_dict->{"bin_dir"} = $bin_dir;
-
-
-
 
 }
 

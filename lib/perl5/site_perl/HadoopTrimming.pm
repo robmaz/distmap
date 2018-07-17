@@ -52,7 +52,7 @@ sub start {
 #	print STDERR "Step6: Cleaning the temperory files and folders\n";
 #	print STDERR "=======================================================================\n";
 #
-#	Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}");
+#	Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'local_home'}");
 #
 #}
 
@@ -63,21 +63,21 @@ sub paired_end_trimming {
 	$args_dict->{"read_folder"} = "fastq_paired_end";
 	$args_dict->{"read_type"} = "pe";
 	$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_trimmed_reads";
-	my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/trim_pe_hadoop.sh";
+	my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'local_home'}/trim_pe_hadoop.sh";
 	$args_dict->{"shell_script"} = $shell_script;
 
 	my $file_count=0;
 
-	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
+	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}";
 	if (-d $to_read_dir) {
-		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
+		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}");
 	}
 
 	#my $output_string = `ls`;
 
 
 
-	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_paired_end";
+	my $hdfs_input_folder = "/$args_dict->{'hdfs_home'}"."_input/fastq_paired_end";
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
 
 	my @cmd =();
@@ -114,17 +114,17 @@ sub single_end_trimming {
 	$args_dict->{"read_folder"} = "fastq_single_end";
 	$args_dict->{"read_type"} = "se";
 	$args_dict->{"final_output_file"} = "DistMap_output_Single_end_trimmed_reads";
-	my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'job_home'}/trim_se_hadoop.sh";
+	my $shell_script = $args_dict->{"output_directory"}."/$args_dict->{'local_home'}/trim_se_hadoop.sh";
 	$args_dict->{"shell_script"} = $shell_script;
 
 	my $file_count=0;
 
-	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
+	my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}";
 	if (-d $to_read_dir) {
-		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
+		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}");
 	}
 
-	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_single_end";
+	my $hdfs_input_folder = "/$args_dict->{'hdfs_home'}"."_input/fastq_single_end";
 
 
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
@@ -186,8 +186,8 @@ sub get_trim_command {
 	##########################################################################################
 	# 				Hadoop input output folders
 
-	my $input =  "/$args_dict->{'job_home'}"."_input";
-	my $output =  "/$args_dict->{'job_home'}"."_output";
+	my $input =  "/$args_dict->{'hdfs_home'}"."_input";
+	my $output =  "/$args_dict->{'hdfs_home'}"."_output";
 	my $read_folder = "$input/$args_dict->{'read_folder'}";
 	#my $input_folder ="$read_folder/fastq";
 	my $input_folder ="$read_folder";
@@ -249,9 +249,9 @@ sub write_hadoop_trimming_job {
 	open my $ofh,">$shell_script" or die "Could not open $shell_script for write $!";
 
 	print $ofh "#!/bin/sh\n\n";
-	print $ofh "streaming_home=\"$args_dict->{'streaming_jar'}\"\n";
-	print $ofh "hadoop_home=\"$args_dict->{'hadoop_exe'}\"\n\n";
-	print $ofh "job_home=\"$args_dict->{'hdfs_exe'}\"\n\n";
+	print $ofh "streaming_jar=\"$args_dict->{'streaming_jar'}\"\n";
+	print $ofh "hadoop_exe=\"$args_dict->{'hadoop_exe'}\"\n\n";
+	print $ofh "hdfs_exe=\"$args_dict->{'hdfs_exe'}\"\n\n";
 	print $ofh "input_folder=\"$args_dict->{'input_folder'}\"\n";
 	print $ofh "output_folder=\"$args_dict->{'output_folder'}/\"\n";
 	print $ofh "job=\"$args_dict->{'job_desc'}"."_Trimming_"."$args_dict->{'read_folder'}\"\n\n";
@@ -262,8 +262,8 @@ sub write_hadoop_trimming_job {
 	print $ofh "echo \"Step3: Short read trimming on cluster started\"\n";
 	print $ofh "echo \"===============================================================\"\n";
 	print $ofh "time\n";
-	print $ofh "time \$job_home dfs -rm -r \$output_folder\n\n";
-	print $ofh "time \$hadoop_home  jar \$streaming_home \\\n";
+	print $ofh "time \$hdfs_exe dfs -rm -r \$output_folder\n\n";
+	print $ofh "time \$hadoop_exe  jar \$streaming_jar \\\n";
 	#print $ofh "-archives 'hdfs://$args_dict->{'archieve_folder'}/$args_dict->{'job_arch'}"."#"."$args_dict->{'extracted_arch'}' \\\n";
 
 	if ($args_dict->{"upload_index"}) {

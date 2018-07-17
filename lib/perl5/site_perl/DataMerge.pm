@@ -61,7 +61,7 @@ sub compare_fastq_bam_reads {
 	my ( $name, $path, $extension ) = File::Basename::fileparse ( abs_path($0), '\..*' );
 
 
-	my $output =  "/$args_dict->{'job_home'}"."_output";
+	my $output =  "/$args_dict->{'hdfs_home'}"."_output";
 	my $output_folder_trim = "$output/$args_dict->{'read_folder'}"."_trimming";
 	my $hadoop_exe = $args_dict->{'hadoop_exe'};
 	$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_trimmed_reads";
@@ -239,7 +239,7 @@ sub paired_end_data {
 	#$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_reads";
 	#$args_dict->{"read_output_folder"} = "$args_dict->{'read_folder'}"."_mapping";
 
-	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_paired_end";
+	my $hdfs_input_folder = "/$args_dict->{'hdfs_home'}"."_input/fastq_paired_end";
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
 	my @cmd =();
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
@@ -265,9 +265,9 @@ sub paired_end_data {
 		$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_reads_".lc($mapper_name);
 
 		my $file_count=0;
-		my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
+		my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}";
 		if (-d $to_read_dir) {
-		    $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}");
+		    $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}");
 		}
 
 
@@ -295,7 +295,7 @@ sub paired_end_data {
 				$self->bwa_output($args_dict,$mapper_name);
 			}
 
-			my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}";
+			my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}";
 			my $bam_output_file = "$args_dict->{'output_directory'}/$output_file";
 		}
 
@@ -317,7 +317,7 @@ sub single_end_data {
     #$args_dict->{"read_output_folder"} = "$args_dict->{'read_folder'}"."_mapping";
 
 
-	my $hdfs_input_folder = "/$args_dict->{'job_home'}"."_input/fastq_single_end";
+	my $hdfs_input_folder = "/$args_dict->{'hdfs_home'}"."_input/fastq_single_end";
 	#my $cmd = "$args_dict->{'hdfs_exe'} dfs -ls $hdfs_input_folder | `wc -l`";
 	my @cmd =();
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
@@ -343,9 +343,9 @@ sub single_end_data {
 		$args_dict->{"final_output_file"} = "DistMap_output_Single_end_reads_".lc($mapper_name);
 
 		my $file_count=0;
-		my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
+		my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}";
 		if (-d $to_read_dir) {
-		    $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}");
+		    $file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}");
 		}
 
 
@@ -367,7 +367,7 @@ sub single_end_data {
 				$self->bwa_output($args_dict,$mapper_name);
 			}
 
-			my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}";
+			my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}";
 			my $bam_output_file = "$args_dict->{'output_directory'}/$output_file";
 		}
 
@@ -377,9 +377,9 @@ sub single_end_data {
 
 
     my $file_count=0;
-    my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
+    my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}";
     if (-d $to_read_dir) {
-	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}");
+	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}");
     }
 
     if ($file_count>0 or $hdfs_file_count>0) {
@@ -442,9 +442,9 @@ sub bwa_output {
 	die("OBSOLETE: DataMerge::bwa_output shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict, $mapper_name) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}";
 
-    my $picard_temp = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/".$mapper_name."_picard_tmp";
+    my $picard_temp = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/".$mapper_name."_picard_tmp";
     unless (-d "$picard_temp") { mkdir $picard_temp || warn "Could not create Directory $picard_temp $!\n"; }
 
 
@@ -490,7 +490,7 @@ sub bwa_output {
 	if (scalar(@$files_to_merge)>$merge_limit) {
 
 		my @final_temp_bam = ();
-		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$mapper_name";
+		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$mapper_name";
 		unless (-d $temp_dir) {
 			mkdir($temp_dir);
 		}
@@ -577,12 +577,12 @@ sub tophat_output {
 	die("OBSOLETE: DataMerge::tophat_output shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict, $mapper_name) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}";
     my $picard_mergesamfiles_jar = $args_dict->{"picard_mergesamfiles_jar"};
     my $output_dir = $args_dict->{"output_directory"};
     my $output_format = $args_dict->{"output_format"};
 
-    my $picard_temp = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/picard_tmp";
+    my $picard_temp = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/picard_tmp";
     unless (-d "$picard_temp") { mkdir $picard_temp || warn "Could not create Directory $picard_temp $!\n"; }
 
     my $output_file = "";
@@ -630,7 +630,7 @@ sub tophat_output {
 	if (scalar(@$files_to_merge)>$merge_limit) {
 
 		my @final_temp_bam = ();
-		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$mapper_name";
+		my $temp_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$mapper_name";
 		unless (-d $temp_dir) {
 			mkdir($temp_dir);
 		}
@@ -989,7 +989,7 @@ sub exonerate_output {
 	die("OBSOLETE: DataMerge::exonerate_output shouldn't be called. Use DataDownloadAnMerge instead");
     my ($self,$args_dict) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_output_folder'}";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_output_folder'}";
     my $output_dir = $args_dict->{"output_directory"};
     my $output_format = $args_dict->{"output_format"};
 

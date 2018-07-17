@@ -40,7 +40,7 @@ sub start {
     #my $hadoop_exe = $args_dict->{'hadoop_exe'};
     my $hadoop_exe = $args_dict->{'hdfs_exe'};
 
-    my $input =  "/$args_dict->{'job_home'}"."_input";
+    my $input =  "/$args_dict->{'hdfs_home'}"."_input";
 
 
 	if (system ("$hadoop_exe dfs -test -d $input")==0) {
@@ -148,13 +148,13 @@ sub paired_end_data {
 	$args_dict->{"shell_script"} = $shell_script;
 
 	my $file_count=0;
-	if (-d "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}") {
-		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
+	if (-d "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}") {
+		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}");
 	}
         #my $hadoop_exe = $args_dict->{'hadoop_exe'};
 	my $hadoop_exe = $args_dict->{'hdfs_exe'};
 
-        my $input =  "/$args_dict->{'job_home'}"."_input";
+        my $input =  "/$args_dict->{'hdfs_home'}"."_input";
         my $read_folder = "$input/$args_dict->{'read_folder'}";
 
         if ($file_count>0) {
@@ -166,8 +166,8 @@ sub paired_end_data {
 	    else {
 		system("$hadoop_exe dfs -mkdir $read_folder") == 0 || die "Error could not create input directory $read_folder folder on hdfs file system\n";
 	    }
-		print "$hadoop_exe dfs -D dfs.block.size=$args_dict->{'block_size'} -copyFromLocal $args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}/* $read_folder/\n";
-            system("$hadoop_exe dfs -D dfs.block.size=$args_dict->{'block_size'} -copyFromLocal $args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}/* $read_folder/") == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
+		print "$hadoop_exe dfs -D dfs.block.size=$args_dict->{'block_size'} -copyFromLocal $args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}/* $read_folder/\n";
+            system("$hadoop_exe dfs -D dfs.block.size=$args_dict->{'block_size'} -copyFromLocal $args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}/* $read_folder/") == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
 
         }
 
@@ -186,14 +186,14 @@ sub single_end_data {
 
 	my $file_count=0;
 
-	if (-d "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}") {
-		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
+	if (-d "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}") {
+		$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}");
 	}
 
 	#my $hadoop_exe = $args_dict->{'hadoop_exe'};
 	my $hadoop_exe = $args_dict->{'hdfs_exe'};
 
-        my $input =  "/$args_dict->{'job_home'}"."_input";
+        my $input =  "/$args_dict->{'hdfs_home'}"."_input";
         my $read_folder = "$input/$args_dict->{'read_folder'}";
 
         if ($file_count>0) {
@@ -206,7 +206,7 @@ sub single_end_data {
 		system("$hadoop_exe dfs -mkdir $read_folder") == 0 || die "Error could not create input directory $read_folder folder on hdfs file system\n";
 	    }
 
-            system("$hadoop_exe dfs -D dfs.block.size=$args_dict->{'block_size'} -copyFromLocal $args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}/* $read_folder/") == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
+            system("$hadoop_exe dfs -D dfs.block.size=$args_dict->{'block_size'} -copyFromLocal $args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}/* $read_folder/") == 0 || warn "Error in uploading the $args_dict->{'job_arch'}\n";
 
         }
 
