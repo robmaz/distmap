@@ -11,7 +11,7 @@ use POSIX ":sys_wait_h";
 
 sub check_hadoop {
 
-    my $args_dict = @_;
+    my $args_dict = $_[0];
     my $hadoop_home = $args_dict->{"hadoop_home"};
     if ($hadoop_home =~ /\/$/) {
         $hadoop_home =~ s/\/$//;
@@ -70,13 +70,10 @@ sub check_hadoop {
     $args_dict->{"yarn_exe"} = $yarn_exe;
     $args_dict->{"streaming_jar"} = $streaming_jar;
 
-    # Construct a prefix path for all files put in the hdfs
-    my
-
 }
 
 sub create_dir {
-    my $args_dict = @_;
+    my $args_dict = $_[0];
     my $output_dir = $args_dict->{"output_directory"};
 
     createdir($output_dir);

@@ -41,9 +41,9 @@ my @mapper_path=();
 my @mapper_args=();
 
 ## PSEUDO-REQUIRED
-my $hadoop_home=$ENV{"HADOOP_HOME"};
-my $picard=`which picard`;
-my $readtools_arg = `which readtools`;
+my $hadoop_home = $ENV{"HADOOP_HOME"};
+chomp(my $picard = `which picard`);
+chomp(my $readtools_arg = `which readtools`);
 
 ## OPTIONAL
 ### pipeline
@@ -151,8 +151,8 @@ GetOptions(
 	"trim-script-path=s"			=> \$trim_script_path,
 	"fastq-type=s"					=>\$fastqtype,
 	"disable-zipped-output"			=>\$nozip,
-	
-	
+
+
 	## TODO: undocummented options!!!
 	"only-download-trimmed-reads"	=> \$only_download_reads,
 	"mappers-exe-archive=s"			=>\$mappers_exe_archive
@@ -184,19 +184,15 @@ if ( defined $hadoop_home and $hadoop_home ne "" ) {
 }
 else {
     # try to find "hadoop" in path and prune "/bin/hadoop" from the full path
-    $hadoop_home = `which hadoop`;
+    chomp($hadoop_home = `which hadoop`);
     $hadoop_home =~ s/\/bin\/hadoop$//;
 }
 if ( $hadoop_home eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: cannot define HADOOP_HOME. Use --hadoop-home or add 'hadoop' to your PATH");
 }
 
-<<<<<<< HEAD
 ### READTOOLS
-#### error if ReadTools is not found 
-=======
-# error if ReadTools is not found
->>>>>>> faaf392ad21dfeed05ba5eb85fc46b9dcf246e9b
+#### error if ReadTools is not found
 if ( $readtools_arg eq "" ) {
 	pod2usage(-msg=>"\n\tERROR: no ReadTools found. Use --readtools or add a wrapper/jar to your PATH");
 }
