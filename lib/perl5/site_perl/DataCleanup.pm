@@ -49,8 +49,8 @@ sub start {
 sub clean_hdfs_files {
     my ($self,$args_dict) = @_;
 
-    my $input =  "/$args_dict->{'job_home'}"."_input";
-    my $output =  "/$args_dict->{'job_home'}"."_output";
+    my $input =  "/$args_dict->{'hdfs_home'}"."_input";
+    my $output =  "/$args_dict->{'hdfs_home'}"."_output";
     my $hadoop_exe = $args_dict->{'hadoop_exe'};
     my $hdfs_exe = $args_dict->{'hdfs_exe'};
 
@@ -64,10 +64,10 @@ sub clean_hdfs_files {
 sub clean_local_files {
 	my ($self,$args_dict) = @_;
 
-	my $dir1 = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}";
+	my $dir1 = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}";
 	my $dir2 = "$args_dict->{'output_directory'}/ref";
 	my $dir3 = "$args_dict->{'output_directory'}/bin";
-	#print "$args_dict->{'output_directory'}/$args_dict->{'job_home'}\n";
+	#print "$args_dict->{'output_directory'}/$args_dict->{'local_home'}\n";
 	Utility::deletedir($dir1);
 	Utility::deletedir($dir2);
 	Utility::deletedir($dir3);

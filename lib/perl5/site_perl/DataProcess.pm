@@ -63,7 +63,7 @@ sub file_process {
 
 
 	if (scalar(@$files_pair_list)>0) {
-		Utility::createdir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'fastq_dir_pe'}");
+		Utility::createdir("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'fastq_dir_pe'}");
 
 		$self->fastq2tab_pe_java($files_pair_list,$args_dict);
 
@@ -73,7 +73,7 @@ sub file_process {
 	}
 
 	if (scalar(@$files_single_list)>0) {
-		Utility::createdir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'fastq_dir_pe'}");
+		Utility::createdir("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'fastq_dir_pe'}");
 
 		$self->fastq2tab_se_java($files_single_list,$args_dict);
 
@@ -92,7 +92,7 @@ sub create_archive {
 
 	my $current_directory = cwd();
 
-	chdir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/") || die "Can not change to directory: $args_dict->{'output_directory'}/$args_dict->{'job_home'} $!\n";
+	chdir("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/") || die "Can not change to directory: $args_dict->{'output_directory'}/$args_dict->{'local_home'} $!\n";
 		system("tar -cvzf $args_dict->{'exec_arch'} $args_dict->{'bin_dir'}/");
 	chdir($current_directory) || die "Can not change to directory: $current_directory $!\n";
 
@@ -103,7 +103,7 @@ sub create_archive {
 sub compress_fastq_file {
 	my ($self,$args_dict,$read_type) = @_;
 
-	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$read_type";
+	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$read_type";
 
 	my $script_current_directory = abs_path($0);
 	my ( $name, $path, $extension ) = File::Basename::fileparse ( abs_path($0), '\..*' );
@@ -188,8 +188,8 @@ sub fastq2tab_se {
 sub fastq2tab_pe_java {
 	my ($self,$file_list,$args_dict) = @_;
 	use File::Basename;
-	my $input_dir =  $args_dict->{'job_home'};
-	my $input_dir1 =  "/$args_dict->{'job_home'}_input/fastq_paired_end";
+
+	my $input_dir1 =  "/$args_dict->{'hdfs_home'}_input/fastq_paired_end";
 
 	my $readtools = $args_dict->{'readtools'};
 
@@ -214,7 +214,7 @@ sub fastq2tab_pe_java {
 
 	my $file_count = scalar(@$file_list);
 	$file_count = $file_count+1;
-	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'fastq_dir_pe'}";
+	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'fastq_dir_pe'}";
 	my $index=1;
 	my $hdfs = `$hdfs_exe getconf -confKey "fs.defaultFS"`;
 	foreach my $f (@$file_list) {
@@ -247,8 +247,7 @@ sub fastq2tab_pe_java {
 sub fastq2tab_se_java {
 	my ($self,$file_list,$args_dict) = @_;
 	use File::Basename;
-	my $input_dir =  $args_dict->{'job_home'};
-	my $input_dir1 =  "/$args_dict->{'job_home'}_input/fastq_single_end";
+	my $input_dir1 =  "/$args_dict->{'hdfs_home'}_input/fastq_single_end";
 
 	my $readtools = $args_dict->{'readtools'};
 
@@ -273,7 +272,7 @@ sub fastq2tab_se_java {
 
 	my $file_count = scalar(@$file_list);
 	$file_count = $file_count+1;
-	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'fastq_dir_se'}";
+	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'fastq_dir_se'}";
 	my $index=1;
 	my $hdfs = `$hdfs_exe getconf -confKey "fs.defaultFS"`;
 	foreach my $f (@$file_list) {
@@ -309,12 +308,12 @@ sub copy_exec {
 		my $mapper_path = $args_dict->{"mapper_path"}->[$i];
 
 		if ($mapper =~ /bwa/i) {
-			copy($mapper_path, "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
-			system("chmod -R +x $args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
+			copy($mapper_path, "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
+			system("chmod -R +x $args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
 		}
 		else {
 			my ( $name, $path, $extension ) = File::Basename::fileparse ( $mapper_path, '\..*' );
-			$self->read_dir($path,"$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}");
+			$self->read_dir($path,"$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}");
 		}
 
 		$i++;
@@ -322,23 +321,23 @@ sub copy_exec {
 
 
 	if (-e $args_dict->{"picard_mergesamfiles_jar"}) {
-		copy($args_dict->{"picard_mergesamfiles_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
+		copy($args_dict->{"picard_mergesamfiles_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
 	}
 
 	if (-e $args_dict->{"picard_sortsam_jar"}) {
-		copy($args_dict->{"picard_sortsam_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
+		copy($args_dict->{"picard_sortsam_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
 	}
 
 	if (-e $args_dict->{"picard_jar"}) {
-		copy($args_dict->{"picard_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
+		copy($args_dict->{"picard_jar"}, "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
 	}
 
 
 	if (-e $args_dict->{"trim_script_path"}) {
-		copy($args_dict->{"trim_script_path"}, "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
+		copy($args_dict->{"trim_script_path"}, "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
 	}
 
-	system("chmod -R +x $args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'bin_dir'}/");
+	system("chmod -R +x $args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'bin_dir'}/");
 
 
 }

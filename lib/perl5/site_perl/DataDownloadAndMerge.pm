@@ -55,15 +55,15 @@ sub paired_end_data {
     my $hadoop_exe    = $args_dict->{'hadoop_exe'};
     my $hdfs_exe      = $args_dict->{"hdfs_exe"};
     my $readtools     = $args_dict->{"readtools"};
-    my $output        = "/$args_dict->{'job_home'}" . "_output";
+    my $output        = "/$args_dict->{'hdfs_home'}" . "_output";
     my $output_folder = "$output/$args_dict->{'read_folder'}" . "_mapping";
 
     my $file_count = $self->get_file_list(
-"$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"
+"$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}"
     );
 
     my $hdfs_input_folder =
-      "/$args_dict->{'job_home'}" . "_input/fastq_paired_end";
+      "/$args_dict->{'hdfs_home'}" . "_input/fastq_paired_end";
 
     my @cmd = ();
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {
@@ -125,15 +125,15 @@ sub single_end_data {
     my $hadoop_exe    = $args_dict->{'hadoop_exe'};
     my $hdfs_exe      = $args_dict->{"hdfs_exe"};
     my $readtools     = $args_dict->{"readtools"};
-    my $output        = "/$args_dict->{'job_home'}" . "_output";
+    my $output        = "/$args_dict->{'hdfs_home'}" . "_output";
     my $output_folder = "$output/$args_dict->{'read_folder'}" . "_mapping";
 
     my $file_count = $self->get_file_list(
-"$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"
+"$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}"
     );
 
     my $hdfs_input_folder =
-      "/$args_dict->{'job_home'}" . "_input/fastq_single_end";
+      "/$args_dict->{'hdfs_home'}" . "_input/fastq_single_end";
 
     my @cmd = ();
     if ( ( system("$hdfs_exe dfs -test -d $hdfs_input_folder") == 0 ) ) {

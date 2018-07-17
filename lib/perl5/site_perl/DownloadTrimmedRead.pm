@@ -60,15 +60,15 @@ sub paired_end_trimming {
 	$args_dict->{"read_type"} = "pe";
 	$args_dict->{"final_output_file"} = "DistMap_output_Paired_end_trimmed_reads";
 
-	my $output =  "/$args_dict->{'job_home'}"."_output";
+	my $output =  "/$args_dict->{'hdfs_home'}"."_output";
 	my $output_folder = "$output/$args_dict->{'read_folder'}"."_trimming";
 	$args_dict->{"output_folder"} = $output_folder;
 
 	#my $file_count=0;
 	#
-	#my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
+	#my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}";
 	#if (-d $to_read_dir) {
-	#	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
+	#	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}");
 	#}
 	#
 	#
@@ -90,15 +90,15 @@ sub single_end_trimming {
 	$args_dict->{"read_type"} = "se";
 	$args_dict->{"final_output_file"} = "DistMap_output_Single_end_trimmed_reads";
 
-	my $output =  "/$args_dict->{'job_home'}"."_output";
+	my $output =  "/$args_dict->{'hdfs_home'}"."_output";
 	my $output_folder = "$output/$args_dict->{'read_folder'}"."_trimming";
 	$args_dict->{"output_folder"} = $output_folder;
 
 	#my $file_count=0;
 
-	#my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}";
+	#my $to_read_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}";
 	#if (-d $to_read_dir) {
-	#	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}");
+	#	$file_count = $self->get_file_list("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}");
 	#}
 
 	#if ($file_count>0) {
@@ -147,10 +147,10 @@ sub download_merge_trimmed_reads {
 	if ((system("$hdfs_exe dfs -test -d $output_folder_trim")==0)) {
 
 		#### Deleting the download folder if already exists
-		Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"."_trimming");
+		Utility::deletedir("$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}"."_trimming");
 
 
-		my $download_command = "$hdfs_exe dfs -copyToLocal $output_folder_trim $args_dict->{'output_directory'}/$args_dict->{'job_home'}/";
+		my $download_command = "$hdfs_exe dfs -copyToLocal $output_folder_trim $args_dict->{'output_directory'}/$args_dict->{'local_home'}/";
 
 		print "$download_command\n";
 		print STDERR "Data download from hdfs file system started ", localtime(), "\n";
@@ -180,7 +180,7 @@ sub download_merge_trimmed_reads {
 sub merge_trimmed_reads {
     my ($self,$args_dict) = @_;
 
-    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'job_home'}/$args_dict->{'read_folder'}"."_trimming";
+    my $temp_output_folder = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'read_folder'}"."_trimming";
 
     my $picard_mergesamfiles_jar = $args_dict->{"picard_mergesamfiles_jar"};
     my $output_dir = $args_dict->{"output_directory"};
@@ -196,7 +196,7 @@ sub merge_trimmed_reads {
 
 	$nozip=1;
 
-	my $output_file = $args_dict->{"output_directory"}."/".$args_dict->{'job_home'};
+	my $output_file = $args_dict->{"output_directory"}."/".$args_dict->{'local_home'};
 
 	my $read1_fastq = $output_file."_trimmed_1.fastq";
 	my $read2_fastq = $output_file."_trimmed_2.fastq";
