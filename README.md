@@ -7,7 +7,7 @@ DistMap is a wrapper around different mappers for distributed computation using 
 This repository contains a modified version for the DistMap pipeline derived from the original
 implementation (see the [SourceForge DistMap project](https://sourceforge.net/projects/distmap/)).
 This version shall provide an unified version that can be used on both Linux and MacOS servers
-and it is no longer tied to a specific version of Hadoop (although 2.7.4 is the currently intended target).
+and it is no longer tied to a specific version of Hadoop (although 2.7.6 is the currently intended target).
 
 This unified version will find a Hadoop configuration either via `HADOOP_CONF_DIR` or, possibly,
 via a command line argument, and use the cluster configured there.
