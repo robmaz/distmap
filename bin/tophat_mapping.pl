@@ -31,7 +31,6 @@ my $mapper_path = "";
 my $mapper_args = "";
 my $hadoop="";
 my $hdfs="";
-my $output_format = "bam";
 my $quality_encoding;
 my $verbose = 0;
 my $test = 0;
@@ -43,7 +42,6 @@ GetOptions(
     "mapper-path=s"   		=>\$mapper_path,
     "hadoop=s"   		=>\$hadoop,
     "hdfs=s"   			=>\$hdfs,
-    "output-format=s"		=>\$output_format,
     "mapper-args=s"		=>\$mapper_args,
     "quality-encoding=s"	=>\$quality_encoding,
     "test"          		=>\$test,
@@ -57,7 +55,6 @@ if($verbose) {
 	print STDERR "  reference fasta: $ref_fasta\n";
 	print STDERR "  reference directory: $ref_dir\n";
 	print STDERR "  mapper path: $mapper_path\n";
-	print STDERR "  output format: $output_format\n";
 	print STDERR "  TopHat arguments: $mapper_args\n";
 	print STDERR "  quality encoding: $quality_encoding\n";
 }

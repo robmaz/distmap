@@ -34,7 +34,6 @@ my $ref_fasta = "";
 my $mapper_path = "";
 my $hadoop="";
 my $hdfs="";
-my $output_format = "bam";
 my $mapper_args = "";
 my $bwa_sampe_options = "";
 
@@ -47,7 +46,6 @@ GetOptions(
     "mapper-path=s"   		=>\$mapper_path,
     "hadoop=s"   		=>\$hadoop,
     "hdfs=s"   			=>\$hdfs,
-    "output-format=s"		=>\$output_format,
     "mapper-args=s"		=>\$mapper_args,
     "bwa-sampe-options=s"	=>\$bwa_sampe_options,
     "test"          		=>\$test,
@@ -60,7 +58,6 @@ if($verbose) {
 	print STDERR "  output directory: $output_dir\n";
 	print STDERR "  reference fasta: $ref_fasta\n";
 	print STDERR "  bwa executable: $mapper_path\n";
-	print STDERR "  output format: $output_format\n";
 	print STDERR "  bwa aln options: $mapper_args\n";
 	print STDERR "  bwa sampe/samse options: $bwa_sampe_options\n";
 }

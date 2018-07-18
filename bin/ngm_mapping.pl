@@ -34,7 +34,6 @@ my $ref_fasta = "";
 my $mapper_path = "";
 my $hadoop="";
 my $hdfs="";
-my $output_format = "bam";
 my $mapper_args = "";
 
 my $verbose = 0;
@@ -46,7 +45,6 @@ GetOptions(
     "mapper-path=s"   		=>\$mapper_path,
     "hadoop=s"   		=>\$hadoop,
     "hdfs=s"   			=>\$hdfs,
-    "output-format=s"		=>\$output_format,
     "mapper-args=s"		=>\$mapper_args,
     "test"          		=>\$test,
     "verbose"        		=> \$verbose
@@ -58,7 +56,6 @@ if($verbose) {
 	print STDERR "  output directory: $output_dir\n";
 	print STDERR "  reference fasta: $ref_fasta\n";
 	print STDERR "  bwa executable: $mapper_path\n";
-	print STDERR "  output format: $output_format\n";
 	print STDERR "  NGM options: $mapper_args\n";
 }
 
