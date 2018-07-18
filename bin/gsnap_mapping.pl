@@ -148,22 +148,4 @@ else {
 	}
 }
 
-$output_format="sam";
-if ($output_format =~ /bam/i) {
-	## TODO: WARNING: this won't work anymore and will fail!!!
-	my $cmd2 = "java -Xmx5g -Dsnappy.disable=true -jar $sartsam_jar I=$sam_output O=$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT";
-	Utility::runCommand($cmd2, "converting SAM into BAM") == 0 || die "Error in converting SAM into BAM";
-	Utility::runCommand("$hdfs dfs -put $bam_output $output_dir >&2", "hdfs dfs -put") == 0 || die "hdfs dfs -put command failed";
-}
-
-else {
-	open my $sfh,"<$sam_output" or die "Could not open $sam_output for write $!";
-
-	while(<$sfh>){
-		chomp;
-		print "$_\n";
-
-	}
-	close $sfh;
-}
 print STDERR "END_OF gsnap_mapping\n";
