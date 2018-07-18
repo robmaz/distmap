@@ -135,6 +135,7 @@ GetOptions(
 	# DEPRECATED (log warning if used?) - TODO: remove support
 	## triming
 	"no-trim"						=> \$no_trim,
+	"only-download-trimmed-reads"	=> \$only_download_reads,
 	"only-merge"					=> \$only_merging,
 	"quality-threshold=i"			=>\$qualThreshold,
 	"discard-internal-N"			=>\$discardRemainingNs,
@@ -154,7 +155,6 @@ GetOptions(
 
 
 	## TODO: undocummented options!!!
-	"only-download-trimmed-reads"	=> \$only_download_reads,
 	"mappers-exe-archive=s"			=>\$mappers_exe_archive
 
 ) or pod2usage(-msg=>"Wrong options",-verbose=>1);
@@ -733,6 +733,13 @@ Next version will remove this option in favor of B<--only-hdfs-download>
 
  This option will skip the trimming. Next version will decide if trimming
  will be performed by using B<--trim-args>
+
+=item B<--only-download-trimmed-reads>
+
+This option would download the only trimmed reads. As trimming is done on
+upload or locally with ReadTools, this option is equivalent to download
+mapped reads and convert to FASTQ or trim locally with ReadTools and
+upload in a second step.
 
 =item B<--verbose>
 
