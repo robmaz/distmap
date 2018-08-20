@@ -239,12 +239,12 @@ sub get_mapper_command {
 	my $hdfs_exe = $args_dict->{"hdfs_exe"};
 
 
-	if ($args_dict->{"trimming_flag"}) {
-		$input_folder = $output_folder_trim;
-	}
-	elsif ((system("$hdfs_exe dfs -test -d $output_folder_trim")==0)) {
-		$input_folder = $output_folder_trim;
-	}
+	# if ($args_dict->{"trimming_flag"}) {
+	# 	$input_folder = $output_folder_trim;
+	# }
+	# elsif ((system("$hdfs_exe dfs -test -d $output_folder_trim")==0)) {
+	# 	$input_folder = $output_folder_trim;
+	# }
 
 
 
