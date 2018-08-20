@@ -216,7 +216,7 @@ sub fastq2tab_pe_java {
 	$file_count = $file_count+1;
 	my $output_dir = "$args_dict->{'output_directory'}/$args_dict->{'local_home'}/$args_dict->{'fastq_dir_pe'}";
 	my $index=1;
-	my $hdfs = `$hdfs_exe getconf -confKey "fs.defaultFS"`;
+	my $hdfs = chomp(`$hdfs_exe getconf -confKey "fs.defaultFS"`);
 	foreach my $f (@$file_list) {
 		my $output_file = "$output_dir/fastq_file".$index;
 		my $read1_fastq=$f->[0];
