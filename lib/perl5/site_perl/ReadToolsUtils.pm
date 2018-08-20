@@ -64,7 +64,7 @@ Output:
 =cut
 sub get_trimming_args {
 	my ($qualThreshold, $minLength, $discardRemainingNs, $noTrimQuality, $no5ptrim) = @_;
-	my $trim_args = " --readFilter ReadLengthReadFilter --minReadLength $minLength";
+	my $trim_args = " --readFilter ReadLengthReadFilter --minReadLength $minLength --maxReadLength 1000";
 	# quality trimming
 	if ($noTrimQuality) {
 		# ignores the qualThreshold
