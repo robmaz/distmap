@@ -171,10 +171,10 @@ close $ofh2;
 ##my $ref= "bwaexe/reference.fa";
 my $ref= $ref_fasta;
 
-if (system("$hdfs dfs -test -e $output_dir/$bam_output")==0) {
-	exit();
-
-}
+# if (system("$hdfs dfs -test -e $output_dir/$bam_output")==0) {
+# 	exit();
+#
+# }
 
 #my $index_command = "$mapper_path index ref.fa > $output_dir/";
 
