@@ -136,10 +136,10 @@ close $ofh2;
 ##my $ref= "bwaexe/reference.fa";
 my $ref= "$ref_dir/$ref_fasta";
 
-if (system("$hdfs dfs -test -e $output_dir/$bam_output")==0) {
-	exit();
-
-}
+# if (system("$hdfs dfs -test -e $output_dir/$bam_output")==0) {
+# 	exit();
+#
+# }
 
 
 
