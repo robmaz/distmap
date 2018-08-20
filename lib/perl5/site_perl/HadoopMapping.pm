@@ -404,8 +404,8 @@ sub get_mapper_command {
 
 
 
-	$args_dict->{"mapper_script_path"} = "$script_current_directory/bin/$args_dict->{'mapper_script_name'}";
-	$args_dict->{"utility_script_path"} = "$script_current_directory/bin/Utility.pm";
+	$args_dict->{"mapper_script_path"} = "$script_current_directory/$args_dict->{'mapper_script_name'}";
+	$args_dict->{"utility_script_path"} = "$script_current_directory/../lib/perl5/site_perl/Utility.pm";
 	$args_dict->{"input_folder"} = $input_folder;
 	$args_dict->{"output_folder"} = $output_folder;
 	$args_dict->{"output_folder_trim"} = $output_folder_trim;
