@@ -474,16 +474,18 @@ sub check_inputs {
 	Utility::create_dir($args_dict);
 
 	#get username
-	my $username = getlogin();
-	my $uname = (getpwuid($<))[0];
-	my @groups = split'\s',$(; # $( means real group id (gid), list (seperated by spaces) of groups. $) means effective group id (gied), list (seperated by spaces) of groups
-	my @group_name = ();
-	foreach (@groups) {
-		push(@group_name,getgrgid($_));
-	}
-	#print "$username,,$uname,,,@group_name\n";
-	$args_dict->{"username"} = $uname;
-	$args_dict->{"groupname"} = "hadoop";
+	# my $username = getlogin();
+	# my $uname = (getpwuid($<))[0];
+	# my @groups = split'\s',$(; # $( means real group id (gid), list (seperated by spaces) of groups. $) means effective group id (gied), list (seperated by spaces) of groups
+	# my @group_name = ();
+	# foreach (@groups) {
+	# 	push(@group_name,getgrgid($_));
+	# }
+	# #print "$username,,$uname,,,@group_name\n";
+	# $args_dict->{"username"} = $uname;
+	# $args_dict->{"groupname"} = "hadoop";
+	$args_dict->{"username"} = $ENV{"USER"};
+	$args_dict->{"groupname"} = "staff";
 	#$args_dict->{'username'}:$args_dict->{'groupname'}
 	#exit();
 	return $args_dict;
