@@ -457,7 +457,7 @@ sub check_inputs {
 	$args_dict->{"exec_arch"} = "DistMap_Mapper_Archive.tgz";
 	$args_dict->{"extracted_execarch"} = "execarch";
 
-	$args_dict->{"ref_arch"} = "Distmap_Genome_Index_Archive.tgz";
+	$args_dict->{"ref_arch"} = "DistMap_Genome_Index_Archive.tgz";
 	$args_dict->{"extracted_refarch"} = "Genome_Index_Archive";
 
   if ( $args_dict->{"no_trim"} ) {
