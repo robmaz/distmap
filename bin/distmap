@@ -467,6 +467,10 @@ sub check_inputs {
     $args_dict->{"trimming_flag"} = $trim_args; # TODO: trimming_flag will be passed to readtools as is
   }
 
+  # get username
+	$args_dict->{"username"} = $ENV{"USER"};
+	$args_dict->{"groupname"} = "staff";
+
 	### Get HADOOP executables and Streaming jar
 	Utility::check_hadoop($args_dict);
 
@@ -484,8 +488,6 @@ sub check_inputs {
 	# #print "$username,,$uname,,,@group_name\n";
 	# $args_dict->{"username"} = $uname;
 	# $args_dict->{"groupname"} = "hadoop";
-	$args_dict->{"username"} = $ENV{"USER"};
-	$args_dict->{"groupname"} = "staff";
 	#$args_dict->{'username'}:$args_dict->{'groupname'}
 	#exit();
 	return $args_dict;

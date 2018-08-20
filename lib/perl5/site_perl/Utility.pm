@@ -79,7 +79,7 @@ sub create_dir {
     createdir($output_dir);
 
     my $local_home = "distmap/".basename($output_dir);
-    my $hdfs_home = "user/".$ENV{"USER"}."/".$local_home;
+    my $hdfs_home = "user/".$args_dict->{"username"}."/".$local_home;
     my $fastq_dir="fastq";
     my $fastq_dir_pe="fastq_paired_end";
     my $fastq_dir_se="fastq_single_end";
