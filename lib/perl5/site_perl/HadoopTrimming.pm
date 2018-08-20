@@ -206,8 +206,8 @@ sub get_trim_command {
 	$args_dict->{"trim_script_name"} = "cluster_trimming.pl";
 	$trim_command = "$args_dict->{'trim_script_name'} --output-dir $output_folder --trim-args '$args_dict->{trim_args}' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --exe-path $args_dict->{'extracted_execarch'}/bin/ReadTools.jar --verbose";
 
-	$args_dict->{"cluster_trim_script_path"} = "$script_current_directory/bin/$args_dict->{'trim_script_name'}";
-	$args_dict->{"utility_script_path"} = "$script_current_directory/bin/Utility.pm";
+	$args_dict->{"cluster_trim_script_path"} = "$script_current_directory/$args_dict->{'trim_script_name'}";
+	$args_dict->{"utility_script_path"} = "$script_current_directory/../lib/perl5/site_perl/Utility.pm";
 	$args_dict->{"input_folder"} = $input_folder;
 	$args_dict->{"output_folder"} = $output_folder;
 	$args_dict->{"archieve_folder"} = $archieve_folder;
