@@ -31,8 +31,6 @@ my $mapper_path = "";
 my $mapper_args = "";
 my $hadoop="";
 my $hdfs="";
-my $sartsam_jar = "";
-my $output_format = "bam";
 my $quality_encoding;
 my $verbose = 0;
 my $test = 0;
@@ -44,8 +42,6 @@ GetOptions(
     "mapper-path=s"   		=>\$mapper_path,
     "hadoop=s"   		=>\$hadoop,
     "hdfs=s"   			=>\$hdfs,
-    "picard-sartsam-jar=s"	=>\$sartsam_jar,
-    "output-format=s"		=>\$output_format,
     "mapper-args=s"		=>\$mapper_args,
     "quality-encoding=s"	=>\$quality_encoding,
     "test"          		=>\$test,
@@ -59,8 +55,6 @@ if($verbose) {
 	print STDERR "  reference fasta: $ref_fasta\n";
 	print STDERR "  reference directory: $ref_dir\n";
 	print STDERR "  mapper path: $mapper_path\n";
-	print STDERR "  picard sartsam jar: $sartsam_jar\n";
-	print STDERR "  output format: $output_format\n";
 	print STDERR "  Bowtie arguments: $mapper_args\n";
 	#print STDERR "  quality encoding: $quality_encoding\n";
 }
@@ -153,23 +147,6 @@ else {
 		my $cmd1 = "$mapper_path $mapper_args -S $ref_dir/$ref_fasta $read1_fastq";
 		Utility::runCommand($cmd1, "bowtie mapping of $read1_fastq") == 0 || die "Error bowtie mapping of $read1_fastq and $read2_fastq";
 	}
-
-	#if ($output_format =~ /bam/i) {
-	#	my $cmd2 = "$hadoop jar $sartsam_jar I=$sam_output O=$bam_output SO=coordinate VALIDATION_STRINGENCY=SILENT";
-	#	Utility::runCommand($cmd2, "converting SAM into BAM") == 0 || die "Error in converting SAM into BAM";
-	#	Utility::runCommand("$hdfs dfs -put $bam_output $output_dir >&2", "hdfs dfs -put") == 0 || die "hadoop dfs -put command failed";
-	#}
-	#
-	#else {
-	#	open my $sfh,"<$sam_output" or die "Could not open $sam_output for write $!";
-	#
-	#	while(<$sfh>){
-	#		chomp;
-	#		print "$_\n";
-	#
-	#	}
-	#	close $sfh;
-	#}
 
 	print STDERR "END_OF bowtie_mapping\n";
 
