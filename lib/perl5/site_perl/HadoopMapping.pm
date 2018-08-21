@@ -458,6 +458,15 @@ sub write_hadoop_mapping_job {
 	print $ofh "output_folder=\"$args_dict->{'output_folder'}/\"\n";
 	print $ofh "job=\"$args_dict->{'job_desc'}"."_Mapping_"."$args_dict->{'read_folder'}\"\n\n";
 
+  # now only works like this
+	print $ofh "mpsh=$(mktemp)\n";
+	print $ofh "cat > \$mpsh << 'TOK'\n";
+  print $ofh "#!/bin/bash\n"
+	print $ofh "./$args_dict->{'mapper_command'}\n";
+	print $ofh "wait\n";
+	print $ofh "TOK\n";
+	print $ofh "chmod +x \$mpsh\n";
+
 	print $ofh "time\n";
 	print $ofh "\n\n";
 	print $ofh "echo \"===============================================================\"\n";
@@ -511,7 +520,8 @@ sub write_hadoop_mapping_job {
 	print $ofh "-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner \\\n";
 	print $ofh "-input \"\$input_folder\" \\\n";
 	print $ofh "-output \"\$output_folder\" \\\n";
-	print $ofh "-mapper \"$args_dict->{'mapper_command'}\" \\\n";
+	print $ofh "-mapper \$mpsh \\\n";
+	print $ofh "-file \$mpsh \\\n";
 	print $ofh "-file '$args_dict->{'mapper_script_path'}' \\\n";
 	print $ofh "-file '$args_dict->{'utility_script_path'}'";
 	close $ofh;
