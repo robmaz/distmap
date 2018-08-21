@@ -461,7 +461,7 @@ sub write_hadoop_mapping_job {
   # now only works like this
 	print $ofh "mpsh=$(mktemp)\n";
 	print $ofh "cat > \$mpsh << 'TOK'\n";
-  print $ofh "#!/bin/bash\n"
+  print $ofh "#!/bin/bash\n";
 	print $ofh "./$args_dict->{'mapper_command'}\n";
 	print $ofh "wait\n";
 	print $ofh "TOK\n";
