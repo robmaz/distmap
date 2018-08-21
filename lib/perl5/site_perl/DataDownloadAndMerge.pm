@@ -7,6 +7,7 @@ use FindBin qw/$RealBin/;
 use lib "$RealBin/../lib/perl5/site_perl";
 use Utility;
 use File::Basename;
+use File::Temp qw/tempdir/;
 
 sub new {
     my $class = shift;
