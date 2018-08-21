@@ -40,7 +40,7 @@ sub start {
 
     ################### Time end #########################
     my $end_time       = time();
-    my $execution_time = Utility::get_execution_time( $start_time, $end_time );
+    my $execution_time = Utility::get_executation_time( $start_time, $end_time );
     my $time_stamp_end = Utility::get_time_stamp();
     print STDERR "Finished at: $time_stamp_end\n";
     print STDERR "Duration: $execution_time\n\n";
