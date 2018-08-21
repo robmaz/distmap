@@ -250,19 +250,19 @@ sub get_mapper_command {
 
 	if (system ("$hdfs_exe dfs -test -d $input")==0) {
 		system("$hdfs_exe dfs -chmod -R 777 $output") == 0 || warn "Error in changing the permission of $output folder\n";
-		system("$hdfs_exe dfs -chown -R $args_dict->{'username'}:$args_dict->{'groupname'} $output/") == 0 || warn "Error in changing the ownership of $output folder\n";
+		system("$hdfs_exe dfs -chown -R $args_dict->{'username'} $output/") == 0 || warn "Error in changing the ownership of $output folder\n";
 	}
 	else {
 		system("$hdfs_exe dfs -mkdir $output") == 0 || warn "Error could not create output directory $output folder on hdfs file system\n";
 		system("$hdfs_exe dfs -chmod -R 777 $output") == 0 || warn "Error in changing the permission of $output folder\n";
-		system("$hdfs_exe dfs -chown -R $args_dict->{'username'}:$args_dict->{'groupname'} $output/") == 0 || warn "Error in changing the ownership of $output folder\n";
+		system("$hdfs_exe dfs -chown -R $args_dict->{'username'} $output/") == 0 || warn "Error in changing the ownership of $output folder\n";
 	}
 	if (system ("$hdfs_exe dfs -test -d $output_folder")==0) {
-		system("$hdfs_exe dfs -chown -R $args_dict->{'username'}:$args_dict->{'groupname'} $output_folder/") == 0 || warn "Error in changing the ownership of $output_folder folder\n";
+		system("$hdfs_exe dfs -chown -R $args_dict->{'username'} $output_folder/") == 0 || warn "Error in changing the ownership of $output_folder folder\n";
 	}
 
 	if (system ("$hdfs_exe dfs -test -d $output_folder_trim")==0) {
-		system("$hdfs_exe dfs -chown -R $args_dict->{'username'}:$args_dict->{'groupname'} $output_folder_trim/") == 0 || warn "Error in changing the ownership of $output_folder_trim folder\n";
+		system("$hdfs_exe dfs -chown -R $args_dict->{'username'} $output_folder_trim/") == 0 || warn "Error in changing the ownership of $output_folder_trim folder\n";
 	}
 
 	##########################################################################################

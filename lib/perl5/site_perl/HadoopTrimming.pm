@@ -200,8 +200,8 @@ sub get_trim_command {
 
 	system("$hdfs_exe dfs -mkdir $output") == 0 || warn "Error could not create output directory $output folder on hdfs file system\n";
 	system("$hdfs_exe dfs -chmod -R 777 $output") == 0 || warn "Error in changing the permission of $output folder\n";
-	system("$hdfs_exe dfs -chown -R $args_dict->{'username'}:$args_dict->{'groupname'} $output/") == 0 || warn "Error in changing the ownership of $output folder\n";
-	system("$hdfs_exe dfs -chown -R $args_dict->{'username'}:$args_dict->{'groupname'} $output_folder/") == 0 || warn "Error in changing the ownership of $output_folder folder\n";
+	system("$hdfs_exe dfs -chown -R $args_dict->{'username'} $output/") == 0 || warn "Error in changing the ownership of $output folder\n";
+	system("$hdfs_exe dfs -chown -R $args_dict->{'username'} $output_folder/") == 0 || warn "Error in changing the ownership of $output_folder folder\n";
 
 	$args_dict->{"trim_script_name"} = "cluster_trimming.pl";
 	$trim_command = "$args_dict->{'trim_script_name'} --output-dir $output_folder --trim-args '$args_dict->{trim_args}' --hadoop $args_dict->{hadoop_exe} --hdfs $args_dict->{hdfs_exe} --exe-path $args_dict->{'extracted_execarch'}/bin/ReadTools.jar --verbose";
