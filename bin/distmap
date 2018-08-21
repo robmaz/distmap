@@ -284,6 +284,9 @@ $args_dict->{"picard"} = $picard;
 $args_dict->{"readtools"} = $readtools;
 $args_dict->{"tmp_dir"} = $tmp_dir;
 
+# get username
+$args_dict->{"username"} = $ENV{"USER"};
+
 my $step_hash = {};
 $step_hash = Utility::get_steps($args_dict);
 
@@ -469,7 +472,6 @@ sub check_inputs {
 
   # get username
 	$args_dict->{"username"} = $ENV{"USER"};
-	$args_dict->{"groupname"} = "staff";
 
 	### Get HADOOP executables and Streaming jar
 	Utility::check_hadoop($args_dict);
