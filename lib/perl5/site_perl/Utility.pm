@@ -414,7 +414,7 @@ sub get_steps {
 	}
 
 	if ($args_dict->{"only_trim"}) {
-		print "WARNING: trimming is now done on upload to the HDFS (--only-trim does not have any effect)";
+		print "WARNING: trimming is now done on upload to the HDFS (--only-trim does not have any effect)\n";
 		# my $trimming_object = HadoopTrimming->new();
 
 		# $trimming_object->trim($args_dict);
@@ -429,16 +429,16 @@ sub get_steps {
 	}
 
 	if ( $args_dict->{"only_hdfs_download"} or $args_dict->{"only_merge"} ) {
-		print "--only-hdfs-download now merges also the data in the same step";
+		print "--only-hdfs-download now merges also the data in the same step\n";
 		if ( $args_dict->{"only_merge"} ) {
-			print "WARNING: --only-merge is deprecated. Use --only-hdfs-download instead";
+			print "WARNING: --only-merge is deprecated. Use --only-hdfs-download instead\n";
 		}
 		my $datadownloadandmerge_object = DataDownloadAndMerge->new();
 		$step_hash->{6} = $datadownloadandmerge_object;
 	}
 
 	if ($args_dict->{"only_download_reads"}) {
-		die("OBSOLETE: --only-download-trimmed-reads is not supported anymore (and has not work for a while). Use ReadTools for trimming if you need the raw reads, or convert output from mapping using Picard/ReadTools");
+		die("OBSOLETE: --only-download-trimmed-reads is not supported anymore (and has not work for a while). Use ReadTools for trimming if you need the raw reads, or convert output from mapping using Picard/ReadTools\n");
 	    # my $read_download_object = DownloadTrimmedRead->new();
 	    # $step_hash->{8} = $read_download_object;
 
