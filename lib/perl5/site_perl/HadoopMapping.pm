@@ -459,7 +459,7 @@ sub write_hadoop_mapping_job {
 	print $ofh "job=\"$args_dict->{'job_desc'}"."_Mapping_"."$args_dict->{'read_folder'}\"\n\n";
 
   # now only works like this
-	print $ofh "mpsh=$(mktemp)\n";
+	print $ofh "mpsh=\$(mktemp)\n";
 	print $ofh "cat > \$mpsh << 'TOK'\n";
   print $ofh "#!/bin/bash\n";
 	print $ofh "./$args_dict->{'mapper_command'}\n";
