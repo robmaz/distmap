@@ -103,7 +103,7 @@ sub paired_end_data {
                                               DIR => $tmp_dir,
                                               CLEANUP => 1 );
             my $download_command =
-            qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir );
+            qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir --forceOverwrite );
 
             print STDERR "Data merge/download from hdfs file system started ",
               localtime(), "\n";
@@ -175,11 +175,11 @@ sub single_end_data {
                                                 DIR => $tmp_dir,
                                                 CLEANUP => 1 );
               my $download_command =
-  qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir );
+  qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir --forceOverwrite );
 
             print STDERR "Data merge/download from hdfs file system started ",
               localtime(), "\n";
-            system($download_command) == 0
+            system("$download_command") == 0
               || warn
               "Error in merge/downloading the $args_dict->{'job_arch'}\n";
             print STDERR "Data merge/download from hdfs file system finished ",
