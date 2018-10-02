@@ -218,24 +218,6 @@ sub copy_exec {
 		$i++;
 	}
 
-
-	if (-e $args_dict->{"picard_mergesamfiles_jar"}) {
-		copy($args_dict->{"picard_mergesamfiles_jar"}, "$bin_dir_path/");
-	}
-
-	if (-e $args_dict->{"picard_sortsam_jar"}) {
-		copy($args_dict->{"picard_sortsam_jar"}, "$bin_dir_path/");
-	}
-
-	if (-e $args_dict->{"picard_jar"}) {
-		copy($args_dict->{"picard_jar"}, "$bin_dir_path/");
-	}
-
-
-	if (-e $args_dict->{"trim_script_path"}) {
-		copy($args_dict->{"trim_script_path"}, "$bin_dir_path/");
-	}
-
 	system("chmod -R +x $bin_dir_path/");
 
 
