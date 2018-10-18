@@ -462,8 +462,7 @@ sub write_hadoop_mapping_job {
 	print $ofh "mpsh=\$(mktemp distmap.XXXXX)\n";
 	print $ofh "cat > \$mpsh << 'TOK'\n";
   print $ofh "#!/bin/bash\n";
-	print $ofh "./$args_dict->{'mapper_command'}\n";
-	print $ofh "wait\n";
+	print $ofh "exec ./$args_dict->{'mapper_command'}\n";
 	print $ofh "TOK\n";
 	print $ofh "chmod +x \$mpsh\n";
 
