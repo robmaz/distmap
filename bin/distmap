@@ -120,7 +120,7 @@ GetOptions(
 	"only-map"						=> \$only_map,
 	"only-hdfs-download"			=> \$only_hdfs_download,
 	"only-delete-temp"				=> \$only_delete_temp,
-	"trim-args"						=> \$trim_args,
+	"trim-args=s"						=> \$trim_args,
 	## other
 	"tmp-dir=s"						=> \$tmp_dir,
 	"output-format=s"				=> \$output_format,
