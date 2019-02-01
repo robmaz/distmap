@@ -16,8 +16,8 @@ use Utility;
 my $counter = strftime( q/%Y%m%dT%H%M%S/, localtime());
 $counter = "mapping_".$counter;
 
-my $read1_fastq = $counter."read1.fastq";
-my $read2_fastq = $counter."read2.fastq";
+my $read1_fastq = "reads1.fq";
+my $read2_fastq = "reads2.fq";
 my $out_bam = "out.bam";
 my $out_sam = "out.sam";
 my $sam_output = $counter.$out_sam;

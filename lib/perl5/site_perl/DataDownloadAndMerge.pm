@@ -103,7 +103,7 @@ sub paired_end_data {
                                               DIR => $tmp_dir,
                                               CLEANUP => 1 );
             my $download_command =
-            qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir --forceOverwrite );
+            qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir --noRemoveTaskProgramGroup true --forceOverwrite );
 
 
             print STDERR "Data merge/download from hdfs file system started ",
@@ -176,7 +176,7 @@ sub single_end_data {
                                                 DIR => $tmp_dir,
                                                 CLEANUP => 1 );
               my $download_command =
-              qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir --forceOverwrite );
+              qq( JAVA_OPTS="-Xmx8g -Dsnappy.disable=true" $readtools DownloadDistmapResult --input $hdfs/$output_folder --output $local_output_dir/$output_file --TMP_DIR $tmp_dir --noRemoveTaskProgramGroup true --forceOverwrite );
 
 
             print STDERR "Data merge/download from hdfs file system started ",
